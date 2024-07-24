@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	database.ConnectDB()
+	database.ConnectDB("DB_DEV_PATH")
 	app := api.Setup()
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(":8081"))
 }

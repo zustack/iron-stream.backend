@@ -1,5 +1,14 @@
 # Iron Stream 
 
+## Make file instuctions
 ```bash
-sqlite3 sqlite.db ".read tables.sql"
+make run
+```
+
+```bash
+make build
+```
+
+```bash
+make test
 ```

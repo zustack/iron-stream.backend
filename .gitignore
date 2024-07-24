@@ -1,2 +1,4 @@
 uploads
 .env
+sqlite.db
+test_sqlite.db

@@ -10,10 +10,10 @@ import (
 
 var DB *sql.DB
 
-func ConnectDB() {
+func ConnectDB(path string) {
 	var err error
 
-	dbPath := utils.GetEnv("DB_PATH")
+	dbPath := utils.GetEnv(path)
 	if dbPath == "" {
 		log.Fatal("DB_PATH environment variable is not set")
 	}

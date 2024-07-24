@@ -1,6 +1,8 @@
 package api
 
 import (
+	"iron-stream/api/routes"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -8,11 +10,12 @@ import (
 
 func Setup() *fiber.App {
 	app := fiber.New()
-  app.Use(logger.New())
+	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "https://ai.zustack.com",
+		AllowOrigins:     "http://localhost:3000",
 		AllowCredentials: true,
 	}))
 	app.Static("/web/uploads", "./web/uploads")
+	routes.UserRoutes(app)
 	return app
 }

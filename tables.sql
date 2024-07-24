@@ -12,5 +12,6 @@ CREATE TABLE users (
   verified   BOOL DEFAULT FALSE, 
   courses    TEXT DEFAULT '',  
   pc         VARCHAR(255) DEFAULT '',  
+  os VARCHAR(20) DEFAULT '',  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
