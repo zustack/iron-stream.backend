@@ -23,7 +23,6 @@ func Register(c *fiber.Ctx) error {
 		Email:      payload.Email,
 		Name:       payload.Name,
 		Surname:    payload.Surname,
-		IsAdmin:    payload.IsAdmin,
 		EmailToken: payload.EmailToken,
 		Pc:         payload.Pc,
 		Os:         payload.Os,
