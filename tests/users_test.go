@@ -15,7 +15,6 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-
 	tests := []struct {
 		description  string
 		payload      database.User
@@ -303,6 +302,145 @@ func TestRegister(t *testing.T) {
 
 			resBody, _ := io.ReadAll(res.Body)
 			assert.JSONEqf(t, test.expectedBody, string(resBody), test.description)
+		})
+	}
+}
+
+func TestLogin(t *testing.T) {
+	tests := []struct {
+		description  string
+		payload      database.User
+		expectedCode int
+		expectToken  bool
+		expectedBody string
+	}{
+		{
+			description: "login successfully",
+			payload: database.User{
+				Username: "some-username",
+				Password: "some-password",
+				Pc:       "test-pc",
+			},
+			expectedCode: fiber.StatusOK,
+			expectToken:  true,
+		},
+
+		{
+			description: "invalid pc",
+			payload: database.User{
+				Username: "some-username",
+				Password: "some-password",
+				Pc:       "wrong-pc",
+			},
+			expectedCode: fiber.StatusUnauthorized,
+			expectToken:  false,
+			expectedBody: `{"error":"Esta cuenta esta registrada en otra computadora."}`,
+		},
+
+		{
+			description: "username not found",
+			payload: database.User{
+				Username: "not-existing-username",
+				Password: "some-password",
+				Pc:       "test-pc",
+			},
+			expectedCode: fiber.StatusUnauthorized,
+			expectToken:  false,
+			expectedBody: `{"error":"No se encontro el usuario con el nombre de usuario proporcionado."}`,
+		},
+
+		{
+			description: "incorrect password",
+			payload: database.User{
+				Username: "some-username",
+				Password: "wrong-password",
+				Pc:       "test-pc",
+			},
+			expectedCode: fiber.StatusUnauthorized,
+			expectToken:  false,
+			expectedBody: `{"error":"La contraseña es incorrecta."}`,
+		},
+
+		{
+			description: "admin login",
+			payload: database.User{
+				Username: "admin",
+				Password: "some-password",
+				Pc:       "admin-pc-dont-read-this-field",
+			},
+			expectedCode: fiber.StatusOK,
+			expectToken:  true,
+		},
+
+		{
+			description: "missing username",
+			payload: database.User{
+				Username: "",
+				Password: "some-password",
+				Pc:       "test-pc",
+			},
+			expectedCode: fiber.StatusBadRequest,
+			expectToken:  false,
+			expectedBody: `{"error":"El nombre de usuario es requerido."}`,
+		},
+
+		{
+			description: "missing password",
+			payload: database.User{
+				Username: "some-username",
+				Password: "",
+				Pc:       "test-pc",
+			},
+			expectedCode: fiber.StatusBadRequest,
+			expectToken:  false,
+			expectedBody: `{"error":"La contraseña es requerida."}`,
+		},
+
+		{
+			description: "missing pc normal user",
+			payload: database.User{
+				Username: "some-username",
+				Password: "some-password",
+				Pc:       "",
+			},
+			expectedCode: fiber.StatusBadRequest,
+			expectToken:  false,
+			expectedBody: `{"error":"Ocurrio un error debido a una incompatibilidad con tu sistema operativo."}`,
+		},
+	}
+
+	app := api.Setup()
+	database.ConnectDB("DB_TEST_PATH")
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+
+			var body io.Reader
+			jsonBody, _ := json.Marshal(test.payload)
+			body = bytes.NewBuffer(jsonBody)
+			req, _ := http.NewRequest("POST", "/login", body)
+			req.Header.Set("Content-Type", "application/json")
+
+			res, _ := app.Test(req, -1)
+
+			assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+
+			resBody, _ := io.ReadAll(res.Body)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(resBody, &response)
+			assert.NoError(t, err, "El cuerpo de la respuesta debería ser JSON válido")
+
+			if test.expectToken {
+				token, exists := response["token"]
+				assert.True(t, exists, "The response should contain a 'token' field")
+				assert.NotEmpty(t, token, "The token should not be empty")
+			} else {
+				_, exists := response["token"]
+				assert.False(t, exists, "The response should not contain a 'token' field")
+				assert.JSONEqf(t, test.expectedBody, string(resBody), test.description)
+			}
+
 		})
 	}
 }

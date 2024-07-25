@@ -7,6 +7,31 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func CleanLoginInput(input database.User) (database.User, error) {
+	if input.Username == "" {
+		return database.User{}, fmt.Errorf("El nombre de usuario es requerido.")
+	}
+
+	if input.Password == "" {
+		return database.User{}, fmt.Errorf("La contraseña es requerida.")
+	}
+
+	if input.Pc == "" {
+		return database.User{}, fmt.Errorf("Ocurrio un error debido a una incompatibilidad con tu sistema operativo.")
+	}
+
+	pc := input.Pc
+	if input.Username == "admin" {
+		pc = ""
+	}
+
+	return database.User{
+		Username: input.Username,
+		Password: input.Password,
+		Pc:       pc,
+	}, nil
+}
+
 func CleanRegisterInput(input database.User) (database.User, error) {
 	if input.Username == "" {
 		return database.User{}, fmt.Errorf("El nombre de usuario es requerido.")
@@ -70,13 +95,8 @@ func CleanRegisterInput(input database.User) (database.User, error) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return database.User{}, fmt.Errorf("Error hashing password")
+		return database.User{}, fmt.Errorf("Ocurrio un error al generar encriptar la contraseña.")
 	}
-
-	/*
-		assert.True(t, user.ValidatePassword(pw))
-		assert.False(t, user.ValidatePassword("hunter2005"))
-	*/
 
 	return database.User{
 		Username: input.Username,

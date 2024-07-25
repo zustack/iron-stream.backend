@@ -1,16 +1,17 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 )
 
 type User struct {
 	ID         int64  `json:"id"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	Email      string `json:"email"`
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
-	Username   string `json:"username"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
 	IsAdmin    bool   `json:"is_admin"`
 	IsActive   bool   `json:"is_active"`
 	EmailToken int    `json:"email_token"`
@@ -19,6 +20,20 @@ type User struct {
 	Pc         string `json:"pc"`
 	Os         string `json:"os"`
 	CreatedAt  string `json:"created_at"`
+}
+
+func GetUserByUsername(username string) (User, error) {
+	var u User
+	row := DB.QueryRow(`SELECT * FROM users WHERE username = ?`, username)
+	if err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Email, &u.Name,
+		&u.Surname, &u.IsAdmin, &u.IsActive, &u.EmailToken, &u.Verified,
+		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return u, fmt.Errorf("GetUserByUsername %s: no such user", username)
+		}
+		return u, fmt.Errorf("GetUserByUsername %s: %v", username, err)
+	}
+	return u, nil
 }
 
 func CreateUser(u User) (int64, error) {
