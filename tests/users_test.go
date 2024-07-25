@@ -331,15 +331,14 @@ func TestLogin(t *testing.T) {
 		Name:     "a",
 		Surname:  "a",
 		IsAdmin:  false,
-    // si el usuario es admin, en el request handler, el pc se anula!
-		Pc:       "",
-		Os:       "a",
+		// si el usuario es admin, en el request handler, el pc se anula!
+		Pc: "",
+		Os: "a",
 	})
 
 	if err != nil {
 		t.Fatal(err)
 	}
-
 
 	normalUserHashedPassword, err := bcrypt.GenerateFromPassword([]byte("n"), bcrypt.DefaultCost)
 	if err != nil {
@@ -361,7 +360,7 @@ func TestLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-  tests := []struct {
+	tests := []struct {
 		description  string
 		payload      database.User
 		expectedCode int

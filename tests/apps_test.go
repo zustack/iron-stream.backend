@@ -98,7 +98,7 @@ func TestCreateApp(t *testing.T) {
 			expectedBody: `{"id":1}`,
 		},
 
-    // missing name
+		// missing name
 		{
 			description: "missing name",
 			payload: database.App{
@@ -111,7 +111,7 @@ func TestCreateApp(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El nombre es requerido."}`,
 		},
-    // name to long
+		// name to long
 		{
 			description: "name to long",
 			payload: database.App{
@@ -124,7 +124,7 @@ func TestCreateApp(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El nombre no debe tener más de 55 caracteres."}`,
 		},
-    // missing process name
+		// missing process name
 		{
 			description: "missing process name",
 			payload: database.App{
@@ -137,11 +137,11 @@ func TestCreateApp(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El nombre del proceso es requerido."}`,
 		},
-    // process name to long
+		// process name to long
 		{
 			description: "process name to long",
 			payload: database.App{
-				Name:       "test-app", 
+				Name:        "test-app",
 				ProcessName: strings.Repeat("a", 56),
 				Os:          "test-os",
 				IsActive:    true,
@@ -150,7 +150,7 @@ func TestCreateApp(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El nombre del proceso no debe tener más de 55 caracteres."}`,
 		},
-    // missing os
+		// missing os
 		{
 			description: "missing os",
 			payload: database.App{
@@ -163,11 +163,11 @@ func TestCreateApp(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El sistema operativo es requerido."}`,
 		},
-    // os to long
+		// os to long
 		{
 			description: "os to long",
 			payload: database.App{
-				Name:       "test-app", 
+				Name:        "test-app",
 				ProcessName: "test-process",
 				Os:          strings.Repeat("a", 56),
 				IsActive:    true,
