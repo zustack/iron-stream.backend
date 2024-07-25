@@ -8,7 +8,7 @@ import (
 )
 
 func GetEnv(key string) string {
-	err := godotenv.Load("/home/agust/work/iron-stream/backend/.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err.Error())
 	}

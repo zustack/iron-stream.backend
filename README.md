@@ -1,17 +1,25 @@
-# Iron Stream 
+# Iron Stream API
+
+## Installation & setup
+```bash
+git clone https://github.com/zustack/iron-stream.backend.git ~/
+cd ~/iron-stream.backend
+```
+
+##### cp the .env.example to .env and then edit it to your needs
+```bash
+cp ~/iron-stream.backend/.env.example .env
+```
 
 ## Make file instuctions
-
 ##### Run for development
 ```bash
 make run
 ```
-
 ##### Build
 ```bash
 make build
 ```
-
 ##### Run every test with a new testing database
 ```bash
 make test
@@ -30,19 +38,17 @@ sqlite3 sqlite.db ".read tables.sql"
 # register test
 go test -v ./tests/users_test.go -run TestRegister
 ```
-
 ```bash
 # login test
 go test -v ./tests/users_test.go -run TestLogin
 ```
-
 ```bash
 # create app test
 go test -v ./tests/apps_test.go -run TestCreateApp
 ```
 
 ## Want to make curl requets?
-- Register 
+##### Register
 ```bash
 curl -X POST http://localhost:8081/register \
   -H "Content-Type: application/json" \
@@ -56,15 +62,13 @@ curl -X POST http://localhost:8081/register \
     "os": "Linux"
   }'
 ```
-
-- Login
+##### Login
 ```bash
 curl -X POST "http://localhost:8081/login" \
      -H "Content-Type: application/json" \
-     -d '{"username": "admin", "password": "some-password", "pc": "admin-pc"}'
+     -d '{"username": "admin", "password": "admin", "pc": "admin-pc"}'
 ```
-
-- Create new app
+##### Create new app
 ```bash
 curl -X POST http://localhost:8081/apps/create \
   -H "Content-Type: application/json" \
