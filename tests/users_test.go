@@ -12,9 +12,16 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestRegister(t *testing.T) {
+	app := api.Setup()
+	err := database.ExecuteSQLFile("../test_sqlite.db", "../tables.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	database.ConnectDB("DB_TEST_PATH")
 	tests := []struct {
 		description  string
 		payload      database.User
@@ -65,6 +72,7 @@ func TestRegister(t *testing.T) {
 			expectedCode: fiber.StatusBadRequest,
 			expectedBody: `{"error":"El nombre de usuario es requerido."}`,
 		},
+
 		{
 			description: "username to long",
 			payload: database.User{
@@ -284,9 +292,6 @@ func TestRegister(t *testing.T) {
 		},
 	}
 
-	app := api.Setup()
-	database.ConnectDB("DB_TEST_PATH")
-
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
 
@@ -307,7 +312,56 @@ func TestRegister(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	tests := []struct {
+	app := api.Setup()
+	err := database.ExecuteSQLFile("../test_sqlite.db", "../tables.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	database.ConnectDB("DB_TEST_PATH")
+
+	adminUserHashedPassword, err := bcrypt.GenerateFromPassword([]byte("a"), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = database.CreateUser(database.User{
+		Username: "admin",
+		Password: string(adminUserHashedPassword),
+		Email:    "a@a.com",
+		Name:     "a",
+		Surname:  "a",
+		IsAdmin:  false,
+    // si el usuario es admin, en el request handler, el pc se anula!
+		Pc:       "",
+		Os:       "a",
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+
+	normalUserHashedPassword, err := bcrypt.GenerateFromPassword([]byte("n"), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = database.CreateUser(database.User{
+		Username: "n",
+		Password: string(normalUserHashedPassword),
+		Email:    "n@n.com",
+		Name:     "n",
+		Surname:  "n",
+		IsAdmin:  false,
+		Pc:       "n",
+		Os:       "n",
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+  tests := []struct {
 		description  string
 		payload      database.User
 		expectedCode int
@@ -315,11 +369,11 @@ func TestLogin(t *testing.T) {
 		expectedBody string
 	}{
 		{
-			description: "login successfully",
+			description: "normal user login successfully",
 			payload: database.User{
-				Username: "some-username",
-				Password: "some-password",
-				Pc:       "test-pc",
+				Username: "n",
+				Password: "n",
+				Pc:       "n",
 			},
 			expectedCode: fiber.StatusOK,
 			expectToken:  true,
@@ -328,9 +382,9 @@ func TestLogin(t *testing.T) {
 		{
 			description: "invalid pc",
 			payload: database.User{
-				Username: "some-username",
-				Password: "some-password",
-				Pc:       "wrong-pc",
+				Username: "n",
+				Password: "n",
+				Pc:       "some-wrong-pc",
 			},
 			expectedCode: fiber.StatusUnauthorized,
 			expectToken:  false,
@@ -340,9 +394,9 @@ func TestLogin(t *testing.T) {
 		{
 			description: "username not found",
 			payload: database.User{
-				Username: "not-existing-username",
-				Password: "some-password",
-				Pc:       "test-pc",
+				Username: "some-wrong-username",
+				Password: "n",
+				Pc:       "n",
 			},
 			expectedCode: fiber.StatusUnauthorized,
 			expectToken:  false,
@@ -352,9 +406,9 @@ func TestLogin(t *testing.T) {
 		{
 			description: "incorrect password",
 			payload: database.User{
-				Username: "some-username",
-				Password: "wrong-password",
-				Pc:       "test-pc",
+				Username: "n",
+				Password: "some-wrong-password",
+				Pc:       "n",
 			},
 			expectedCode: fiber.StatusUnauthorized,
 			expectToken:  false,
@@ -365,8 +419,8 @@ func TestLogin(t *testing.T) {
 			description: "admin login",
 			payload: database.User{
 				Username: "admin",
-				Password: "some-password",
-				Pc:       "admin-pc-dont-read-this-field",
+				Password: "a",
+				Pc:       "i dont care about pc when is admin",
 			},
 			expectedCode: fiber.StatusOK,
 			expectToken:  true,
@@ -376,8 +430,8 @@ func TestLogin(t *testing.T) {
 			description: "missing username",
 			payload: database.User{
 				Username: "",
-				Password: "some-password",
-				Pc:       "test-pc",
+				Password: "a",
+				Pc:       "a",
 			},
 			expectedCode: fiber.StatusBadRequest,
 			expectToken:  false,
@@ -387,9 +441,9 @@ func TestLogin(t *testing.T) {
 		{
 			description: "missing password",
 			payload: database.User{
-				Username: "some-username",
+				Username: "a",
 				Password: "",
-				Pc:       "test-pc",
+				Pc:       "a",
 			},
 			expectedCode: fiber.StatusBadRequest,
 			expectToken:  false,
@@ -399,8 +453,8 @@ func TestLogin(t *testing.T) {
 		{
 			description: "missing pc normal user",
 			payload: database.User{
-				Username: "some-username",
-				Password: "some-password",
+				Username: "a",
+				Password: "a",
 				Pc:       "",
 			},
 			expectedCode: fiber.StatusBadRequest,
@@ -409,15 +463,10 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
-	app := api.Setup()
-	database.ConnectDB("DB_TEST_PATH")
-
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
-
-			var body io.Reader
 			jsonBody, _ := json.Marshal(test.payload)
-			body = bytes.NewBuffer(jsonBody)
+			body := bytes.NewBuffer(jsonBody)
 			req, _ := http.NewRequest("POST", "/login", body)
 			req.Header.Set("Content-Type", "application/json")
 
@@ -440,7 +489,6 @@ func TestLogin(t *testing.T) {
 				assert.False(t, exists, "The response should not contain a 'token' field")
 				assert.JSONEqf(t, test.expectedBody, string(resBody), test.description)
 			}
-
 		})
 	}
 }

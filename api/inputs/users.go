@@ -16,13 +16,13 @@ func CleanLoginInput(input database.User) (database.User, error) {
 		return database.User{}, fmt.Errorf("La contraseña es requerida.")
 	}
 
-	if input.Pc == "" {
-		return database.User{}, fmt.Errorf("Ocurrio un error debido a una incompatibilidad con tu sistema operativo.")
-	}
-
 	pc := input.Pc
 	if input.Username == "admin" {
 		pc = ""
+	}
+
+	if input.Username != "admin" && input.Pc == "" {
+		return database.User{}, fmt.Errorf("Ocurrio un error debido a una incompatibilidad con tu sistema operativo.")
 	}
 
 	return database.User{

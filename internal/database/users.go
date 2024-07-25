@@ -22,6 +22,20 @@ type User struct {
 	CreatedAt  string `json:"created_at"`
 }
 
+func GetUserByID(id string) (User, error) {
+	var u User
+	row := DB.QueryRow(`SELECT * FROM users WHERE id = ?`, id)
+	if err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Email, &u.Name,
+		&u.Surname, &u.IsAdmin, &u.IsActive, &u.EmailToken, &u.Verified,
+		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return u, fmt.Errorf("GetUserByID%s: no such user", id)
+		}
+		return u, fmt.Errorf("GetUserByID: %s: %v", id, err)
+	}
+	return u, nil
+}
+
 func GetUserByUsername(username string) (User, error) {
 	var u User
 	row := DB.QueryRow(`SELECT * FROM users WHERE username = ?`, username)
