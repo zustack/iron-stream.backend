@@ -19,9 +19,9 @@ type Course struct {
 
 func CreateCourse(c Course) (int64, error) {
 	result, err := DB.Exec(`
-  INSERT INTO course
+  INSERT INTO courses
   (title, description, author, thumbnail, preview, duration, is_active, sort_order) 
-  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, 0)
 
 	if err != nil {
@@ -33,7 +33,7 @@ func CreateCourse(c Course) (int64, error) {
 		return 0, fmt.Errorf("CreateCourse: %v", err)
 	}
 
-	_, err = DB.Exec("UPDATE course SET sort_order = ? WHERE id = ?", id, id)
+	_, err = DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", id, id)
 	if err != nil {
 		return 0, fmt.Errorf("CreateCourse/updateOrder: %v", err)
 	}

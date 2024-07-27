@@ -164,5 +164,22 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
 ```
 Response
 ```json
-{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/46a90838-f68b-4c84-9ed7-8539876d1e0d/test.mkv"}%
+{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/3e3b97ea-e69a-43a5-9507-ead8745be672/test.mkv"}%
+{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/3e2018cb-4d68-42c2-9aab-896b66cd1cab/test.mkv"}%
+{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/1cd35233-c3c5-4d6f-b155-1c1a74a1a133/test.mkv"}%
+```
+/courses/create
+
+##### Create course
+```bash
+curl -X POST http://localhost:8081/courses/create \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=Data Structures" \
+  -F "description=Description for Data Structures" \
+  -F "author=agustfricke" \
+  -F "duration=4 hours, 20 minutes" \
+  -F "is_active=true" \
+  -F "thumbnail=@/home/agust/Pictures/test.png" \
+  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/1cd35233-c3c5-4d6f-b155-1c1a74a1a133/test.mkv"
 ```
