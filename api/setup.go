@@ -18,5 +18,6 @@ func Setup() *fiber.App {
 	app.Static("/web/uploads", "./web/uploads")
 	routes.UserRoutes(app)
 	routes.AppsRoutes(app)
+	routes.CoursesRoutes(app)
 	return app
 }

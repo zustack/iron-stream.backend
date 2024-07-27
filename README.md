@@ -152,3 +152,17 @@ curl -X GET "http://localhost:8081/apps/normal-user/Mac" \
 curl -X DELETE "http://localhost:8081/apps/delete/3" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ1MjUwMjYsImlhdCI6MTcyMTkzMzAyNiwibmJmIjoxNzIxOTMzMDI2LCJzdWIiOjF9.qhWUBsobBK0TIWX2OD08HqlCas833r3bsQPKZTjlmU0" 
 ```
+
+##### Upload a large file
+```bash
+curl -X POST http://localhost:8081/courses/chunk/upload \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \
+  -H "Content-Type: multipart/form-data" \
+  -F "chunkNumber=0" \
+  -F "totalChunks=1" \
+  -F "file=@/home/agust/Videos/test.mkv"
+```
+Response
+```json
+{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/46a90838-f68b-4c84-9ed7-8539876d1e0d/test.mkv"}%
+```
