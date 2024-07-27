@@ -34,5 +34,10 @@ func CleanCourseInput(input database.Course) (database.Course, error) {
 		return database.Course{}, fmt.Errorf("La duración no debe tener más de 25 caracteres.")
 	}
 
-	return database.Course{}, nil
+	return database.Course{
+		Title:       input.Title,
+		Description: input.Description,
+		Author:      input.Author,
+		Duration:    input.Duration,
+	}, nil
 }

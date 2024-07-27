@@ -94,8 +94,7 @@ curl -X POST "http://localhost:8081/apps/create" \
 ##### Get fist 50 apps
 ```bash
 # this endpoint need to be authenticated as admin
-# cursor=0 means the first 50, cursor=1 means the second 50
-# q= means search by name, process_name or os 
+# q= means search query
 # the a=0 is not active, the a=1 is active
 curl -X GET "http://localhost:8081/apps/?cursor=0&q=&a=" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ1MjUwMjYsImlhdCI6MTcyMTkzMzAyNiwibmJmIjoxNzIxOTMzMDI2LCJzdWIiOjF9.qhWUBsobBK0TIWX2OD08HqlCas833r3bsQPKZTjlmU0" | jq
 ```
@@ -164,11 +163,8 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
 ```
 Response
 ```json
-{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/3e3b97ea-e69a-43a5-9507-ead8745be672/test.mkv"}%
-{"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/3e2018cb-4d68-42c2-9aab-896b66cd1cab/test.mkv"}%
 {"message":"Archivo cargado con éxito","path":"/home/agust/work/iron-stream/backend/web/uploads/tmp/1cd35233-c3c5-4d6f-b155-1c1a74a1a133/test.mkv"}%
 ```
-/courses/create
 
 ##### Create course
 ```bash
@@ -182,4 +178,24 @@ curl -X POST http://localhost:8081/courses/create \
   -F "is_active=true" \
   -F "thumbnail=@/home/agust/Pictures/test.png" \
   -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/1cd35233-c3c5-4d6f-b155-1c1a74a1a133/test.mkv"
+```
+
+##### Get courses
+```bash
+curl -X GET "http://localhost:8081/courses/?cursor=0&q="  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \ | jq
+```
+
+##### Get admin courses
+```bash
+curl -X GET "http://localhost:8081/courses/admin?cursor=0&q=&a="  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \ | jq
+```
+
+##### Add course to user
+```bash
+curl -X PUT "http://localhost:8081/courses/add/user" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \
+  -d '{"user_id": 1, "course_id": 1}'
 ```
