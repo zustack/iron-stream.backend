@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/smtp"
+	"os"
 )
 
 func SendEmail(token int, email string, subject string) error {
-	secretPassword := GetEnv("EMAIL_SECRET_KEY")
+	secretPassword := os.Getenv("EMAIL_SECRET_KEY")
 	auth := smtp.PlainAuth(
 		"",
 		"agustfricke@gmail.com",
@@ -16,7 +17,7 @@ func SendEmail(token int, email string, subject string) error {
 		"smtp.gmail.com",
 	)
 
-	path := GetEnv("HTML_PATH") + "/email.html"
+	path := os.Getenv("ROOT_PATH") + "/web/templates/email.html"
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		return fmt.Errorf("error al analizar la plantilla: %w", err)

@@ -47,6 +47,16 @@ go test -v ./tests/users_test.go -run TestLogin
 go test -v ./tests/apps_test.go -run TestCreateApp
 ```
 
+## Environment variables
+For the environment variables, run this command with the corresponding information
+```bash
+export DB_DEV_PATH=/path/to/sqlite.db
+export DB_TEST_PATH=/path/to/test_sqlite.db
+export SECRET_KEY=someradomstring
+export EMAIL_SECRET_KEY=emailsecret
+export ROOT_PATH=/path/to/iron-stream.backend
+```
+
 ## Want to make curl requets?
 ##### Register
 ```bash

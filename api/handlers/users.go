@@ -4,6 +4,7 @@ import (
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
+	"os"
 	"strings"
 	"time"
 
@@ -63,7 +64,7 @@ func Login(c *fiber.Ctx) error {
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
 
-	tokenString, err := tokenByte.SignedString([]byte(utils.GetEnv("SECRET_KEY")))
+	tokenString, err := tokenByte.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Ocurrio un error al generar el token de autenticación.",

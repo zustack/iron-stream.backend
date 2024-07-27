@@ -6,8 +6,8 @@ import (
 	"io"
 	"iron-stream/api"
 	"iron-stream/internal/database"
-	"iron-stream/internal/utils"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -29,7 +29,7 @@ func generateToken(t *testing.T, user_id int64, is_admin bool) string {
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
 
-	tokenString, err := tokenByte.SignedString([]byte(utils.GetEnv("SECRET_KEY")))
+	tokenString, err := tokenByte.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		t.Fatal(err)
 	}
