@@ -56,6 +56,6 @@ go test -v ./tests/apps_test.go -run TestCreateApp
 
 ## Endpoints
 All the endpoints can be found on the **endpoints/*/README.md** dir.
-[users](https://github.com/zustack/www-iron-stream/endpoints/users/README.md)
-[apps](https://github.com/zustack/www-iron-stream/endpoints/apps/README.md)
-[courses](https://github.com/zustack/www-iron-stream/endpoints/courses/README.md)
+[users](https://github.com/zustack/iron-stream.backend/endpoints/users/README.md)
+[apps](https://github.com/zustack/iron-streambackend/endpoints/apps/README.md)
+[courses](https://github.com/zustack/iron-stream.backend/endpoints/courses/README.md)
