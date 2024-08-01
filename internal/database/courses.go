@@ -22,6 +22,21 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func DeleteCourseByID(id string) error {
+	result, err := DB.Exec("DELETE FROM courses WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("DeleteCourseByID: course id: %s: %v", id, err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+    return fmt.Errorf("DeleteCourseByID: error getting rows affected %v", err)
+	}
+	if rowsAffected == 0 {
+    return fmt.Errorf("DeleteCourseByID: no course found with ID: %s", id)
+	}
+	return nil
+}
+
 func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
   title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 

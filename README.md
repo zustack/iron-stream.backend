@@ -58,3 +58,4 @@ go test -v ./tests/apps_test.go -run TestCreateApp
 [users](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/users) <br>
 [apps](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/apps) <br>
 [courses](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/courses)
+

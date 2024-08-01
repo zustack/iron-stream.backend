@@ -166,6 +166,20 @@ func GetCourses(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
+func DeleteCourse(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	err := database.DeleteCourseByID(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+
+}
+
 func UpdateCourse(c *fiber.Ctx) error {
 	payloadToClean := database.Course{
 		Title:       c.FormValue("title"),
