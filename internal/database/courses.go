@@ -22,6 +22,25 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func UpdateCourse(c Course) error {
+	result, err := DB.Exec(`UPDATE courses SET 
+  title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
+  duration = ?, is_active = ?, sort_order = ? WHERE id = ?`,
+    c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, c.SortOrder, c.ID)
+	if err != nil {
+		return fmt.Errorf("UpdateCourse: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("UpdateCourse: error getting rows affected %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("UpdateCourse: no course found with ID: %d", c.ID)
+	}
+	return nil
+}
+
 func AddCourseToUser(userID, courseID int64) error {
 	var courseExists bool
 	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)", courseID).Scan(&courseExists)
