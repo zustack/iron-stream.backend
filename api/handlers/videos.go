@@ -13,6 +13,78 @@ import (
 	"github.com/google/uuid"
 )
 
+type updateVideoInput struct {
+	VideoId int64 `json:"video_id"`
+	CourseId int64 `json:"course_id"`
+  VideoResume string `json:"video_resume"`
+}
+
+func UpdateVideoView(c *fiber.Ctx) error {
+  user := c.Locals("user").(*database.User)
+  var payload updateVideoInput
+  if err := c.BodyParser(&payload); err != nil {
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+      "error": "No se pudo procesar la solicitud.",
+    })
+  }
+
+  err := database.UpdateVideoViews(payload.VideoId)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  count, err := database.GetHistoryCountByUserID(user.ID)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  fmt.Println("count", count)
+
+  if count == 0 {
+    payloadToDBi := database.History{
+      VideoId: payload.VideoId,
+      CourseId: payload.CourseId,
+      UserId: user.ID,
+      VideoResume: "",
+    }
+    newRecord, err := database.CreateHistory(payloadToDBi)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+    return c.JSON(newRecord)
+  }
+
+  record, err := database.GetLastVideoRecord(user.ID)
+  if err != nil {
+    fmt.Println("some err", err)
+  }
+
+  err = database.UpdateHistory(record.ID, payload.VideoResume)
+  if err != nil {
+    fmt.Println("some err", err)
+  }
+
+  payloadToDB := database.History{
+    VideoId: payload.VideoId,
+    CourseId: payload.CourseId,
+    UserId: user.ID,
+    VideoResume: "",
+  }
+
+  newHistoryId, err := database.CreateHistory(payloadToDB)
+  if err != nil {
+    fmt.Println("some err", err)
+  }
+
+  return c.JSON(newHistoryId)
+}
+
 func UpdateVideo(c *fiber.Ctx) error {
 	payloadToClean := database.Video{
 		Title:       c.FormValue("title"),

@@ -1,6 +1,9 @@
 package database
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type Video struct {
 	ID          int64  `json:"id"`
@@ -13,6 +16,38 @@ type Video struct {
 	CourseID    int64  `json:"course_id"`
 	SortOrder   int64  `json:"sort_order"`
 	CreatedAt   string `json:"created_at"`
+}
+
+func UpdateVideoViews(id int64) error {
+  // First, get the current view count
+  var currentViews int
+  err := DB.QueryRow("SELECT views FROM videos WHERE id = ?", id).Scan(&currentViews)
+  if err != nil {
+    if err == sql.ErrNoRows {
+      return fmt.Errorf("UpdateVideoViews: no video found with ID: %d", id)
+    }
+    return fmt.Errorf("UpdateVideoViews: error fetching current views: %v", err)
+  }
+
+  // Increment the view count
+  newViews := currentViews + 1
+
+  // Update the database with the new view count
+  result, err := DB.Exec(`UPDATE videos SET views = ? WHERE id = ?`, newViews, id)
+  if err != nil {
+    return fmt.Errorf("UpdateVideoViews: %v", err)
+  }
+
+  rowsAffected, err := result.RowsAffected()
+  if err != nil {
+    return fmt.Errorf("UpdateVideoViews: error getting rows affected: %v", err)
+  }
+
+  if rowsAffected == 0 {
+    return fmt.Errorf("UpdateVideoViews: no video updated with ID: %d", id)
+  }
+
+  return nil
 }
 
 func DeleteVideoByID(id string) error {

@@ -19,11 +19,11 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
 ## Create video
 ```bash
 # this endpoint need to be authenticated as admin
-curl -X POST http://localhost:8081/videos/create \
+curl -X POST http://localhost:8081/videos \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
   -H "Content-Type: multipart/form-data" \
-  -F "title=Data Structures" \
-  -F "description=Description for Data Structures" \
+  -F "title=Data Structures 2" \
+  -F "description=Description for Data Structures 2" \
   -F "course_id=1" \
   -F "length=4 hours, 20 minutes" \
   -F "thumbnail=@/home/agust/Pictures/test.png" \
@@ -54,4 +54,19 @@ curl -X PUT http://localhost:8081/videos \
 ```bash
 curl -X DELETE "http://localhost:8081/videos/1"  \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" | jq
+```
+
+## update video view and create history
+
+type updateVideoInput struct {
+	VideoId int64 `json:"video_id"`
+	CourseId int64 `json:"course_id"`
+  Resume string `json:"resume"`
+}
+
+```bash
+curl -X PUT "http://localhost:8081/videos/views" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
+  -d '{"video_id": 1, "course_id": 1, "video_resume": "069420"}'
 ```
