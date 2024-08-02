@@ -29,6 +29,7 @@ func DeleteVideoByID(id string) error {
 	}
 	return nil
 }
+
 func UpdateVideo(v Video) error {
 	result, err := DB.Exec(`UPDATE videos SET 
   title = ?, description = ?, video_hls = ?, thumbnail = ?, length = ?
