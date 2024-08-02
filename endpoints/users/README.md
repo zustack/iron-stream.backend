@@ -7,7 +7,7 @@ curl -X POST http://localhost:8081/register \
   -d '{
     "username": "admin",
     "password": "admin",
-    "email": "admin@admin.com",
+    "email": "agustfricke@gmail.com",
     "name": "admin",
     "surname": "admin",
     "pc": "some-pc",

@@ -34,8 +34,8 @@ CREATE TABLE courses (
   author VARCHAR(25) NOT NULL,
   thumbnail VARCHAR(155) NOT NULL,
   preview VARCHAR(155) NOT NULL,
-  rating INTEGER, 
-  num_reviews INTEGER, 
+  rating INTEGER DEFAULT 0, 
+  num_reviews INTEGER DEFAULT 0, 
   duration VARCHAR(25) NOT NULL, 
   is_active BOOL DEFAULT FALSE,
   sort_order INTEGER, 
@@ -50,7 +50,7 @@ CREATE TABLE videos (
   video_hls VARCHAR(255) NOT NULL,
   thumbnail VARCHAR(155) NOT NULL,
   length VARCHAR(155) NOT NULL, 
-  views INTEGER, 
+  views INTEGER DEFAULT 0, 
   course_id INTEGER NOT NULL, 
   sort_order INTEGER, 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -81,6 +81,6 @@ CREATE TABLE reviews (
   course_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
   description VARCHAR(255) NOT NULL,
-  rating INTEGER, 
+  rating INTEGER NOT NULL, 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

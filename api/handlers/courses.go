@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type ACUInput struct {
 	CourseID int64 `json:"course_id"`
 	UserID   int64 `json:"user_id"`
@@ -110,7 +109,7 @@ func GetCourses(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(400).SendString("Invalid cursor")
 	}
-	limit := 50 // Número de cursos por página
+	limit := 50 
 
 	searchParam := c.Query("q", "")
 	searchParam = "%" + searchParam + "%"
@@ -188,16 +187,16 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Duration:    c.FormValue("duration"),
 	}
 
-  id := c.FormValue("id")
-  if id == "" {
+	id := c.FormValue("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
-  }
+	}
 
-  // convert id to int64
-  id64, err := strconv.ParseInt(id, 10, 64)
-  if err != nil {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
-  }
+	// convert id to int64
+	id64, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
+	}
 
 	cleanInput, err := inputs.CleanUpdateCourseInput(payloadToClean)
 	if err != nil {
@@ -210,68 +209,67 @@ func UpdateCourse(c *fiber.Ctx) error {
 	isActiveBool, err := strconv.ParseBool(isActive)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-      "error": "invalid boolean value for is_active",
-    })
+			"error": "invalid boolean value for is_active",
+		})
 	}
 
 	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
-  var thumbnailToDB string
-  thumbnail, err := c.FormFile("thumbnail")
-  if err == nil {
-	if thumbnail.Size > MaxFileSize {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "El archivo es demasiado grande. El tamaño máximo permitido es 10MB.",
-		})
+	var thumbnailToDB string
+	thumbnail, err := c.FormFile("thumbnail")
+	if err == nil {
+		if thumbnail.Size > MaxFileSize {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "El archivo es demasiado grande. El tamaño máximo permitido es 10MB.",
+			})
+		}
+		thumbnail_id := uuid.New()
+		ext := filepath.Ext(thumbnail.Filename)
+		newFilename := fmt.Sprintf("%s%s", thumbnail_id, ext)
+		thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
+		// save the file in local disk
+		err = c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al guardar el thumbnail"})
+		}
+
+		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 	}
-  thumbnail_id := uuid.New()
-	ext := filepath.Ext(thumbnail.Filename)
-	newFilename := fmt.Sprintf("%s%s", thumbnail_id, ext)
-	thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
-  // save the file in local disk
-	err = c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al guardar el thumbnail"})
-  }
 
-	thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
-  }
+	previewTmpDir := c.FormValue("previewTmpDir")
+	var previewFinalPath string
+	if previewTmpDir != "" {
+		previewId := uuid.New()
+		previewDir := "/web/uploads/previews/" + previewId.String()
+		previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
+		err = os.MkdirAll(previewFinalPath, 0755)
+		if err != nil {
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
 
+		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
+		cmd := exec.Command("sh", ffmpegPath, previewTmpDir, previewFinalPath)
+		err = cmd.Run()
+		if err != nil {
+			return c.SendStatus(500)
+		}
+	}
 
-  previewTmpDir := c.FormValue("previewTmpDir")
-  var previewFinalPath string
-  if previewTmpDir != "" {
-    previewId := uuid.New()
-    previewDir := "/web/uploads/previews/" + previewId.String()
-    previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
-    err = os.MkdirAll(previewFinalPath, 0755)
-    if err != nil {
-      return c.SendStatus(fiber.StatusInternalServerError)
-    }
+	err = database.UpdateCourse(database.Course{
+		ID:          id64,
+		Title:       cleanInput.Title,
+		Description: cleanInput.Description,
+		Author:      cleanInput.Author,
+		Thumbnail:   thumbnailToDB,
+		Preview:     previewFinalPath + "/master.m3u8",
+		Duration:    cleanInput.Duration,
+		IsActive:    isActiveBool,
+	})
 
-    ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-    cmd := exec.Command("sh", ffmpegPath, previewTmpDir, previewFinalPath)
-    err = cmd.Run()
-    if err != nil {
-      return c.SendStatus(500)
-    }
-  }
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 
-  err = database.UpdateCourse(database.Course{
-    ID:          id64,    
-    Title:       cleanInput.Title,
-    Description: cleanInput.Description,
-    Author:      cleanInput.Author,
-    Thumbnail:   thumbnailToDB,
-    Preview:     previewFinalPath + "/master.m3u8",
-    Duration:    cleanInput.Duration,
-    IsActive:    isActiveBool,
-  })
-
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-  }
-
-  return c.SendStatus(fiber.StatusOK)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func CreateCourse(c *fiber.Ctx) error {
