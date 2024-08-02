@@ -5,15 +5,15 @@
 # this endpoint need to be authenticated as admin
 curl -X POST "http://localhost:8081/apps/create" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ1MjUwMjYsImlhdCI6MTcyMTkzMzAyNiwibmJmIjoxNzIxOTMzMDI2LCJzdWIiOjF9.qhWUBsobBK0TIWX2OD08HqlCas833r3bsQPKZTjlmU0" \
-  -d '{"name": "Quick Time Player", "process_name": "QuickTime", "os": "Mac", "is_active": true}'
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
+  -d '{"name": "OBS", "process_name": "obs.exe", "os": "Win", "is_active": false}'
 ```
 
 ## Get fist 50 apps && search by param && search by is_active
 ```bash
 # this endpoint need to be authenticated as admin
 # q= search query && (a=1 is_active=true, a=0 is_active=false)
-curl -X GET "http://localhost:8081/apps/?cursor=0&q=&a=" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ1MjUwMjYsImlhdCI6MTcyMTkzMzAyNiwibmJmIjoxNzIxOTMzMDI2LCJzdWIiOjF9.qhWUBsobBK0TIWX2OD08HqlCas833r3bsQPKZTjlmU0" | jq
+curl -X GET "http://localhost:8081/apps/?cursor=0&q=&a=0" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ1MjUwMjYsImlhdCI6MTcyMTkzMzAyNiwibmJmIjoxNzIxOTMzMDI2LCJzdWIiOjF9.qhWUBsobBK0TIWX2OD08HqlCas833r3bsQPKZTjlmU0" | jq
 ```
 
 ## Get app by id

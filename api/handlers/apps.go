@@ -36,7 +36,6 @@ func GetApps(c *fiber.Ctx) error {
 	searchParam = "%" + searchParam + "%"
 
 	isActiveParam := c.Query("a", "")
-	isActiveParam = "%" + isActiveParam + "%"
 	apps, err := database.GetApps(searchParam, isActiveParam, limit, cursor)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

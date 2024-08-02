@@ -37,14 +37,28 @@ func GetAppsCount() (int, error) {
 
 func GetApps(searchParam, isActiveParam string, limit, cursor int) ([]App, error) {
 	var apps []App
-	rows, err := DB.Query(`SELECT * FROM apps WHERE 
-  name LIKE ? OR process_name LIKE ? OR os LIKE ? OR is_active LIKE ? 
-  ORDER BY id DESC LIMIT ? OFFSET ?`,
-		searchParam, searchParam, searchParam, isActiveParam, limit, cursor)
+	var args []interface{}
+	query := `SELECT * FROM apps WHERE 
+              (name LIKE ? OR process_name LIKE ? OR os LIKE ?)`
+
+	args = append(args, searchParam, searchParam, searchParam)
+
+	if isActiveParam != "" {
+		query += ` AND is_active = ?`
+		isActive := isActiveParam == "1"
+		args = append(args, isActive)
+	}
+
+	query += ` ORDER BY id DESC LIMIT ? OFFSET ?`
+	args = append(args, limit, cursor)
+
+	rows, err := DB.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("GetApps: %v", err)
 	}
+
 	defer rows.Close()
+
 	for rows.Next() {
 		var a App
 		if err := rows.Scan(&a.ID, &a.Name, &a.ProcessName, &a.Os, &a.IsActive, &a.CreatedAt); err != nil {
