@@ -58,15 +58,9 @@ curl -X DELETE "http://localhost:8081/videos/1"  \
 
 ## update video view and create history
 
-type updateVideoInput struct {
-	VideoId int64 `json:"video_id"`
-	CourseId int64 `json:"course_id"`
-  Resume string `json:"resume"`
-}
-
 ```bash
 curl -X PUT "http://localhost:8081/videos/views" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
-  -d '{"video_id": 1, "course_id": 1, "video_resume": "069420"}'
+  -d '{"video_id": 2, "course_id": 1, "video_resume": "069420"}'
 ```

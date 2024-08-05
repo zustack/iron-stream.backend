@@ -57,5 +57,7 @@ go test -v ./tests/apps_test.go -run TestCreateApp
 ## Endpoints
 [users](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/users) <br>
 [apps](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/apps) <br>
-[courses](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/courses)
+[courses](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/courses) <br>
+[history](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/history) <br>
+[files](https://github.com/zustack/iron-stream.backend/tree/main/endpoints/files) <br>
 

@@ -36,16 +36,16 @@ func GetUserByID(id string) (User, error) {
 	return u, nil
 }
 
-func GetUserByUsername(username string) (User, error) {
+func GetUserByEmail(email string) (User, error) {
 	var u User
-	row := DB.QueryRow(`SELECT * FROM users WHERE username = ?`, username)
+	row := DB.QueryRow(`SELECT * FROM users WHERE email = ?`, email)
 	if err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Email, &u.Name,
 		&u.Surname, &u.IsAdmin, &u.IsActive, &u.EmailToken, &u.Verified,
 		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return u, fmt.Errorf("GetUserByUsername %s: no such user", username)
+      return u, fmt.Errorf("GetUserByEmail: %s: no such user", email)
 		}
-		return u, fmt.Errorf("GetUserByUsername %s: %v", username, err)
+		return u, fmt.Errorf("GetUserByEmail: %s: %v", email, err)
 	}
 	return u, nil
 }

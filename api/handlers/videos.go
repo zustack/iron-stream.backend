@@ -13,45 +13,33 @@ import (
 	"github.com/google/uuid"
 )
 
-type updateVideoInput struct {
-	VideoId int64 `json:"video_id"`
-	CourseId int64 `json:"course_id"`
-  VideoResume string `json:"video_resume"`
+type createHistoryInput struct {
+	Id string `json:"id"`
+	VideoId string `json:"video_id"`
+	CourseId string `json:"course_id"`
+  Resume string `json:"resume"`
 }
 
-func UpdateVideoView(c *fiber.Ctx) error {
+func WatchNewVideo(c *fiber.Ctx) error {
   user := c.Locals("user").(*database.User)
-  var payload updateVideoInput
+  var payload createHistoryInput 
   if err := c.BodyParser(&payload); err != nil {
+    fmt.Println("fucking error", err)
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
       "error": "No se pudo procesar la solicitud.",
     })
   }
-
-  err := database.UpdateVideoViews(payload.VideoId)
+  // actualizo el ultimo registro del historial con el resume del video
+  err := database.UpdateHistory(payload.Id, payload.Resume)
   if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
+    fmt.Println("er1", err)
+    return c.SendStatus(500)
   }
 
-  count, err := database.GetHistoryCountByUserID(user.ID)
+  // find the last record with the same user.ID, payload.VideoId, payload.CourseId
+  record, err := database.GetLastVideoByUserIdAndCourseIdAndVideoId(user.ID, payload.CourseId, payload.VideoId)
   if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-
-  fmt.Println("count", count)
-
-  if count == 0 {
-    payloadToDBi := database.History{
-      VideoId: payload.VideoId,
-      CourseId: payload.CourseId,
-      UserId: user.ID,
-      VideoResume: "",
-    }
-    newRecord, err := database.CreateHistory(payloadToDBi)
+    newRecord, err := database.CreateHistory(user.ID, payload.VideoId, payload.CourseId, "")
     if err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
         "error": err.Error(),
@@ -60,30 +48,54 @@ func UpdateVideoView(c *fiber.Ctx) error {
     return c.JSON(newRecord)
   }
 
-  record, err := database.GetLastVideoRecord(user.ID)
+  newRecord, err := database.CreateHistory(user.ID, payload.VideoId, payload.CourseId, record.VideoResume)
   if err != nil {
-    fmt.Println("some err", err)
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
   }
-
-  err = database.UpdateHistory(record.ID, payload.VideoResume)
-  if err != nil {
-    fmt.Println("some err", err)
-  }
-
-  payloadToDB := database.History{
-    VideoId: payload.VideoId,
-    CourseId: payload.CourseId,
-    UserId: user.ID,
-    VideoResume: "",
-  }
-
-  newHistoryId, err := database.CreateHistory(payloadToDB)
-  if err != nil {
-    fmt.Println("some err", err)
-  }
-
-  return c.JSON(newHistoryId)
+  fmt.Println("new record", newRecord)
+  return c.JSON(newRecord)
 }
+
+func GetCurrentVideo(c *fiber.Ctx) error {
+  user := c.Locals("user").(*database.User)
+  course_id := c.Params("course_id")
+  // obtener el utlimo video del historial
+  record, err := database.GetLastVideoByUserIdAndCourseId(user.ID, course_id)
+  // es el primer video que el usuario ve
+  if err != nil {
+    // obtener el primer video del curso
+    video, err := database.GetFistVideoByCourseId(course_id)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+    // crear nuevo record con el primer video
+    // user_id int64, video_id int64, course_id int64, resume string
+    videoStr := fmt.Sprintf("%d", video.ID)
+    newRecord, err := database.CreateHistory(user.ID, videoStr, course_id, "")
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+    fmt.Println("first record", newRecord)
+    return c.JSON(video)
+
+  }
+
+  // nesesito el video y el record para el historial, sobre todo para saber donde estaba el video
+  video, err := database.GetVideoById(record.VideoId)
+  return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "video": video,
+        "resume": record.VideoResume,
+        "history_id": record.ID,
+  })
+}
+
+
 
 func UpdateVideo(c *fiber.Ctx) error {
 	payloadToClean := database.Video{

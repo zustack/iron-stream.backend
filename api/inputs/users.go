@@ -7,31 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CleanLoginInput(input database.User) (database.User, error) {
-	if input.Username == "" {
-		return database.User{}, fmt.Errorf("El nombre de usuario es requerido.")
-	}
-
-	if input.Password == "" {
-		return database.User{}, fmt.Errorf("La contraseña es requerida.")
-	}
-
-	pc := input.Pc
-	if input.Username == "admin" {
-		pc = ""
-	}
-
-	if input.Username != "admin" && input.Pc == "" {
-		return database.User{}, fmt.Errorf("Ocurrio un error debido a una incompatibilidad con tu sistema operativo.")
-	}
-
-	return database.User{
-		Username: input.Username,
-		Password: input.Password,
-		Pc:       pc,
-	}, nil
-}
-
 func CleanRegisterInput(input database.User) (database.User, error) {
 	if input.Username == "" {
 		return database.User{}, fmt.Errorf("El nombre de usuario es requerido.")

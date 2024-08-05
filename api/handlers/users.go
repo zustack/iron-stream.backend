@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
@@ -21,33 +22,44 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	payloadToClean := database.User{
-		Username: payload.Username,
-		Password: payload.Password,
-		Pc:       payload.Pc,
+	if payload.Email == "" {
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+      "error": "El correo electrónico es requerido.",
+    })
 	}
 
-	cleanInput, err := inputs.CleanLoginInput(payloadToClean)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+	if payload.Password == "" {
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+      "error": "La contraseña es requerida.",
+    })
 	}
 
-	user, err := database.GetUserByUsername(cleanInput.Username)
+  fmt.Println(payload.Pc)
+	if payload.Pc == "" {
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+      "error": "Ocurrio un error debido a una incompatibilidad con tu sistema operativo.",
+    })
+	}
+
+	user, err := database.GetUserByEmail(payload.Email)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "No se encontro el usuario con el nombre de usuario proporcionado.",
 		})
 	}
 
-	if user.Pc != cleanInput.Pc {
+	pc := payload.Pc
+	if user.IsAdmin {
+		pc = ""
+	}
+
+	if user.Pc != pc {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Esta cuenta esta registrada en otra computadora.",
 		})
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cleanInput.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "La contraseña es incorrecta.",
@@ -73,6 +85,9 @@ func Login(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": tokenString,
+    "userId":  user.ID,
+    "isAdmin": user.IsAdmin,
+    "exp":      now.Add(expDuration).Unix(),
 	})
 }
 

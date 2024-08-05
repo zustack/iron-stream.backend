@@ -15,8 +15,8 @@ func Setup() *fiber.App {
 	app := fiber.New()
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000",
-		AllowCredentials: true,
+		AllowOrigins:     "*",
+		AllowCredentials: false,
 	}))
 	app.Use("/web/assets/videos", middleware.AllowToWatch)
 	staticPath := os.Getenv("ROOT_PATH") + "/web/uploads"

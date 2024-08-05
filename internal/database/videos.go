@@ -18,6 +18,33 @@ type Video struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func GetVideoById(videoId int64) (Video, error) {
+	var v Video
+	row := DB.QueryRow(`SELECT * FROM videos WHERE id = ?`, videoId)
+	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS, 
+  &v.Thumbnail, &v.Length, &v.Views, &v.CourseID, &v.SortOrder, &v.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return v, fmt.Errorf("GetVideoById: %d: no such video", videoId)
+		}
+		return v, fmt.Errorf("GetVideoById: %d: %v", videoId, err)
+	}
+	return v, nil
+}
+
+func GetFistVideoByCourseId(courseID string) (Video, error) {
+  var video Video
+  row := DB.QueryRow(`SELECT * FROM videos WHERE 
+  course_id = ? ORDER BY sort_order ASC LIMIT 1`, courseID)
+  err := row.Scan(&video.ID, &video.Title, &video.Description, &video.VideoHLS, &video.Thumbnail, &video.Length, &video.Views, &video.CourseID, &video.SortOrder, &video.CreatedAt)
+  if err != nil {
+    if err == sql.ErrNoRows {
+      return video, fmt.Errorf("GetFistVideoByCourseId: no video found with course ID: %s", courseID)
+    }
+    return video, fmt.Errorf("GetFistVideoByCourseId: error fetching first video: %v", err)
+  }
+  return video, nil
+}
+
 func UpdateVideoViews(id int64) error {
   // First, get the current view count
   var currentViews int
