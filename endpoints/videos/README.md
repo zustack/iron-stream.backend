@@ -22,8 +22,8 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
 curl -X POST http://localhost:8081/videos \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
   -H "Content-Type: multipart/form-data" \
-  -F "title=Data Structures 2" \
-  -F "description=Description for Data Structures 2" \
+  -F "title=Data Structures 420" \
+  -F "description=Description for Data Structures 420" \
   -F "course_id=1" \
   -F "length=4 hours, 20 minutes" \
   -F "thumbnail=@/home/agust/Pictures/test.png" \

@@ -43,6 +43,16 @@ func UpdateHistory(id string, resume string) error {
   return nil
 }
 
+/*
+func UpdateHistory(resume string, user_id int64, current_video_id int64) error {
+  _, err := DB.Exec(`UPDATE history SET video_resume = ? WHERE user_id = ? AND video_id = ?`, resume, user_id, current_video_id)
+  if err != nil {
+    return fmt.Errorf("UpdateHistory: %v", err)
+  }
+  return nil
+}
+*/
+
 func GetLastVideoByUserIdAndCourseIdAndVideoId(user_id int64, course_id string, video_id string) (History, error) {
   var history History
   row := DB.QueryRow(`
@@ -95,5 +105,42 @@ func GetUserHistory(user_id int64) ([]History, error) {
     }
     histories = append(histories, history)
   }
+  return histories, nil
+}
+
+func GetUserUniqueHistory(user_id int64) ([]History, error) {
+  var histories []History
+
+  query := `
+    SELECT video_id, video_resume
+    FROM history
+    WHERE user_id = ?
+    AND (video_id, created_at) IN (
+        SELECT video_id, MAX(created_at)
+        FROM history
+        WHERE user_id = ?
+        GROUP BY video_id
+    )
+    ORDER BY created_at DESC
+  `
+  
+  rows, err := DB.Query(query, user_id, user_id)
+  if err != nil {
+    return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
+  }
+  defer rows.Close()
+
+  for rows.Next() {
+    var history History
+    if err := rows.Scan(&history.VideoId, &history.VideoResume); err != nil {
+      return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
+    }
+    histories = append(histories, history)
+  }
+
+  if err := rows.Err(); err != nil {
+    return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
+  }
+
   return histories, nil
 }

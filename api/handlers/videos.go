@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ import (
 type createHistoryInput struct {
 	Id string `json:"id"`
 	VideoId string `json:"video_id"`
+  CurrentVideoId int64 `json:"current_video_id"`
 	CourseId string `json:"course_id"`
   Resume string `json:"resume"`
 }
@@ -29,6 +31,23 @@ func WatchNewVideo(c *fiber.Ctx) error {
       "error": "No se pudo procesar la solicitud.",
     })
   }
+  // actualizo el ultimo registro del historial con el resume del video
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+  // deberia actualizar el history de todos los registros del usuario que tengan el mismo video_id y user_id
+  // payload.id es el history_id que viene del video actual
+  // payload.resume es el video actual
+  // user.ID
+  // payload.CurrentVideoId
+  // saco esto? y al buscar los registros del usuario solo traigo los ultimos recolectados y unicos?
+  // cuanto cuesta la escritura de abajo?
+  /*
+  err := database.UpdateHistory(payload.Resume, user.ID, payload.CurrentVideoId)
+  if err != nil {
+    fmt.Println("er1", err)
+    return c.SendStatus(500)
+  }
+  */
   // actualizo el ultimo registro del historial con el resume del video
   err := database.UpdateHistory(payload.Id, payload.Resume)
   if err != nil {
@@ -72,6 +91,13 @@ func GetCurrentVideo(c *fiber.Ctx) error {
         "error": err.Error(),
       })
     }
+    // agrega un video view
+    err = database.UpdateVideoViews(video.ID)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
     // crear nuevo record con el primer video
     // user_id int64, video_id int64, course_id int64, resume string
     videoStr := fmt.Sprintf("%d", video.ID)
@@ -83,27 +109,34 @@ func GetCurrentVideo(c *fiber.Ctx) error {
     }
     fmt.Println("first record", newRecord)
     return c.JSON(video)
-
   }
 
   // nesesito el video y el record para el historial, sobre todo para saber donde estaba el video
   video, err := database.GetVideoById(record.VideoId)
+
+  // agrega un video view
+  err = database.UpdateVideoViews(video.ID)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
   return c.Status(fiber.StatusOK).JSON(fiber.Map{
-        "video": video,
-        "resume": record.VideoResume,
-        "history_id": record.ID,
+    "video": video,
+    "resume": record.VideoResume,
+    "history_id": record.ID,
   })
 }
 
 
 
 func UpdateVideo(c *fiber.Ctx) error {
-	payloadToClean := database.Video{
-		Title:       c.FormValue("title"),
-		Description: c.FormValue("description"),
-		Length:    c.FormValue("length"),
+  payloadToClean := database.Video{
+    Title:       c.FormValue("title"),
+    Description: c.FormValue("description"),
+    Length:    c.FormValue("length"),
     VideoHLS: c.FormValue("video_tmp"),
-	}
+  }
 
 	cleanInput, err := inputs.CleanVideoInput(payloadToClean)
 	if err != nil {
@@ -196,58 +229,107 @@ func DeleteVideo(c *fiber.Ctx) error {
 }
 
 func GetVideos(c *fiber.Ctx) error {
+  user := c.Locals("user").(*database.User)
+  // este history deberia retornar items unicos, no duplicados!! mucho alloc de memoria!!!!
+  // ok deberia estar bien ahora :)
+  history, err := database.GetUserUniqueHistory(user.ID)
+  if err != nil {
+    fmt.Println("1", err)
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  historyMap := make(map[int64]string)
+  for _, h := range history {
+    historyMap[h.VideoId] = h.VideoResume
+    fmt.Println("resume", h.VideoResume)
+  }
+
   id := c.Params("id")
   if id == "" {
+    fmt.Println("2", err)
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
       "error": "Course ID is required",
     })
   }
 
-	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
-	if err != nil {
-		return c.Status(400).SendString("Invalid cursor")
-	}
-	limit := 50 
+  cursor, err := strconv.Atoi(c.Query("cursor", "0"))
+  if err != nil {
+    fmt.Println("3", err)
+    return c.Status(400).SendString("Invalid cursor")
+  }
+  limit := 50 
 
-	searchParam := c.Query("q", "")
-	searchParam = "%" + searchParam + "%"
+  searchParam := c.Query("q", "")
+  searchParam = "%" + searchParam + "%"
 
-	videos, err := database.GetVideos(id, searchParam, cursor, limit)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
+  videos, err := database.GetVideos(id, searchParam, cursor, limit)
+  if err != nil {
+    fmt.Println("4", err)
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
 
-	totalCount, err := database.GetVideosCount()
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
+for i := range videos {
+		if resume, ok := historyMap[videos[i].ID]; ok {
+			parts := strings.Split(resume, ".")
+			resumeInt, err1 := strconv.Atoi(parts[0])
+			if err1 != nil {
+				fmt.Println("Error al convertir la parte entera:", err1)
+				continue
+			}
 
-	var previousID, nextID *int
-	if cursor > 0 {
-		prev := cursor - limit
-		if prev < 0 {
-			prev = 0
+			lengthInt, err2 := strconv.Atoi(videos[i].Length)
+			if err2 != nil {
+				fmt.Println("Error al convertir la longitud:", err2)
+				continue
+			}
+
+			if lengthInt == 0 {
+				fmt.Println("Longitud no puede ser cero")
+				continue
+			}
+			result := float64(resumeInt) / float64(lengthInt) * 100
+
+			videos[i].VideoResume = fmt.Sprintf("%.0f", result)
+			fmt.Println("Nuevo resumen:", videos[i].VideoResume)
+		} else {
+			videos[i].VideoResume = "0"
 		}
-		previousID = &prev
-	}
-	if cursor+limit < totalCount {
-		next := cursor + limit
-		nextID = &next
 	}
 
-	response := struct {
-		Data       []database.Video `json:"data"`
-		PreviousID *int             `json:"previousId"`
-		NextID     *int             `json:"nextId"`
-	}{
-		Data:       videos,
-		PreviousID: previousID,
-		NextID:     nextID,
-	}
+  totalCount, err := database.GetVideosCount()
+  if err != nil {
+    fmt.Println("5", err)
+    return c.SendStatus(fiber.StatusInternalServerError)
+  }
 
-	return c.JSON(response)
+  var previousID, nextID *int
+  if cursor > 0 {
+    prev := cursor - limit
+    if prev < 0 {
+      prev = 0
+    }
+    previousID = &prev
+  }
+  if cursor+limit < totalCount {
+    next := cursor + limit
+    nextID = &next
+  }
+
+  response := struct {
+    Data       []database.Video `json:"data"`
+    PreviousID *int             `json:"previousId"`
+    NextID     *int             `json:"nextId"`
+  }{
+    Data:       videos,
+    PreviousID: previousID,
+    NextID:     nextID,
+  }
+
+  return c.JSON(response)
 }
 
 func CreateVideo(c *fiber.Ctx) error {
@@ -290,6 +372,18 @@ func CreateVideo(c *fiber.Ctx) error {
 	thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
 	c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
 	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
+
+  // get the lenght of the video
+	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), cleanInput.VideoHLS)
+  output, err := getLengthCmd.Output()
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  length := strings.Trim(string(output), "\n")
+  fmt.Println("length: ", length)
+  cleanInput.Length = length
 
 	videoId := uuid.New()
 	previewDir := "/web/uploads/videos/" + videoId.String()

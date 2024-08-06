@@ -16,6 +16,8 @@ type Video struct {
 	CourseID    int64  `json:"course_id"`
 	SortOrder   int64  `json:"sort_order"`
 	CreatedAt   string `json:"created_at"`
+  // not in db
+  VideoResume string `json:"video_resume"`
 }
 
 func GetVideoById(videoId int64) (Video, error) {

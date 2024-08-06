@@ -6,6 +6,11 @@ git clone https://github.com/zustack/iron-stream.backend.git ~/
 cd ~/iron-stream.backend
 ```
 
+```bash
+# get the seconds of the video
+ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 test.mp4 | awk '{print int($1)}'
+```
+
 ## Environment variables
 For the environment variables, run this command with the corresponding information.
 ```bash
