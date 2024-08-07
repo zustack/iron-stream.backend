@@ -15,4 +15,5 @@ func CoursesRoutes(app *fiber.App) {
 	app.Post("/courses/create", middleware.AdminUser, handlers.CreateCourse)
 	app.Put("/courses/update", middleware.AdminUser, handlers.UpdateCourse)
 	app.Delete("/courses/delete/:id", middleware.AdminUser, handlers.DeleteCourse)
+	app.Get("/courses/solo/:id", middleware.NormalUser, handlers.GetSoloCourse)
 }

@@ -22,6 +22,21 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+
+func GetCourseById(id string) (Course, error) {
+	var c Course
+	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
+	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author, 
+  &c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration, 
+  &c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+      return c, fmt.Errorf("GetCourseById: %s: no such course", id)
+		}
+    return c, fmt.Errorf("GetCourseById: %s: %v", id, err)
+	}
+	return c, nil
+}
+
 func DeleteCourseByID(id string) error {
 	result, err := DB.Exec("DELETE FROM courses WHERE id = ?", id)
 	if err != nil {
@@ -95,6 +110,21 @@ func AddCourseToUser(userID, courseID int64) error {
 	}
 
 	return nil
+}
+
+func GetCourseClientCount(searchParam, isActiveParam string) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM courses
+		WHERE (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?)
+		AND is_active = ?`
+	
+	searchPattern := "%" + searchParam + "%"
+	
+	err := DB.QueryRow(query, searchPattern, searchPattern, searchPattern, searchPattern, isActiveParam).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("GetCourseClientCount: %v", err)
+	}
+	return count, nil
 }
 
 func GetAdminCourses(searchParam, isActiveParam string, limit, cursor int) ([]Course, error) {
