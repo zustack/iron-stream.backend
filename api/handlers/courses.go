@@ -212,6 +212,13 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Duration:    c.FormValue("duration"),
 	}
 
+	sortOrder := c.FormValue("sortOrder")
+	sortOrderInt, err := strconv.ParseInt(sortOrder, 10, 0)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
+	}
+
+
 	id := c.FormValue("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
@@ -288,6 +295,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Preview:     previewDir + "/master.m3u8",
 		Duration:    cleanInput.Duration,
 		IsActive:    isActiveBool,
+    SortOrder:   int(sortOrderInt),
 	})
 
 	if err != nil {

@@ -39,7 +39,7 @@ func GetFiles(video_id, page int64) ([]File, error) {
 
 	for rows.Next() {
 		var f File
-		if err := rows.Scan(&f.ID, &f.Path, &f.VideoID, &f.Page, &f.SortOrder, &f.CreatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.Path, &f.Page, &f.VideoID, &f.SortOrder, &f.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetFiles: %v", err)
 		}
 		files = append(files, f)

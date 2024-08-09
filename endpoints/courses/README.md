@@ -87,3 +87,15 @@ curl -X PUT http://localhost:8081/courses/update \
 curl -X DELETE "http://localhost:8081/courses/delete/1" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMjQ0OTYsImlhdCI6MTcyMjUzMjQ5NiwibmJmIjoxNzIyNTMyNDk2LCJzdWIiOjF9.ENH-zsDg-s1Z4aKOMP6tnV7Wg91-qaRJHlXvKhc_Uik" 
 ```
+
+
+	IdA int64 `json:"idA"`
+	IdB int64 `json:"idB"`
+  SortA int64 `json:"sortA"`
+	SortB int64 `json:"sortB"`
+```bash
+curl -X PUT "http://localhost:8081/courses/sort" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMjQ0OTYsImlhdCI6MTcyMjUzMjQ5NiwibmJmIjoxNzIyNTMyNDk2LCJzdWIiOjF9.ENH-zsDg-s1Z4aKOMP6tnV7Wg91-qaRJHlXvKhc_Uik" \
+     -d '{"idA": 12, "idB": 13}'
+```

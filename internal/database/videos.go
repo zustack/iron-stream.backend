@@ -115,9 +115,9 @@ func UpdateVideo(v Video) error {
 	return nil
 }
 
-func GetVideosCount() (int, error) {
+func GetVideosCount(id string) (int, error) {
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM videos").Scan(&count)
+	err := DB.QueryRow("SELECT COUNT(*) FROM videos WHERE course_id = ?", id).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetVideosCount: %v", err)
 	}

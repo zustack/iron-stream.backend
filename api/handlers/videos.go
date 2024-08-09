@@ -138,7 +138,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 	payloadToClean := database.Video{
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
-		Length:      c.FormValue("length"),
+		Duration:    c.FormValue("duration"),
 		VideoHLS:    c.FormValue("video_tmp"),
 	}
 
@@ -184,6 +184,17 @@ func UpdateVideo(c *fiber.Ctx) error {
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 	}
 
+	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), cleanInput.VideoHLS)
+	output, err := getLengthCmd.Output()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	fmt.Println("duration", string(output))
+	length := strings.Trim(string(output), "\n")
+
 	var previewDir string
 	if cleanInput.VideoHLS != "" {
 		videoId := uuid.New()
@@ -208,7 +219,8 @@ func UpdateVideo(c *fiber.Ctx) error {
 		Description: cleanInput.Description,
 		VideoHLS:    previewDir + "/master.m3u8",
 		Thumbnail:   thumbnailToDB,
-		Length:      cleanInput.Length,
+		Length:      length,
+    Duration:    cleanInput.Duration,
 		ID:          id64,
 	}
 
@@ -222,6 +234,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 }
 
 func DeleteVideo(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 	err := database.DeleteVideoByID(id)
 	if err != nil {
@@ -229,7 +242,7 @@ func DeleteVideo(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	return c.SendStatus(fiber.StatusNoContent)
+  return c.JSON(id)
 }
 
 func GetAdminVideos(c *fiber.Ctx) error {
@@ -259,7 +272,7 @@ func GetAdminVideos(c *fiber.Ctx) error {
 		})
 	}
 
-	totalCount, err := database.GetVideosCount()
+	totalCount, err := database.GetVideosCount(id)
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -279,10 +292,12 @@ func GetAdminVideos(c *fiber.Ctx) error {
 
 	response := struct {
 		Data       []database.Video `json:"data"`
+    TotalCount int              `json:"totalCount"`
 		PreviousID *int             `json:"previousId"`
 		NextID     *int             `json:"nextId"`
 	}{
 		Data:       videos,
+    TotalCount: totalCount,
 		PreviousID: previousID,
 		NextID:     nextID,
 	}
@@ -361,7 +376,7 @@ func GetVideos(c *fiber.Ctx) error {
 		}
 	}
 
-	totalCount, err := database.GetVideosCount()
+	totalCount, err := database.GetVideosCount(id)
 	if err != nil {
 		fmt.Println("5", err)
 		return c.SendStatus(fiber.StatusInternalServerError)

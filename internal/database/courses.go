@@ -54,8 +54,9 @@ func DeleteCourseByID(id string) error {
 func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
   title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
-  duration = ?, is_active = ? WHERE id = ?`,
-		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, c.ID)
+  duration = ?, is_active = ?, sort_order = ? WHERE id = ?`,
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, 
+    c.IsActive, c.SortOrder, c.ID)
 	if err != nil {
 		return fmt.Errorf("UpdateCourse: %v", err)
 	}
@@ -220,3 +221,5 @@ func CreateCourse(c Course) (int64, error) {
 
 	return id, nil
 }
+
+
