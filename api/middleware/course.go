@@ -17,16 +17,16 @@ func AllowToWatch(c *fiber.Ctx) error {
 	authorization := c.Get("Authorization")
 
 	courseID := c.Query("courseID", "")
-  if courseID == "" {
+	if courseID == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-      "status": "fail", "message": "Course ID is required",})
-  }
+			"status": "fail", "message": "Course ID is required"})
+	}
 
-  courseID64, err := strconv.ParseInt(courseID, 10, 64)
-  if err != nil {
-    return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-      "status": "fail", "message": "Course ID is invalid",})
-  }
+	courseID64, err := strconv.ParseInt(courseID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"status": "fail", "message": "Course ID is invalid"})
+	}
 
 	if strings.HasPrefix(authorization, "Bearer ") {
 		tokenString = strings.TrimPrefix(authorization, "Bearer ")

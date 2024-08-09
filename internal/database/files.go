@@ -3,25 +3,25 @@ package database
 import "fmt"
 
 type File struct {
-  ID          int64  `json:"id"`
-  Path        string `json:"path"`
-  VideoID     int64  `json:"video_id"` 
-  Page int64  `json:"page"`
-  SortOrder   int64  `json:"sort_order"`
-  CreatedAt   string `json:"created_at"`
+	ID        int64  `json:"id"`
+	Path      string `json:"path"`
+	VideoID   int64  `json:"video_id"`
+	Page      int64  `json:"page"`
+	SortOrder int64  `json:"sort_order"`
+	CreatedAt string `json:"created_at"`
 }
 
 func DeleteFileByID(id int64) error {
 	result, err := DB.Exec("DELETE FROM files WHERE id = ?", id)
 	if err != nil {
-    return fmt.Errorf("DeleteFileByID: video id: %d: %v", id, err)
+		return fmt.Errorf("DeleteFileByID: video id: %d: %v", id, err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-    return fmt.Errorf("DeleteFileByID: error getting rows affected %v", err)
+		return fmt.Errorf("DeleteFileByID: error getting rows affected %v", err)
 	}
 	if rowsAffected == 0 {
-    return fmt.Errorf("DeleteFileByID: no file found with ID: %d", id)
+		return fmt.Errorf("DeleteFileByID: no file found with ID: %d", id)
 	}
 	return nil
 }
@@ -55,7 +55,7 @@ func CreateFile(f File) (int64, error) {
   INSERT INTO files
   (path, video_id, page, sort_order) 
   VALUES (?, ?, ?, ?)`,
-  f.Path, f.VideoID, f.Page, 0)
+		f.Path, f.VideoID, f.Page, 0)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateFile: %v", err)

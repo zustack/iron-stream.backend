@@ -6,14 +6,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-
 func GetUserHistory(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
-  history, err := database.GetUserHistory(user.ID)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.JSON(history)
+	user := c.Locals("user").(*database.User)
+	history, err := database.GetUserHistory(user.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(history)
 }

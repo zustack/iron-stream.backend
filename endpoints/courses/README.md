@@ -35,7 +35,7 @@ curl -X POST http://localhost:8081/courses/create \
   -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/c628f54d-b00b-4bc2-a86b-d9fc3e260d60/test.mp4"
 ```
 
-## Get courses
+## Get user courses
 ```bash
 curl -X GET "http://localhost:8081/courses/?cursor=0&q="  \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" | jq
@@ -53,8 +53,8 @@ curl -X GET "http://localhost:8081/courses/admin?cursor=0&q=&a="  \
 # this endpoint need to be authenticated as admin
 curl -X PUT "http://localhost:8081/courses/add/user" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQ2ODI3MzAsImlhdCI6MTcyMjA5MDczMCwibmJmIjoxNzIyMDkwNzMwLCJzdWIiOjF9.FPOoBntSbQNs8klEuNOYzGD-XRB07buGMACGofcK7mY" \
-  -d '{"user_id": 1, "course_id": 1}'
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
+  -d '{"user_id": 1, "course_id": 5}'
 ```
 
 ## Update course

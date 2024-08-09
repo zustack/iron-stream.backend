@@ -7,8 +7,18 @@ cd ~/iron-stream.backend
 ```
 
 ```bash
+# benchmark apache
+sudo apt update
+sudo apt install apache2-utils
+ab -n 100000 -c 1000 http://localhost:8081/web/uploads/videos/d6a77d8f-0f4c-4bc9-b3fa-fec6d63e5451/master.m3u8
+```
+
+```bash
 # get the seconds of the video
 ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 test.mp4 | awk '{print int($1)}'
+video /home/agust/work/iron-stream/backend/web/uploads/tmp/test.mp4
+root /home/agust/work/iron-stream/backend/get-video-length.sh
+duration 0
 ```
 
 ## Environment variables

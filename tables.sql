@@ -49,6 +49,7 @@ CREATE TABLE videos (
   description VARCHAR(55) NOT NULL,
   video_hls VARCHAR(255) NOT NULL,
   thumbnail VARCHAR(155) NOT NULL,
+  duration VARCHAR(155) NOT NULL, 
   length VARCHAR(155) NOT NULL, 
   views INTEGER DEFAULT 0, 
   course_id INTEGER NOT NULL, 

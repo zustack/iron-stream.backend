@@ -12,19 +12,20 @@ type Video struct {
 	VideoHLS    string `json:"video_hls"`
 	Thumbnail   string `json:"thumbnail"`
 	Length      string `json:"length"`
+	Duration    string `json:"duration"`
 	Views       int    `json:"views"`
 	CourseID    int64  `json:"course_id"`
 	SortOrder   int64  `json:"sort_order"`
 	CreatedAt   string `json:"created_at"`
-  // not in db
-  VideoResume string `json:"video_resume"`
+	// not in db
+	VideoResume string `json:"video_resume"`
 }
 
 func GetVideoById(videoId int64) (Video, error) {
 	var v Video
 	row := DB.QueryRow(`SELECT * FROM videos WHERE id = ?`, videoId)
-	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS, 
-  &v.Thumbnail, &v.Length, &v.Views, &v.CourseID, &v.SortOrder, &v.CreatedAt); err != nil {
+	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
+		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.SortOrder, &v.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return v, fmt.Errorf("GetVideoById: %d: no such video", videoId)
 		}
@@ -34,62 +35,64 @@ func GetVideoById(videoId int64) (Video, error) {
 }
 
 func GetFistVideoByCourseId(courseID string) (Video, error) {
-  var video Video
-  row := DB.QueryRow(`SELECT * FROM videos WHERE 
+	var video Video
+	row := DB.QueryRow(`SELECT * FROM videos WHERE 
   course_id = ? ORDER BY sort_order ASC LIMIT 1`, courseID)
-  err := row.Scan(&video.ID, &video.Title, &video.Description, &video.VideoHLS, &video.Thumbnail, &video.Length, &video.Views, &video.CourseID, &video.SortOrder, &video.CreatedAt)
-  if err != nil {
-    if err == sql.ErrNoRows {
-      return video, fmt.Errorf("GetFistVideoByCourseId: no video found with course ID: %s", courseID)
-    }
-    return video, fmt.Errorf("GetFistVideoByCourseId: error fetching first video: %v", err)
-  }
-  return video, nil
+	err := row.Scan(&video.ID, &video.Title, &video.Description,
+		&video.VideoHLS, &video.Thumbnail, &video.Length, &video.Duration,
+		&video.Views, &video.CourseID, &video.SortOrder, &video.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return video, fmt.Errorf("GetFistVideoByCourseId: no video found with course ID: %s", courseID)
+		}
+		return video, fmt.Errorf("GetFistVideoByCourseId: error fetching first video: %v", err)
+	}
+	return video, nil
 }
 
 func UpdateVideoViews(id int64) error {
-  // First, get the current view count
-  var currentViews int
-  err := DB.QueryRow("SELECT views FROM videos WHERE id = ?", id).Scan(&currentViews)
-  if err != nil {
-    if err == sql.ErrNoRows {
-      return fmt.Errorf("UpdateVideoViews: no video found with ID: %d", id)
-    }
-    return fmt.Errorf("UpdateVideoViews: error fetching current views: %v", err)
-  }
+	// First, get the current view count
+	var currentViews int
+	err := DB.QueryRow("SELECT views FROM videos WHERE id = ?", id).Scan(&currentViews)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("UpdateVideoViews: no video found with ID: %d", id)
+		}
+		return fmt.Errorf("UpdateVideoViews: error fetching current views: %v", err)
+	}
 
-  // Increment the view count
-  newViews := currentViews + 1
+	// Increment the view count
+	newViews := currentViews + 1
 
-  // Update the database with the new view count
-  result, err := DB.Exec(`UPDATE videos SET views = ? WHERE id = ?`, newViews, id)
-  if err != nil {
-    return fmt.Errorf("UpdateVideoViews: %v", err)
-  }
+	// Update the database with the new view count
+	result, err := DB.Exec(`UPDATE videos SET views = ? WHERE id = ?`, newViews, id)
+	if err != nil {
+		return fmt.Errorf("UpdateVideoViews: %v", err)
+	}
 
-  rowsAffected, err := result.RowsAffected()
-  if err != nil {
-    return fmt.Errorf("UpdateVideoViews: error getting rows affected: %v", err)
-  }
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("UpdateVideoViews: error getting rows affected: %v", err)
+	}
 
-  if rowsAffected == 0 {
-    return fmt.Errorf("UpdateVideoViews: no video updated with ID: %d", id)
-  }
+	if rowsAffected == 0 {
+		return fmt.Errorf("UpdateVideoViews: no video updated with ID: %d", id)
+	}
 
-  return nil
+	return nil
 }
 
 func DeleteVideoByID(id string) error {
 	result, err := DB.Exec("DELETE FROM videos WHERE id = ?", id)
 	if err != nil {
-    return fmt.Errorf("DeleteVideoByID: course id: %s: %v", id, err)
+		return fmt.Errorf("DeleteVideoByID: course id: %s: %v", id, err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-    return fmt.Errorf("DeleteVideoByID: error getting rows affected %v", err)
+		return fmt.Errorf("DeleteVideoByID: error getting rows affected %v", err)
 	}
 	if rowsAffected == 0 {
-    return fmt.Errorf("DeleteVideoByID: no video found with ID: %s", id)
+		return fmt.Errorf("DeleteVideoByID: no video found with ID: %s", id)
 	}
 	return nil
 }
@@ -98,7 +101,7 @@ func UpdateVideo(v Video) error {
 	result, err := DB.Exec(`UPDATE videos SET 
   title = ?, description = ?, video_hls = ?, thumbnail = ?, length = ?
   WHERE id = ?`,
-  v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.ID)
+		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.ID)
 	if err != nil {
 		return fmt.Errorf("UpdateVideo: %v", err)
 	}
@@ -121,21 +124,48 @@ func GetVideosCount() (int, error) {
 	return count, nil
 }
 
-func GetVideos(course_id, searchParam string, offset int, limit int) ([]Video, error) {
+func GetAdminVideos(course_id string, searchParam string, offset int, limit int) ([]Video, error) {
 	var videos []Video
 	rows, err := DB.Query(`SELECT * FROM videos
-  WHERE course_id = ? AND title LIKE ? OR description LIKE ? 
-  ORDER BY sort_order LIMIT ? OFFSET ?`,
-		course_id, searchParam, searchParam, limit, offset)
+		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
+		ORDER BY sort_order DESC
+		LIMIT ? OFFSET ?`,
+		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("GetAdminVideos: %v", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var v Video
+		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
+			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID, &v.SortOrder,
+			&v.CreatedAt); err != nil {
+			return nil, fmt.Errorf("GetAdminVideos: %v", err)
+		}
+		videos = append(videos, v)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAdminVideos: %v", err)
+	}
+	return videos, nil
+}
+
+func GetVideos(course_id string, searchParam string, offset int, limit int) ([]Video, error) {
+	var videos []Video
+	rows, err := DB.Query(`SELECT * FROM videos
+		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
+		ORDER BY sort_order
+		LIMIT ? OFFSET ?`,
+		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("GetVideos: %v", err)
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var v Video
-		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS, 
-    &v.Thumbnail, &v.Length, &v.Views, &v.CourseID, &v.SortOrder, &v.CreatedAt); err != nil {
+		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
+			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID, &v.SortOrder,
+			&v.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetVideos: %v", err)
 		}
 		videos = append(videos, v)
@@ -149,9 +179,9 @@ func GetVideos(course_id, searchParam string, offset int, limit int) ([]Video, e
 func CreateVideo(v Video) (int64, error) {
 	result, err := DB.Exec(`
   INSERT INTO videos
-  (title, description, video_hls, thumbnail, length, course_id, sort_order) 
-  VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.CourseID, 0)
+  (title, description, video_hls, thumbnail, length, duration, course_id, sort_order) 
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, 0)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateVideo: %v", err)

@@ -22,17 +22,16 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-
 func GetCourseById(id string) (Course, error) {
 	var c Course
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
-	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author, 
-  &c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration, 
-  &c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
+	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author,
+		&c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration,
+		&c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-      return c, fmt.Errorf("GetCourseById: %s: no such course", id)
+			return c, fmt.Errorf("GetCourseById: %s: no such course", id)
 		}
-    return c, fmt.Errorf("GetCourseById: %s: %v", id, err)
+		return c, fmt.Errorf("GetCourseById: %s: %v", id, err)
 	}
 	return c, nil
 }
@@ -55,8 +54,8 @@ func DeleteCourseByID(id string) error {
 func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
   title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
-  duration = ?, is_active = ?, sort_order = ? WHERE id = ?`,
-		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, c.SortOrder, c.ID)
+  duration = ?, is_active = ? WHERE id = ?`,
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, c.ID)
 	if err != nil {
 		return fmt.Errorf("UpdateCourse: %v", err)
 	}
@@ -117,9 +116,9 @@ func GetCourseClientCount(searchParam, isActiveParam string) (int, error) {
 	query := `SELECT COUNT(*) FROM courses
 		WHERE (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?)
 		AND is_active = ?`
-	
+
 	searchPattern := "%" + searchParam + "%"
-	
+
 	err := DB.QueryRow(query, searchPattern, searchPattern, searchPattern, searchPattern, isActiveParam).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetCourseClientCount: %v", err)
@@ -178,7 +177,7 @@ func GetCourses(searchParam string, offset int, limit int) ([]Course, error) {
 	var courses []Course
 	rows, err := DB.Query(`SELECT * FROM courses
   WHERE is_active = 1 AND title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ? 
-  ORDER BY sort_order LIMIT ? OFFSET ?`,
+  ORDER BY sort_order DESC LIMIT ? OFFSET ?`,
 		searchParam, searchParam, searchParam, searchParam, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("GetCourses: %v", err)

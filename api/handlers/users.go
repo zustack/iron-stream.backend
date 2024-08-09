@@ -23,22 +23,22 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if payload.Email == "" {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-      "error": "El correo electrónico es requerido.",
-    })
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "El correo electrónico es requerido.",
+		})
 	}
 
 	if payload.Password == "" {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-      "error": "La contraseña es requerida.",
-    })
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "La contraseña es requerida.",
+		})
 	}
 
-  fmt.Println(payload.Pc)
+	fmt.Println(payload.Pc)
 	if payload.Pc == "" {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-      "error": "Ocurrio un error debido a una incompatibilidad con tu sistema operativo.",
-    })
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Ocurrio un error debido a una incompatibilidad con tu sistema operativo.",
+		})
 	}
 
 	user, err := database.GetUserByEmail(payload.Email)
@@ -84,10 +84,10 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token": tokenString,
-    "userId":  user.ID,
-    "isAdmin": user.IsAdmin,
-    "exp":      now.Add(expDuration).Unix(),
+		"token":   tokenString,
+		"userId":  user.ID,
+		"isAdmin": user.IsAdmin,
+		"exp":     now.Add(expDuration).Unix(),
 	})
 }
 

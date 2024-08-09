@@ -43,7 +43,7 @@ func GetUserByEmail(email string) (User, error) {
 		&u.Surname, &u.IsAdmin, &u.IsActive, &u.EmailToken, &u.Verified,
 		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-      return u, fmt.Errorf("GetUserByEmail: %s: no such user", email)
+			return u, fmt.Errorf("GetUserByEmail: %s: no such user", email)
 		}
 		return u, fmt.Errorf("GetUserByEmail: %s: %v", email, err)
 	}
