@@ -5,6 +5,7 @@ import (
 	"io"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,6 +16,36 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
+
+type SortCoursesInput struct {
+  SortCourses []SortPayload `json:"sort_courses"`
+}
+
+type SortPayload struct {
+  ID int64 `json:"id"`
+  SortOrder string `json:"sort_order"`
+}
+
+func SortCourse(c *fiber.Ctx) error {
+	var payload SortCoursesInput
+	if err := c.BodyParser(&payload); err != nil {
+    fmt.Println(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No se pudo procesar la solicitud.",
+		})
+	}
+  fmt.Println(payload)
+  for _, item := range payload.SortCourses {
+    log.Printf("ID: %d, Sort: %s", item.ID, item.SortOrder)
+    err := database.EditSortCourses(item.ID, item.SortOrder)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+	}
+  return c.SendStatus(200)
+}
 
 type ACUInput struct {
 	CourseID int64 `json:"course_id"`

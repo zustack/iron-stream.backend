@@ -223,3 +223,10 @@ func CreateCourse(c Course) (int64, error) {
 }
 
 
+func EditSortCourses(id int64, sort string) error {
+  _, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
+  if err != nil {
+    return fmt.Errorf("EditSortCourses: %v", err)
+  }
+  return nil
+}
