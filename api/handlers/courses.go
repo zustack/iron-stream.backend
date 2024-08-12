@@ -314,6 +314,13 @@ func UpdateCourse(c *fiber.Ctx) error {
 		if err != nil {
 			return c.SendStatus(500)
 		}
+
+    newPreviewTmp := strings.TrimSuffix(previewTmpDir, "/test.mp4")
+    err := os.RemoveAll(newPreviewTmp)
+    if err != nil {
+      fmt.Println("No se pudo eliminar el previewtmp", err)
+    }
+
 	}
 
 	err = database.UpdateCourse(database.Course{
