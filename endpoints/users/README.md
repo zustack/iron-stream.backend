@@ -18,5 +18,5 @@ curl -X POST http://localhost:8081/register \
 ```bash
 curl -X POST "http://localhost:8081/login" \
      -H "Content-Type: application/json" \
-     -d '{"email": "agustfricke@gmail.com", "password": "admin", "pc": "admin-pc"}'
+     -d '{"email": "agustfricke@gmail.com", "password": "admin", "pc": "some-pc"}'
 ```

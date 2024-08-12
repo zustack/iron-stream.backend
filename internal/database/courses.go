@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"iron-stream/internal/utils"
 	"strconv"
 	"strings"
 )
@@ -205,26 +206,24 @@ func GetCourses(searchParam string, offset int, limit int) ([]Course, error) {
 }
 
 func CreateCourse(c Course) (int64, error) {
-    // Start a transaction
+    date := utils.FormattedDate()
     tx, err := DB.Begin()
     if err != nil {
         return 0, fmt.Errorf("CreateCourse: failed to begin transaction: %v", err)
     }
-    defer tx.Rollback() // Rollback the transaction if it's not committed
+    defer tx.Rollback() 
 
-    // Find the highest sort_order
     var maxSortOrder int
     err = tx.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
     if err != nil {
         return 0, fmt.Errorf("CreateCourse: failed to get max sort_order: %v", err)
     }
 
-    // Insert the new course with the incremented sort_order
     result, err := tx.Exec(`
         INSERT INTO courses
-        (title, description, author, thumbnail, preview, duration, is_active, sort_order) 
+        (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1)
+        c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
     if err != nil {
         return 0, fmt.Errorf("CreateCourse: failed to insert course: %v", err)
     }
@@ -234,7 +233,6 @@ func CreateCourse(c Course) (int64, error) {
         return 0, fmt.Errorf("CreateCourse: failed to get last insert ID: %v", err)
     }
 
-    // Commit the transaction
     if err = tx.Commit(); err != nil {
         return 0, fmt.Errorf("CreateCourse: failed to commit transaction: %v", err)
     }

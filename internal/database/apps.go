@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"iron-stream/internal/utils"
 )
 
 type App struct {
@@ -130,11 +131,12 @@ func DeleteAppByID(id string) error {
 }
 
 func CreateApp(a App) (int64, error) {
+  date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO apps
-  (name, process_name, os, is_active) 
-  VALUES (?, ?, ?, ?)`,
-		a.Name, a.ProcessName, a.Os, a.IsActive)
+  (name, process_name, os, is_active, created_at) 
+  VALUES (?, ?, ?, ?, ?)`,
+		a.Name, a.ProcessName, a.Os, a.IsActive, date)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateApp: %v", err)

@@ -1,6 +1,9 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+	"iron-stream/internal/utils"
+)
 
 type History struct {
 	ID          int64  `json:"id"`
@@ -12,11 +15,12 @@ type History struct {
 }
 
 func CreateHistory(user_id int64, video_id string, course_id string, resume string) (History, error) {
+  date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO history
-  (user_id, video_id, course_id, video_resume) 
-  VALUES (?, ?, ?, ?)`,
-		user_id, video_id, course_id, resume)
+  (user_id, video_id, course_id, video_resume, created_at) 
+  VALUES (?, ?, ?, ?, ?)`,
+		user_id, video_id, course_id, resume, date)
 
 	if err != nil {
 		return History{}, fmt.Errorf("CreateHistory: %v", err)

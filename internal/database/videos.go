@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"iron-stream/internal/utils"
 )
 
 type Video struct {
@@ -15,7 +16,6 @@ type Video struct {
 	Duration    string `json:"duration"`
 	Views       int    `json:"views"`
 	CourseID    int64  `json:"course_id"`
-	SortOrder   int64  `json:"sort_order"`
 	CreatedAt   string `json:"created_at"`
 	// not in db
 	VideoResume string `json:"video_resume"`
@@ -25,7 +25,7 @@ func GetVideoById(videoId int64) (Video, error) {
 	var v Video
 	row := DB.QueryRow(`SELECT * FROM videos WHERE id = ?`, videoId)
 	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
-		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.SortOrder, &v.CreatedAt); err != nil {
+		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return v, fmt.Errorf("GetVideoById: %d: no such video", videoId)
 		}
@@ -40,7 +40,7 @@ func GetFistVideoByCourseId(courseID string) (Video, error) {
   course_id = ? ORDER BY sort_order ASC LIMIT 1`, courseID)
 	err := row.Scan(&video.ID, &video.Title, &video.Description,
 		&video.VideoHLS, &video.Thumbnail, &video.Length, &video.Duration,
-		&video.Views, &video.CourseID, &video.SortOrder, &video.CreatedAt)
+		&video.Views, &video.CourseID, &video.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return video, fmt.Errorf("GetFistVideoByCourseId: no video found with course ID: %s", courseID)
@@ -140,7 +140,7 @@ func GetAdminVideos(course_id string, searchParam string, offset int, limit int)
 	for rows.Next() {
 		var v Video
 		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
-			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID, &v.SortOrder,
+			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID,
 			&v.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAdminVideos: %v", err)
 		}
@@ -166,7 +166,7 @@ func GetVideos(course_id string, searchParam string, offset int, limit int) ([]V
 	for rows.Next() {
 		var v Video
 		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
-			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID, &v.SortOrder,
+			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID,
 			&v.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetVideos: %v", err)
 		}
@@ -179,11 +179,12 @@ func GetVideos(course_id string, searchParam string, offset int, limit int) ([]V
 }
 
 func CreateVideo(v Video) (int64, error) {
+  date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO videos
-  (title, description, video_hls, thumbnail, length, duration, course_id, sort_order) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, 0)
+  (title, description, video_hls, thumbnail, length, duration, course_id, created_at) 
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, 0, date)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateVideo: %v", err)
@@ -192,11 +193,6 @@ func CreateVideo(v Video) (int64, error) {
 	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, fmt.Errorf("CreateVideo: %v", err)
-	}
-
-	_, err = DB.Exec("UPDATE videos SET sort_order = ? WHERE id = ?", id, id)
-	if err != nil {
-		return 0, fmt.Errorf("CreateVideo/updateSortOrder: %v", err)
 	}
 
 	return id, nil

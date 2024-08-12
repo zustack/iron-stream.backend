@@ -1,6 +1,9 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+	"iron-stream/internal/utils"
+)
 
 type File struct {
 	ID        int64  `json:"id"`
@@ -51,11 +54,12 @@ func GetFiles(video_id, page int64) ([]File, error) {
 }
 
 func CreateFile(f File) (int64, error) {
+  date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO files
-  (path, video_id, page, sort_order) 
-  VALUES (?, ?, ?, ?)`,
-		f.Path, f.VideoID, f.Page, 0)
+  (path, video_id, page, sort_order, created_at) 
+  VALUES (?, ?, ?, ?, ?)`,
+		f.Path, f.VideoID, f.Page, 0, date)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateFile: %v", err)
