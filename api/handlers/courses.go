@@ -221,6 +221,7 @@ func GetCourses(c *fiber.Ctx) error {
 }
 
 func DeleteCourse(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 
 	err := database.DeleteCourseByID(id)
@@ -230,9 +231,7 @@ func DeleteCourse(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-
-	return c.SendStatus(fiber.StatusNoContent)
-
+	return c.SendString(id)
 }
 
 func UpdateCourse(c *fiber.Ctx) error {
