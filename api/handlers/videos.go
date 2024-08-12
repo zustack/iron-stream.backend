@@ -272,7 +272,7 @@ func GetAdminVideos(c *fiber.Ctx) error {
 		})
 	}
 
-	totalCount, err := database.GetVideosCount(id)
+	totalCount, err := database.GetVideosCount(id, searchParam)
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -376,7 +376,7 @@ func GetVideos(c *fiber.Ctx) error {
 		}
 	}
 
-	totalCount, err := database.GetVideosCount(id)
+	totalCount, err := database.GetVideosCount(id, searchParam)
 	if err != nil {
 		fmt.Println("5", err)
 		return c.SendStatus(fiber.StatusInternalServerError)

@@ -115,9 +115,11 @@ func UpdateVideo(v Video) error {
 	return nil
 }
 
-func GetVideosCount(id string) (int, error) {
+func GetVideosCount(course_id, searchParam string) (int, error) {
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM videos WHERE course_id = ?", id).Scan(&count)
+	err := DB.QueryRow(`SELECT COUNT(*) FROM videos 
+  WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)`, 
+  course_id, "%"+searchParam+"%", "%"+searchParam+ "%").Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetVideosCount: %v", err)
 	}

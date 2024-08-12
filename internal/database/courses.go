@@ -114,13 +114,19 @@ func AddCourseToUser(userID, courseID int64) error {
 
 func GetCourseClientCount(searchParam, isActiveParam string) (int, error) {
 	var count int
-	query := `SELECT COUNT(*) FROM courses
-		WHERE (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?)
-		AND is_active = ?`
+	var args []interface{}
+	query := `SELECT COUNT(*) FROM courses WHERE 
+              (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?)`
 
-	searchPattern := "%" + searchParam + "%"
+	args = append(args, searchParam, searchParam, searchParam, searchParam)
 
-	err := DB.QueryRow(query, searchPattern, searchPattern, searchPattern, searchPattern, isActiveParam).Scan(&count)
+	if isActiveParam != "" {
+		query += ` AND is_active = ?`
+		isActive := isActiveParam == "1"
+		args = append(args, isActive)
+	}
+
+	err := DB.QueryRow(query, args...).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetCourseClientCount: %v", err)
 	}
