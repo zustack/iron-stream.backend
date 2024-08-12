@@ -222,7 +222,7 @@ func CreateCourse(c Course) (int64, error) {
     result, err := tx.Exec(`
         INSERT INTO courses
         (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
     if err != nil {
         return 0, fmt.Errorf("CreateCourse: failed to insert course: %v", err)

@@ -376,6 +376,9 @@ func CreateCourse(c *fiber.Ctx) error {
 	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
 	previewTmp := c.FormValue("preview_tmp")
+  fmt.Println("preview tmp", previewTmp)
+  // preview tmp 
+  // /home/agust/work/iron-stream/backend/web/uploads/tmp/725a519c-1dfd-44f7-9c9a-0c1d14967973/test.mp4
 	previewDir := "/web/uploads/previews/" + id.String()
 	previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
 	err = os.MkdirAll(previewFinalPath, 0755)
@@ -384,16 +387,22 @@ func CreateCourse(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-	fmt.Println("ffpath", ffmpegPath)
-	fmt.Println("preview tmp", previewTmp)
-	fmt.Println("preview final", previewFinalPath)
-	cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
-	err = cmd.Run()
-	if err != nil {
-		fmt.Println("the error22", err)
-		return c.SendStatus(500)
-	}
+  if previewTmp != "" {
+    ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
+    cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
+    err = cmd.Run()
+    if err != nil {
+      fmt.Println("the error22", err)
+      return c.SendStatus(500)
+    }
+
+    newPreviewTmp := strings.TrimSuffix(previewTmp, "/test.mp4")
+    err := os.RemoveAll(newPreviewTmp)
+    if err != nil {
+      fmt.Println("No se pudo eliminar el previewtmp", err)
+    }
+
+  }
 
 	payloadToDB := database.Course{
 		Title:       cleanInput.Title,
