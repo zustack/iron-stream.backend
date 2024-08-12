@@ -295,6 +295,17 @@ func UpdateCourse(c *fiber.Ctx) error {
 		}
 
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
+
+	  oldThumbnail := c.FormValue("old_thumbnail")
+    fmt.Println(oldThumbnail)
+    if oldThumbnail != "" {
+      fmt.Println("file path", filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail))
+      err := os.Remove(filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail))
+      if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al borrar el thumbnail antig"})
+      }
+    }
+
 	}
 
 	previewTmpDir := c.FormValue("preview_tmp")
