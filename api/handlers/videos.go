@@ -480,6 +480,15 @@ func CreateVideo(c *fiber.Ctx) error {
 		return c.SendStatus(500)
 	}
 
+  if cleanInput.VideoHLS != os.Getenv("ROOT_PATH") || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web" || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web/uploads" || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web/uploads/tmp" {
+    newPreviewTmp := strings.TrimSuffix(cleanInput.VideoHLS, "/test.mp4")
+    err := os.RemoveAll(newPreviewTmp)
+    if err != nil {
+      fmt.Println("No se pudo eliminar el previewtmp", err)
+    }
+
+  }
+
 	fmt.Println("lenght", length)
 	fmt.Println("duration user", cleanInput.Duration)
 

@@ -130,7 +130,7 @@ func GetAdminVideos(course_id string, searchParam string, offset int, limit int)
 	var videos []Video
 	rows, err := DB.Query(`SELECT * FROM videos
 		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
-		ORDER BY sort_order DESC
+		ORDER BY id DESC
 		LIMIT ? OFFSET ?`,
 		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
 	if err != nil {
@@ -183,8 +183,8 @@ func CreateVideo(v Video) (int64, error) {
 	result, err := DB.Exec(`
   INSERT INTO videos
   (title, description, video_hls, thumbnail, length, duration, course_id, created_at) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, 0, date)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, date)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateVideo: %v", err)
