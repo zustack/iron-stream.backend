@@ -23,6 +23,7 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+
 func GetCourseById(id string) (Course, error) {
 	var c Course
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
@@ -73,15 +74,6 @@ func UpdateCourse(c Course) error {
 }
 
 func AddCourseToUser(userID, courseID int64) error {
-	var courseExists bool
-	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)", courseID).Scan(&courseExists)
-	if err != nil {
-		return fmt.Errorf("CheckCourseExists: %v", err)
-	}
-	if !courseExists {
-		return fmt.Errorf("Course with ID %d does not exist", courseID)
-	}
-
 	var existingCourses string
 	row := DB.QueryRow(`SELECT courses FROM users WHERE id = ?`, userID)
 	if err := row.Scan(&existingCourses); err != nil {
@@ -92,20 +84,30 @@ func AddCourseToUser(userID, courseID int64) error {
 	}
 
 	courseList := strings.Split(existingCourses, ",")
-	for _, b := range courseList {
-		if b == strconv.FormatInt(courseID, 10) {
-			return nil
+	newCourseList := make([]string, 0, len(courseList))
+	courseExists := false
+	for _, c := range courseList {
+		if c == strconv.FormatInt(courseID, 10) {
+			courseExists = true
+		} else {
+			newCourseList = append(newCourseList, c)
 		}
 	}
 
 	var coursesIDs string
-	if existingCourses == "" {
-		coursesIDs = strconv.FormatInt(courseID, 10)
+	if !courseExists {
+		// Si el curso no existía, lo añadimos
+		if len(newCourseList) == 0 {
+			coursesIDs = strconv.FormatInt(courseID, 10)
+		} else {
+			coursesIDs = strings.Join(newCourseList, ",") + "," + strconv.FormatInt(courseID, 10)
+		}
 	} else {
-		coursesIDs = existingCourses + "," + strconv.FormatInt(courseID, 10)
+		// Si el curso existía, lo hemos eliminado
+		coursesIDs = strings.Join(newCourseList, ",")
 	}
 
-	_, err = DB.Exec("UPDATE users SET courses = ? WHERE id = ?", coursesIDs, userID)
+	_, err := DB.Exec("UPDATE users SET courses = ? WHERE id = ?", coursesIDs, userID)
 	if err != nil {
 		return fmt.Errorf("AddCourseToUser: %v", err)
 	}

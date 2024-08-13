@@ -175,13 +175,26 @@ func UpdateVideo(c *fiber.Ctx) error {
 		ext := filepath.Ext(thumbnail.Filename)
 		newFilename := fmt.Sprintf("%s%s", thumbnail_id, ext)
 		thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
-		// save the file in local disk
 		err = c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al guardar el thumbnail"})
 		}
 
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
+
+    // remove this path with Remove
+    oldThumbnail := c.FormValue("old_thumbnail")
+    if oldThumbnail != "" {
+      oldThumbnailFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail)
+      fmt.Println("Delete this path", oldThumbnailFullPath)
+    }
+    /*
+    err := os.RemoveAll(newPreviewTmp)
+    if err != nil {
+      fmt.Println("No se pudo eliminar el previewtmp", err)
+    }
+    */
+
 	}
 
 	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), cleanInput.VideoHLS)
@@ -212,6 +225,20 @@ func UpdateVideo(c *fiber.Ctx) error {
 		if err != nil {
 			return c.SendStatus(500)
 		}
+
+    // remove this path with RemoveAll
+    // cleanInput.VideoHLS
+    if cleanInput.VideoHLS != "" {
+      videoTmpFullPath := filepath.Join(os.Getenv("ROOT_PATH"), cleanInput.VideoHLS)
+      fmt.Println("Delete this path", videoTmpFullPath)
+    }
+
+    // remove this path RemoveAll
+    oldVideoHls := c.FormValue("old_video")
+    if oldVideoHls != "" {
+      oldVideoHlsFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldVideoHls)
+      fmt.Println("Delete this path", oldVideoHlsFullPath)
+    }
 	}
 
 	payloadToDB := database.Video{
@@ -479,15 +506,6 @@ func CreateVideo(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(500)
 	}
-
-  if cleanInput.VideoHLS != os.Getenv("ROOT_PATH") || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web" || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web/uploads" || cleanInput.VideoHLS != os.Getenv("ROOT_PATH") + "/web/uploads/tmp" {
-    newPreviewTmp := strings.TrimSuffix(cleanInput.VideoHLS, "/test.mp4")
-    err := os.RemoveAll(newPreviewTmp)
-    if err != nil {
-      fmt.Println("No se pudo eliminar el previewtmp", err)
-    }
-
-  }
 
 	fmt.Println("lenght", length)
 	fmt.Println("duration user", cleanInput.Duration)

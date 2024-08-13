@@ -6,6 +6,7 @@ import (
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +14,141 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func DeactivateSpecificCourseForAllUsers(c *fiber.Ctx) error {
+  id := c.Params("id")
+  // convert id to int64
+  id64, err := strconv.ParseInt(id, 10, 64)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  users, err := database.GetUserIds()
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  for _, user := range users {
+    err = database.DeactivateCourseForUser(user.ID, id64)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+  }
+
+  return c.SendStatus(fiber.StatusOK)
+}
+
+func DeactivateAllCoursesForAllUsers(c *fiber.Ctx) error {
+  err := database.DeactivateAllCoursesForAllUsers()
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(fiber.StatusOK)
+}
+
+func UpdateActiveStatusAllUsers(c *fiber.Ctx) error {
+  isActive := c.FormValue("isActive")
+  // convert isActive to bool
+  isActiveBool, err := strconv.ParseBool(isActive)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  err = database.UpdateActiveStatusAllUsers(isActiveBool)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(fiber.StatusOK)
+}
+
+func UpdateActiveStatus(c *fiber.Ctx) error {
+  id := c.Params("id")
+  err := database.UpdateActiveStatus(id)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(fiber.StatusOK)
+}
+
+func AdminUsers(c *fiber.Ctx) error {
+	time.Sleep(1000 * time.Millisecond)
+	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
+	if err != nil {
+		return c.Status(400).SendString("Invalid cursor")
+	}
+
+	limit := 50
+	searchParam := c.Query("q", "")
+	searchParam = "%" + searchParam + "%"
+
+	isActiveParam := c.Query("a", "")
+  isAdminParam := c.Query("admin", "")
+  specialAppsParam := c.Query("special", "")
+  verifiedParam := c.Query("verified", "")
+
+	users, err := database.GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, limit, cursor)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+  fmt.Println(users)
+
+	searchCount, err := database.GetAdminUsersCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam)
+	if err != nil {
+		fmt.Println("el error", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	totalCount, err := database.GetAdminUsersCountAll()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var previousID, nextID *int
+	if cursor > 0 {
+		prev := cursor - limit
+		if prev < 0 {
+			prev = 0
+		}
+		previousID = &prev
+	}
+	if cursor+limit < totalCount {
+		next := cursor + limit
+		nextID = &next
+	}
+
+	response := struct {
+		Data       []database.User `json:"data"`
+		TotalCount int               `json:"totalCount"`
+		PreviousID *int              `json:"previousId"`
+		NextID     *int              `json:"nextId"`
+	}{
+		Data:       users,
+		TotalCount: searchCount,
+		PreviousID: previousID,
+		NextID:     nextID,
+	}
+
+	return c.JSON(response)
+}
 
 func UpdatePassword(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
@@ -202,6 +338,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+  fmt.Println("payload.Pc", payload.Pc, "user.Pc", user.Pc)
 	if user.Pc != payload.Pc {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Esta cuenta esta registrada en otra computadora.",

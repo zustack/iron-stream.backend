@@ -54,7 +54,7 @@ curl -X GET "http://localhost:8081/courses/admin?cursor=0&q=&a="  \
 curl -X PUT "http://localhost:8081/courses/add/user" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
-  -d '{"user_id": 1, "course_id": 5}'
+  -d '{"user_id": 1, "course_id": 1}'
 ```
 
 ## Update course
