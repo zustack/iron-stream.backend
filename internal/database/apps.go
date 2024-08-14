@@ -36,7 +36,7 @@ func GetAppsCount() (int, error) {
 	return count, nil
 }
 
-func GetApps(searchParam, isActiveParam string, limit, cursor int) ([]App, error) {
+func GetApps(searchParam, isActiveParam string) ([]App, error) {
 	var apps []App
 	var args []interface{}
 	query := `SELECT * FROM apps WHERE 
@@ -50,8 +50,7 @@ func GetApps(searchParam, isActiveParam string, limit, cursor int) ([]App, error
 		args = append(args, isActive)
 	}
 
-	query += ` ORDER BY id DESC LIMIT ? OFFSET ?`
-	args = append(args, limit, cursor)
+	query += ` ORDER BY id DESC `
 
 	rows, err := DB.Query(query, args...)
 	if err != nil {

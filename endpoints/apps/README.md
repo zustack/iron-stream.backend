@@ -5,8 +5,9 @@
 # this endpoint need to be authenticated as admin
 curl -X POST "http://localhost:8081/apps/create" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMzU0OTgsImlhdCI6MTcyMjU0MzQ5OCwibmJmIjoxNzIyNTQzNDk4LCJzdWIiOjF9.V1BbfsZ3-ZbNxJrU-TvrYrWmaWmsY128NHQYAZXV_Vc" \
-  -d '{"name": "OBS", "process_name": "obs.exe", "os": "Win", "is_active": false}'
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" \
+  -d '{"name": "Neovim", "process_name": "nvim", "os": "Mac", "is_active": true}'
+
 ```
 
 ## Get fist 50 apps && search by param && search by is_active

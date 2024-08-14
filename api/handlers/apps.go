@@ -3,7 +3,6 @@ package handlers
 import (
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,22 +20,16 @@ func GetAppByID(c *fiber.Ctx) error {
 
 type AppResponse struct {
 	Data       []database.App `json:"data"`
-	PreviousID *int           `json:"previousId"`
-	NextID     *int           `json:"nextId"`
+	TotalCount int           `json:"totalCount"`
 }
 
 func GetApps(c *fiber.Ctx) error {
-	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
-	if err != nil {
-		return c.Status(400).SendString("Invalid cursor")
-	}
-
-	limit := 50
 	searchParam := c.Query("q", "")
 	searchParam = "%" + searchParam + "%"
 
 	isActiveParam := c.Query("a", "")
-	apps, err := database.GetApps(searchParam, isActiveParam, limit, cursor)
+
+	apps, err := database.GetApps(searchParam, isActiveParam)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -50,23 +43,9 @@ func GetApps(c *fiber.Ctx) error {
 		})
 	}
 
-	var previousID, nextID *int
-	if cursor > 0 {
-		prev := cursor - limit
-		if prev < 0 {
-			prev = 0
-		}
-		previousID = &prev
-	}
-	if cursor+limit < totalCount {
-		next := cursor + limit
-		nextID = &next
-	}
-
 	response := AppResponse{
 		Data:       apps,
-		PreviousID: previousID,
-		NextID:     nextID,
+		TotalCount: totalCount,
 	}
 
 	return c.JSON(response)
