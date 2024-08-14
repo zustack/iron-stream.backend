@@ -13,6 +13,7 @@ func UserRoutes(app *fiber.App) {
 
   app.Put("/update/active/status", middleware.AdminUser, handlers.UpdateActiveStatusAllUsers)
   app.Put("/update/active/status/:id", middleware.AdminUser, handlers.UpdateActiveStatus)
+
 	app.Post("/register", handlers.Register)
 	app.Post("/login", handlers.Login)
 	app.Post("/verify", handlers.VerifyEmail)

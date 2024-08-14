@@ -59,6 +59,7 @@ func AddCourseToUser(c *fiber.Ctx) error {
 			"error": "No se pudo procesar la solicitud.",
 		})
 	}
+  fmt.Println("hey here!")
 	err := database.AddCourseToUser(payload.UserID, payload.CourseID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -144,16 +145,110 @@ func GetSoloCourse(c *fiber.Ctx) error {
 	return c.JSON(course)
 }
 
-func GetCourses(c *fiber.Ctx) error {
-	user := c.Locals("user").(*database.User)
+func GetCoursesByUserId(c *fiber.Ctx) error {
+  userId := c.Params("id")
+  user, err := database.GetUserByID(userId)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
 
 	userCourseIDs := make(map[int64]bool)
 
 	if user.Courses != "" {
 		courseIDStrings := strings.Split(user.Courses, ",")
 		for _, idStr := range courseIDStrings {
+         idStr = strings.TrimSpace(idStr)
+        if idStr == "" {
+            continue // Skip empty strings
+        }
 			id, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64)
 			if err != nil {
+        fmt.Println("the error", err)
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID format"})
+			}
+			userCourseIDs[id] = true
+		}
+	}
+
+	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
+	if err != nil {
+		return c.Status(400).SendString("Invalid cursor")
+	}
+	limit := 50
+
+	searchParam := c.Query("q", "")
+	searchParam = "%" + searchParam + "%"
+
+	courses, err := database.GetCourses(searchParam, cursor, limit)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	totalCount, err := database.GetCoursesCount()
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	var previousID, nextID *int
+	if cursor > 0 {
+		prev := cursor - limit
+		if prev < 0 {
+			prev = 0
+		}
+		previousID = &prev
+	}
+	if cursor+limit < totalCount {
+		next := cursor + limit
+		nextID = &next
+	}
+
+	type AllowedCourses struct {
+		database.Course
+		Allowed bool `json:"allowed"`
+	}
+
+	coursesWithOn := make([]AllowedCourses, len(courses))
+	for i, course := range courses {
+		coursesWithOn[i] = AllowedCourses{
+			Course:  course,
+			Allowed: userCourseIDs[course.ID],
+		}
+	}
+
+	response := struct {
+		Data       []AllowedCourses `json:"data"`
+		PreviousID *int             `json:"previousId"`
+		NextID     *int             `json:"nextId"`
+	}{
+		Data:       coursesWithOn,
+		PreviousID: previousID,
+		NextID:     nextID,
+	}
+
+	return c.JSON(response)
+}
+
+
+func GetCourses(c *fiber.Ctx) error {
+	user := c.Locals("user").(*database.User)
+
+	userCourseIDs := make(map[int64]bool)
+
+  fmt.Println("user courses", user.Courses)
+	if user.Courses != "" {
+		courseIDStrings := strings.Split(user.Courses, ",")
+		for _, idStr := range courseIDStrings {
+         idStr = strings.TrimSpace(idStr)
+        if idStr == "" {
+            continue // Skip empty strings
+        }
+			id, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64)
+			if err != nil {
+        fmt.Println("the error", err)
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID format"})
 			}
 			userCourseIDs[id] = true

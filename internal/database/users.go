@@ -51,18 +51,20 @@ func DeactivateCourseForUser(userID, courseID int64) error {
 	newCourseList := make([]string, 0, len(courseList))
 
 	// Elimina el courseID de la lista de cursos
-	courseFound := false
+	// courseFound := false
 	for _, b := range courseList {
 		if b != strconv.FormatInt(courseID, 10) {
 			newCourseList = append(newCourseList, b)
 		} else {
-			courseFound = true
+			// courseFound = true
 		}
 	}
 
+  /*
 	if !courseFound {
 		return fmt.Errorf("Course with ID %d is not enrolled by user %d", courseID, userID)
 	}
+  */
 
 	// Une la lista de cursos actualizada
 	updatedCourses := strings.Join(newCourseList, ",")
@@ -324,7 +326,7 @@ func CreateUser(u User) (int64, error) {
   INSERT INTO users
   (email, name, surname, password, is_admin, email_token, pc, os, created_at) 
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		u.Email, u.Name, u.Surname, u.Password, true, u.EmailToken, u.Pc, u.Os, date)
+		u.Email, u.Name, u.Surname, u.Password, false, u.EmailToken, u.Pc, u.Os, date)
 
 	if err != nil {
 		return 0, fmt.Errorf("CreateUser: %v", err)

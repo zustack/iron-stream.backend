@@ -48,9 +48,9 @@ curl -X PUT "http://localhost:8081/update/active/status"  \
 curl -X POST http://localhost:8081/register \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "caro",
+    "username": "some",
     "password": "caro",
-    "email": "carofricke@proton.me",
+    "email": "carofricke@some.me",
     "name": "caro",
     "surname": "fricke",
     "pc": "some-pc",
@@ -61,5 +61,5 @@ curl -X POST http://localhost:8081/register \
 ```bash
 curl -X POST "http://localhost:8081/login" \
      -H "Content-Type: application/json" \
-     -d '{"email": "carofricke@proton.me", "password": "caro", "pc": "some-pc"}'
+     -d '{"email": "carofricke@some.me", "password": "caro", "pc": "some-pc"}'
 ```
