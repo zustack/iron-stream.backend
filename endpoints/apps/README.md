@@ -7,7 +7,22 @@ curl -X POST "http://localhost:8081/apps/create" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" \
   -d '{"name": "Neovim", "process_name": "nvim", "os": "Mac", "is_active": true}'
+```
 
+```bash
+curl -X GET "http://localhost:8081/special/apps/get/5" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4"
+```
+
+```bash
+curl -X POST "http://localhost:8081/special/apps/create" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" \
+  -d '{"user_id": 1, "apps": [ 
+    {"name": "Neovim", "process_name": "nvim", "os": "Mac", "is_active": true}, 
+    {"name": "Neovim", "process_name": "nvim", "os": "Mac", "is_active": true},
+    {"name": "Neovim", "process_name": "nvim", "os": "Mac", "is_active": true}
+  ]}'
 ```
 
 ## Get fist 50 apps && search by param && search by is_active

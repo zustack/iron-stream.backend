@@ -23,7 +23,6 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-
 func GetCourseById(id string) (Course, error) {
 	var c Course
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
@@ -57,8 +56,8 @@ func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
   title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
   duration = ?, is_active = ?, sort_order = ? WHERE id = ?`,
-		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, 
-    c.IsActive, c.SortOrder, c.ID)
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration,
+		c.IsActive, c.SortOrder, c.ID)
 	if err != nil {
 		return fmt.Errorf("UpdateCourse: %v", err)
 	}
@@ -208,45 +207,44 @@ func GetCourses(searchParam string, offset int, limit int) ([]Course, error) {
 }
 
 func CreateCourse(c Course) (int64, error) {
-    date := utils.FormattedDate()
-    tx, err := DB.Begin()
-    if err != nil {
-        return 0, fmt.Errorf("CreateCourse: failed to begin transaction: %v", err)
-    }
-    defer tx.Rollback() 
+	date := utils.FormattedDate()
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, fmt.Errorf("CreateCourse: failed to begin transaction: %v", err)
+	}
+	defer tx.Rollback()
 
-    var maxSortOrder int
-    err = tx.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
-    if err != nil {
-        return 0, fmt.Errorf("CreateCourse: failed to get max sort_order: %v", err)
-    }
+	var maxSortOrder int
+	err = tx.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
+	if err != nil {
+		return 0, fmt.Errorf("CreateCourse: failed to get max sort_order: %v", err)
+	}
 
-    result, err := tx.Exec(`
+	result, err := tx.Exec(`
         INSERT INTO courses
         (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
-    if err != nil {
-        return 0, fmt.Errorf("CreateCourse: failed to insert course: %v", err)
-    }
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
+	if err != nil {
+		return 0, fmt.Errorf("CreateCourse: failed to insert course: %v", err)
+	}
 
-    id, err := result.LastInsertId()
-    if err != nil {
-        return 0, fmt.Errorf("CreateCourse: failed to get last insert ID: %v", err)
-    }
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("CreateCourse: failed to get last insert ID: %v", err)
+	}
 
-    if err = tx.Commit(); err != nil {
-        return 0, fmt.Errorf("CreateCourse: failed to commit transaction: %v", err)
-    }
+	if err = tx.Commit(); err != nil {
+		return 0, fmt.Errorf("CreateCourse: failed to commit transaction: %v", err)
+	}
 
-    return id, nil
+	return id, nil
 }
 
-
 func EditSortCourses(id int64, sort string) error {
-  _, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
-  if err != nil {
-    return fmt.Errorf("EditSortCourses: %v", err)
-  }
-  return nil
+	_, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
+	if err != nil {
+		return fmt.Errorf("EditSortCourses: %v", err)
+	}
+	return nil
 }

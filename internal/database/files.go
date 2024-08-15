@@ -54,7 +54,7 @@ func GetFiles(video_id, page int64) ([]File, error) {
 }
 
 func CreateFile(f File) (int64, error) {
-  date := utils.FormattedDate()
+	date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO files
   (path, video_id, page, sort_order, created_at) 

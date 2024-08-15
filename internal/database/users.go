@@ -9,20 +9,28 @@ import (
 )
 
 type User struct {
-	ID         int64  `json:"id"`
-	Password   string `json:"password"`
-	Email      string `json:"email"`
-	Name       string `json:"name"`
-	Surname    string `json:"surname"`
-	IsAdmin    bool   `json:"is_admin"`
-  SpecialApps bool  `json:"special_apps"`
-	IsActive   bool   `json:"is_active"`
-	EmailToken int    `json:"email_token"`
-	Verified   bool   `json:"verified"`
-	Courses    string `json:"courses"`
-	Pc         string `json:"pc"`
-	Os         string `json:"os"`
-	CreatedAt  string `json:"created_at"`
+	ID          int64  `json:"id"`
+	Password    string `json:"password"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	IsAdmin     bool   `json:"is_admin"`
+	SpecialApps bool   `json:"special_apps"`
+	IsActive    bool   `json:"is_active"`
+	EmailToken  int    `json:"email_token"`
+	Verified    bool   `json:"verified"`
+	Courses     string `json:"courses"`
+	Pc          string `json:"pc"`
+	Os          string `json:"os"`
+	CreatedAt   string `json:"created_at"`
+}
+
+func UpdateUserSpecialApps(id int64, special_apps bool) error {
+	_, err := DB.Exec(`UPDATE users SET special_apps = ? WHERE id = ?`, special_apps, id)
+	if err != nil {
+    return fmt.Errorf("UpdateUserSpecialApps: %v", err)
+	}
+	return nil
 }
 
 func DeactivateCourseForUser(userID, courseID int64) error {
@@ -60,11 +68,11 @@ func DeactivateCourseForUser(userID, courseID int64) error {
 		}
 	}
 
-  /*
-	if !courseFound {
-		return fmt.Errorf("Course with ID %d is not enrolled by user %d", courseID, userID)
-	}
-  */
+	/*
+		if !courseFound {
+			return fmt.Errorf("Course with ID %d is not enrolled by user %d", courseID, userID)
+		}
+	*/
 
 	// Une la lista de cursos actualizada
 	updatedCourses := strings.Join(newCourseList, ",")
@@ -110,22 +118,22 @@ func DeactivateAllCoursesForAllUsers() error {
 }
 
 func UpdateActiveStatusAllUsers(isActive bool) error {
-  result, err := DB.Exec(`UPDATE users SET is_active = ? WHERE is_admin = false`, isActive)
-  if err != nil {
-    return fmt.Errorf("UpdateActiveStatusAllUsers: %v", err)
-  }
+	result, err := DB.Exec(`UPDATE users SET is_active = ? WHERE is_admin = false`, isActive)
+	if err != nil {
+		return fmt.Errorf("UpdateActiveStatusAllUsers: %v", err)
+	}
 
-  rowsAffected, err := result.RowsAffected()
-  if err != nil {
-    return fmt.Errorf("UpdateActiveStatusAllUsers: error getting rows affected: %v", err)
-  }
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("UpdateActiveStatusAllUsers: error getting rows affected: %v", err)
+	}
 
-  if rowsAffected == 0 {
-    return fmt.Errorf("UpdateActiveStatusAllUsers: no rows were updated")
-  }
+	if rowsAffected == 0 {
+		return fmt.Errorf("UpdateActiveStatusAllUsers: no rows were updated")
+	}
 
-  fmt.Printf("UpdateActiveStatusAllUsers: %d rows were updated\n", rowsAffected)
-  return nil
+	fmt.Printf("UpdateActiveStatusAllUsers: %d rows were updated\n", rowsAffected)
+	return nil
 }
 
 func UpdateActiveStatus(id string) error {
@@ -233,8 +241,8 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
-		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
-		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+			&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
+			&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAdminUsers: %v", err)
 		}
 		users = append(users, u)
@@ -246,50 +254,50 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 }
 
 func UpdateEmailToken(email string, email_token int) error {
-  _, err := DB.Exec(`UPDATE users SET email_token = ? WHERE email = ?`, email_token, email)
-  if err != nil {
-    return fmt.Errorf("UpdateEmailToken: %v", err)
-  }
-  return nil
+	_, err := DB.Exec(`UPDATE users SET email_token = ? WHERE email = ?`, email_token, email)
+	if err != nil {
+		return fmt.Errorf("UpdateEmailToken: %v", err)
+	}
+	return nil
 }
 
 func UpdatePassword(password, email string) error {
-    // Trim any whitespace from email
-    email = strings.TrimSpace(email)
+	// Trim any whitespace from email
+	email = strings.TrimSpace(email)
 
-    // Execute the update
-    result, err := DB.Exec(`UPDATE users SET password = ? WHERE LOWER(email) = LOWER(?)`, password, email)
-    if err != nil {
-        return fmt.Errorf("UpdatePassword: %v", err)
-    }
+	// Execute the update
+	result, err := DB.Exec(`UPDATE users SET password = ? WHERE LOWER(email) = LOWER(?)`, password, email)
+	if err != nil {
+		return fmt.Errorf("UpdatePassword: %v", err)
+	}
 
-    // Check if any rows were affected
-    rowsAffected, err := result.RowsAffected()
-    if err != nil {
-        return fmt.Errorf("UpdatePassword: couldn't get rows affected: %v", err)
-    }
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("UpdatePassword: couldn't get rows affected: %v", err)
+	}
 
-    if rowsAffected == 0 {
-        return fmt.Errorf("UpdatePassword: no user found with email %s", email)
-    }
+	if rowsAffected == 0 {
+		return fmt.Errorf("UpdatePassword: no user found with email %s", email)
+	}
 
-    return nil
+	return nil
 }
 
 func DeleteAccount(email string) error {
-  _, err := DB.Exec(`DELETE FROM users WHERE email = ?`, email)
-  if err != nil {
-    return fmt.Errorf("DeleteAccount: %v", err)
-  }
-  return nil
+	_, err := DB.Exec(`DELETE FROM users WHERE email = ?`, email)
+	if err != nil {
+		return fmt.Errorf("DeleteAccount: %v", err)
+	}
+	return nil
 }
 
 func VerifyAccount(userID int64) error {
-  _, err := DB.Exec(`UPDATE users SET verified = true WHERE id = ?`, userID)
-  if err != nil {
-    return fmt.Errorf("EditSortCourses: %v", err)
-  }
-  return nil
+	_, err := DB.Exec(`UPDATE users SET verified = true WHERE id = ?`, userID)
+	if err != nil {
+		return fmt.Errorf("EditSortCourses: %v", err)
+	}
+	return nil
 }
 
 func GetUserByID(id string) (User, error) {
@@ -321,7 +329,7 @@ func GetUserByEmail(email string) (User, error) {
 }
 
 func CreateUser(u User) (int64, error) {
-  date := utils.FormattedDate()
+	date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO users
   (email, name, surname, password, is_admin, email_token, pc, os, created_at) 

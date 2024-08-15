@@ -118,8 +118,8 @@ func UpdateVideo(v Video) error {
 func GetVideosCount(course_id, searchParam string) (int, error) {
 	var count int
 	err := DB.QueryRow(`SELECT COUNT(*) FROM videos 
-  WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)`, 
-  course_id, "%"+searchParam+"%", "%"+searchParam+ "%").Scan(&count)
+  WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)`,
+		course_id, "%"+searchParam+"%", "%"+searchParam+"%").Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("GetVideosCount: %v", err)
 	}
@@ -179,7 +179,7 @@ func GetVideos(course_id string, searchParam string, offset int, limit int) ([]V
 }
 
 func CreateVideo(v Video) (int64, error) {
-  date := utils.FormattedDate()
+	date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO videos
   (title, description, video_hls, thumbnail, length, duration, course_id, created_at) 

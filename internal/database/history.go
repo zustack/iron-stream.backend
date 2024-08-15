@@ -15,7 +15,7 @@ type History struct {
 }
 
 func CreateHistory(user_id int64, video_id string, course_id string, resume string) (History, error) {
-  date := utils.FormattedDate()
+	date := utils.FormattedDate()
 	result, err := DB.Exec(`
   INSERT INTO history
   (user_id, video_id, course_id, video_resume, created_at) 

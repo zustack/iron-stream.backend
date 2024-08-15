@@ -18,33 +18,33 @@ import (
 )
 
 type SortCoursesInput struct {
-  SortCourses []SortPayload `json:"sort_courses"`
+	SortCourses []SortPayload `json:"sort_courses"`
 }
 
 type SortPayload struct {
-  ID int64 `json:"id"`
-  SortOrder string `json:"sort_order"`
+	ID        int64  `json:"id"`
+	SortOrder string `json:"sort_order"`
 }
 
 func SortCourse(c *fiber.Ctx) error {
 	var payload SortCoursesInput
 	if err := c.BodyParser(&payload); err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No se pudo procesar la solicitud.",
 		})
 	}
-  fmt.Println(payload)
-  for _, item := range payload.SortCourses {
-    log.Printf("ID: %d, Sort: %s", item.ID, item.SortOrder)
-    err := database.EditSortCourses(item.ID, item.SortOrder)
-    if err != nil {
-      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-        "error": err.Error(),
-      })
-    }
+	fmt.Println(payload)
+	for _, item := range payload.SortCourses {
+		log.Printf("ID: %d, Sort: %s", item.ID, item.SortOrder)
+		err := database.EditSortCourses(item.ID, item.SortOrder)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
 	}
-  return c.SendStatus(200)
+	return c.SendStatus(200)
 }
 
 type ACUInput struct {
@@ -59,7 +59,7 @@ func AddCourseToUser(c *fiber.Ctx) error {
 			"error": "No se pudo procesar la solicitud.",
 		})
 	}
-  fmt.Println("hey here!")
+	fmt.Println("hey here!")
 	err := database.AddCourseToUser(payload.UserID, payload.CourseID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -146,26 +146,26 @@ func GetSoloCourse(c *fiber.Ctx) error {
 }
 
 func GetCoursesByUserId(c *fiber.Ctx) error {
-  userId := c.Params("id")
-  user, err := database.GetUserByID(userId)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	userId := c.Params("id")
+	user, err := database.GetUserByID(userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	userCourseIDs := make(map[int64]bool)
 
 	if user.Courses != "" {
 		courseIDStrings := strings.Split(user.Courses, ",")
 		for _, idStr := range courseIDStrings {
-         idStr = strings.TrimSpace(idStr)
-        if idStr == "" {
-            continue // Skip empty strings
-        }
+			idStr = strings.TrimSpace(idStr)
+			if idStr == "" {
+				continue // Skip empty strings
+			}
 			id, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64)
 			if err != nil {
-        fmt.Println("the error", err)
+				fmt.Println("the error", err)
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID format"})
 			}
 			userCourseIDs[id] = true
@@ -232,23 +232,22 @@ func GetCoursesByUserId(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-
 func GetCourses(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 
 	userCourseIDs := make(map[int64]bool)
 
-  fmt.Println("user courses", user.Courses)
+	fmt.Println("user courses", user.Courses)
 	if user.Courses != "" {
 		courseIDStrings := strings.Split(user.Courses, ",")
 		for _, idStr := range courseIDStrings {
-         idStr = strings.TrimSpace(idStr)
-        if idStr == "" {
-            continue // Skip empty strings
-        }
+			idStr = strings.TrimSpace(idStr)
+			if idStr == "" {
+				continue // Skip empty strings
+			}
 			id, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64)
 			if err != nil {
-        fmt.Println("the error", err)
+				fmt.Println("the error", err)
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID format"})
 			}
 			userCourseIDs[id] = true
@@ -316,7 +315,7 @@ func GetCourses(c *fiber.Ctx) error {
 }
 
 func DeleteCourse(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 
 	err := database.DeleteCourseByID(id)
@@ -342,7 +341,6 @@ func UpdateCourse(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
 	}
-
 
 	id := c.FormValue("id")
 	if id == "" {
@@ -422,7 +420,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Preview:     previewDir + "/master.m3u8",
 		Duration:    cleanInput.Duration,
 		IsActive:    isActiveBool,
-    SortOrder:   int(sortOrderInt),
+		SortOrder:   int(sortOrderInt),
 	})
 
 	if err != nil {
@@ -473,9 +471,9 @@ func CreateCourse(c *fiber.Ctx) error {
 	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
 	previewTmp := c.FormValue("preview_tmp")
-  fmt.Println("preview tmp", previewTmp)
-  // preview tmp 
-  // /home/agust/work/iron-stream/backend/web/uploads/tmp/725a519c-1dfd-44f7-9c9a-0c1d14967973/test.mp4
+	fmt.Println("preview tmp", previewTmp)
+	// preview tmp
+	// /home/agust/work/iron-stream/backend/web/uploads/tmp/725a519c-1dfd-44f7-9c9a-0c1d14967973/test.mp4
 	previewDir := "/web/uploads/previews/" + id.String()
 	previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
 	err = os.MkdirAll(previewFinalPath, 0755)
@@ -484,16 +482,16 @@ func CreateCourse(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-  if previewTmp != "" {
-    ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-    cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
-    err = cmd.Run()
-    if err != nil {
-      fmt.Println("the error22", err)
-      return c.SendStatus(500)
-    }
+	if previewTmp != "" {
+		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
+		cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("the error22", err)
+			return c.SendStatus(500)
+		}
 
-  }
+	}
 
 	payloadToDB := database.Course{
 		Title:       cleanInput.Title,

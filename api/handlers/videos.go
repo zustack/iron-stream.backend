@@ -182,18 +182,18 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
-    // remove this path with Remove
-    oldThumbnail := c.FormValue("old_thumbnail")
-    if oldThumbnail != "" {
-      oldThumbnailFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail)
-      fmt.Println("Delete this path", oldThumbnailFullPath)
-    }
-    /*
-    err := os.RemoveAll(newPreviewTmp)
-    if err != nil {
-      fmt.Println("No se pudo eliminar el previewtmp", err)
-    }
-    */
+		// remove this path with Remove
+		oldThumbnail := c.FormValue("old_thumbnail")
+		if oldThumbnail != "" {
+			oldThumbnailFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail)
+			fmt.Println("Delete this path", oldThumbnailFullPath)
+		}
+		/*
+		   err := os.RemoveAll(newPreviewTmp)
+		   if err != nil {
+		     fmt.Println("No se pudo eliminar el previewtmp", err)
+		   }
+		*/
 
 	}
 
@@ -226,19 +226,19 @@ func UpdateVideo(c *fiber.Ctx) error {
 			return c.SendStatus(500)
 		}
 
-    // remove this path with RemoveAll
-    // cleanInput.VideoHLS
-    if cleanInput.VideoHLS != "" {
-      videoTmpFullPath := filepath.Join(os.Getenv("ROOT_PATH"), cleanInput.VideoHLS)
-      fmt.Println("Delete this path", videoTmpFullPath)
-    }
+		// remove this path with RemoveAll
+		// cleanInput.VideoHLS
+		if cleanInput.VideoHLS != "" {
+			videoTmpFullPath := filepath.Join(os.Getenv("ROOT_PATH"), cleanInput.VideoHLS)
+			fmt.Println("Delete this path", videoTmpFullPath)
+		}
 
-    // remove this path RemoveAll
-    oldVideoHls := c.FormValue("old_video")
-    if oldVideoHls != "" {
-      oldVideoHlsFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldVideoHls)
-      fmt.Println("Delete this path", oldVideoHlsFullPath)
-    }
+		// remove this path RemoveAll
+		oldVideoHls := c.FormValue("old_video")
+		if oldVideoHls != "" {
+			oldVideoHlsFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldVideoHls)
+			fmt.Println("Delete this path", oldVideoHlsFullPath)
+		}
 	}
 
 	payloadToDB := database.Video{
@@ -247,7 +247,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 		VideoHLS:    previewDir + "/master.m3u8",
 		Thumbnail:   thumbnailToDB,
 		Length:      length,
-    Duration:    cleanInput.Duration,
+		Duration:    cleanInput.Duration,
 		ID:          id64,
 	}
 
@@ -261,7 +261,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 }
 
 func DeleteVideo(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 	err := database.DeleteVideoByID(id)
 	if err != nil {
@@ -269,7 +269,7 @@ func DeleteVideo(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-  return c.JSON(id)
+	return c.JSON(id)
 }
 
 func GetAdminVideos(c *fiber.Ctx) error {
@@ -319,12 +319,12 @@ func GetAdminVideos(c *fiber.Ctx) error {
 
 	response := struct {
 		Data       []database.Video `json:"data"`
-    TotalCount int              `json:"totalCount"`
+		TotalCount int              `json:"totalCount"`
 		PreviousID *int             `json:"previousId"`
 		NextID     *int             `json:"nextId"`
 	}{
 		Data:       videos,
-    TotalCount: totalCount,
+		TotalCount: totalCount,
 		PreviousID: previousID,
 		NextID:     nextID,
 	}

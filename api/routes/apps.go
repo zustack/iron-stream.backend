@@ -14,4 +14,9 @@ func AppsRoutes(app *fiber.App) {
 	app.Get("/apps/normal-user/:os", middleware.NormalUser, handlers.GetAppsByOsAndIsActive)
 	app.Delete("/apps/delete/:id", middleware.AdminUser, handlers.DeleteApp)
 	app.Post("/apps/create", middleware.AdminUser, handlers.CreateApp)
+	app.Post("/special/apps/create", middleware.AdminUser, handlers.CreateSpecialApp)
+
+  app.Get("special/apps/get/:user_id", middleware.AdminUser, handlers.GetAdminSpecialApps)
+
+  // app.Get("/special/apps/get/:user_id", middleware.AdminUser, handlers.GetUserApps)
 }
