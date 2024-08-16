@@ -37,7 +37,7 @@ func GetVideoById(videoId int64) (Video, error) {
 func GetFistVideoByCourseId(courseID string) (Video, error) {
 	var video Video
 	row := DB.QueryRow(`SELECT * FROM videos WHERE 
-  course_id = ? ORDER BY sort_order ASC LIMIT 1`, courseID)
+  course_id = ? ORDER BY id ASC LIMIT 1`, courseID)
 	err := row.Scan(&video.ID, &video.Title, &video.Description,
 		&video.VideoHLS, &video.Thumbnail, &video.Length, &video.Duration,
 		&video.Views, &video.CourseID, &video.CreatedAt)
@@ -156,7 +156,7 @@ func GetVideos(course_id string, searchParam string, offset int, limit int) ([]V
 	var videos []Video
 	rows, err := DB.Query(`SELECT * FROM videos
 		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
-		ORDER BY sort_order
+		ORDER BY id
 		LIMIT ? OFFSET ?`,
 		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
 	if err != nil {

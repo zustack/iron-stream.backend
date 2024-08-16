@@ -484,6 +484,9 @@ func CreateCourse(c *fiber.Ctx) error {
 
 	if previewTmp != "" {
 		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
+    fmt.Println("the ffpmeg", ffmpegPath)
+    fmt.Println("the preview tmp", previewTmp)
+    fmt.Println("preview final path", previewFinalPath)
 		cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
 		err = cmd.Run()
 		if err != nil {

@@ -88,6 +88,7 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 		// obtener el primer video del curso
 		video, err := database.GetFistVideoByCourseId(course_id)
 		if err != nil {
+      fmt.Println(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
