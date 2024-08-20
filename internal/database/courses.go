@@ -185,7 +185,7 @@ func GetCoursesCount() (int, error) {
 func GetCourses(searchParam string, offset int, limit int) ([]Course, error) {
 	var courses []Course
 	rows, err := DB.Query(`SELECT * FROM courses
-  WHERE is_active = 1 AND title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ? 
+  WHERE is_active = true AND (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?) 
   ORDER BY sort_order DESC LIMIT ? OFFSET ?`,
 		searchParam, searchParam, searchParam, searchParam, limit, offset)
 	if err != nil {
@@ -204,6 +204,7 @@ func GetCourses(searchParam string, offset int, limit int) ([]Course, error) {
 		return nil, fmt.Errorf("GetCourses: %v", err)
 	}
 	return courses, nil
+
 }
 
 func CreateCourse(c Course) (int64, error) {
