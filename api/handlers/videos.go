@@ -21,6 +21,7 @@ type updateHistoryPayload struct {
 }
 
 func UpdateHistory(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	var payload updateHistoryPayload
 	if err := c.BodyParser(&payload); err != nil {
 		fmt.Println("el error", err)

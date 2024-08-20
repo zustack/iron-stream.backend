@@ -471,37 +471,35 @@ func CreateCourse(c *fiber.Ctx) error {
 	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
 	previewTmp := c.FormValue("preview_tmp")
-	fmt.Println("preview tmp", previewTmp)
-	// preview tmp
-	// /home/agust/work/iron-stream/backend/web/uploads/tmp/725a519c-1dfd-44f7-9c9a-0c1d14967973/test.mp4
 	previewDir := "/web/uploads/previews/" + id.String()
 	previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
 	err = os.MkdirAll(previewFinalPath, 0755)
 	if err != nil {
-		fmt.Println("the error", err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	if previewTmp != "" {
 		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-    fmt.Println("the ffpmeg", ffmpegPath)
-    fmt.Println("the preview tmp", previewTmp)
-    fmt.Println("preview final path", previewFinalPath)
 		cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
 		err = cmd.Run()
 		if err != nil {
 			fmt.Println("the error22", err)
 			return c.SendStatus(500)
 		}
-
 	}
+
+  if previewTmp == "" {
+    previewDir = ""
+  } else {
+    previewDir = previewDir + "/master.m3u8"
+  }
 
 	payloadToDB := database.Course{
 		Title:       cleanInput.Title,
 		Description: cleanInput.Description,
 		Author:      cleanInput.Author,
 		Thumbnail:   thumbnailToDB,
-		Preview:     previewDir + "/master.m3u8",
+		Preview:     previewDir,
 		Duration:    cleanInput.Duration,
 		IsActive:    isActiveBool,
 	}
