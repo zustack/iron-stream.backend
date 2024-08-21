@@ -18,7 +18,8 @@ func Setup() *fiber.App {
 		AllowOrigins:     "*",
 		AllowCredentials: false,
 	}))
-	app.Use("/web/assets/videos", middleware.AllowToWatch)
+	// TODO: add middleware for allowed courses
+	app.Use("/web/assets/videos", middleware.NormalUser)
 	staticPath := os.Getenv("ROOT_PATH") + "/web/uploads"
 	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
 		log.Fatalf("Static path does not exist: %s", staticPath)
@@ -30,5 +31,6 @@ func Setup() *fiber.App {
 	routes.VideosRoutes(app)
 	routes.FilesRoutes(app)
 	routes.HistoryRoutes(app)
+	routes.UserCoursesRoutes(app)
 	return app
 }

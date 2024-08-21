@@ -21,41 +21,73 @@ func DeleteAllUserCourses() error {
 	return nil
 }
 
-func GetUserCourses(userID string) ([]Course, error) {
-	var courses []Course
-	rows, err := DB.Query(`SELECT c.* FROM courses c 
-    JOIN user_courses uc ON c.id = uc.course_id 
-    WHERE uc.user_id = ?;
-    `, userID)
+func GetUserCourseIds(userID int64) ([]int64, error) {
+	var courseIDs []int64
+	rows, err := DB.Query(`
+		SELECT uc.course_id FROM user_courses uc
+		WHERE uc.user_id = ?;
+	`, userID)
 	if err != nil {
-		return nil, fmt.Errorf("GetUserCourses: %v", err)
+		return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var c Course
-		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Author, &c.Thumbnail,
-			&c.Preview, &c.Rating, &c.NumReviews, &c.Duration, &c.IsActive,
-			&c.SortOrder, &c.CreatedAt); err != nil {
-			return nil, fmt.Errorf("GetUserCourses: %v", err)
+		var courseID int64
+		if err := rows.Scan(&courseID); err != nil {
+			return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
 		}
-		courses = append(courses, c)
+		courseIDs = append(courseIDs, courseID)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetUserCourses: %v", err)
+		return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
 	}
 
-	return courses, nil
+	return courseIDs, nil
 }
 
-func AddCourseToUser(userID, courseID int64) error {
+func CreateUserCourse(userID, courseID string) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return fmt.Errorf("CreateUserCourse: %v", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	var userExists bool
+	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)`,
+		userID).Scan(&userExists)
+	if err != nil {
+		return fmt.Errorf("CreateUserCourse: %v", err)
+	}
+	if !userExists {
+		return fmt.Errorf("CreateUserCourse: userID %s no existe", userID)
+	}
+
+	var courseExists bool
+	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)`,
+		courseID).Scan(&courseExists)
+	if err != nil {
+		return fmt.Errorf("CreateUserCourse: %v", err)
+	}
+	if !courseExists {
+		return fmt.Errorf("CreateUserCourse: courseID %s no existe", courseID)
+	}
+
 	date := utils.FormattedDate()
-	_, err := DB.Exec(`
-  INSERT INTO user_courses (user_id, course_id, created_at) VALUES (?, ?, ?)`,
+	_, err = tx.Exec(`
+    INSERT INTO user_courses (user_id, course_id, created_at) VALUES (?, ?, ?)`,
 		userID, courseID, date)
 	if err != nil {
-		return fmt.Errorf("CreateUser: %v", err)
+		return fmt.Errorf("CreateUserCourse: %v", err)
 	}
+
 	return nil
 }
