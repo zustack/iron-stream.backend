@@ -16,6 +16,18 @@ import (
 	"github.com/google/uuid"
 )
 
+func UpdateCourseActiveStatus(c *fiber.Ctx) error {
+	id := c.Params("id")
+	// err := database.UpdateActiveStatus(id)
+  err := database.UpdateCourseActiveStatus(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
 type SortCoursesInput struct {
 	SortCourses []SortPayload `json:"sort_courses"`
 }

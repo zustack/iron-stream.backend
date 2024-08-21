@@ -23,6 +23,25 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func UpdateCourseActiveStatus(id string) error {
+	var u User
+	row := DB.QueryRow(`SELECT is_active FROM courses WHERE id = ?`, id)
+	if err := row.Scan(&u.IsActive); err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("%s: no such course", id)
+		}
+		return fmt.Errorf("%s: %v", id, err)
+	}
+
+	isActive := !u.IsActive
+	_, err := DB.Exec(`UPDATE courses SET is_active = ? WHERE id = ?`, isActive, id)
+	if err != nil {
+		return fmt.Errorf("UpdateCourseActiveStatus: %v", err)
+	}
+
+	return nil
+}
+
 func GetCourseById(id string) (Course, error) {
 	var c Course
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
