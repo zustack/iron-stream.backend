@@ -10,10 +10,35 @@ CREATE TABLE users (
   is_active BOOL DEFAULT TRUE,
   email_token INT,
   verified   BOOL DEFAULT FALSE, 
-  courses    TEXT DEFAULT '',  
   pc         VARCHAR(255) DEFAULT '',  
   os VARCHAR(20) DEFAULT '',  
   created_at VARCHAR(40) NOT NULL
+);
+
+DROP TABLE IF EXISTS courses;
+CREATE TABLE courses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  title VARCHAR(44) NOT NULL,
+  description VARCHAR(480) NOT NULL,
+  author VARCHAR(25) NOT NULL,
+  thumbnail VARCHAR(155) NOT NULL,
+  preview VARCHAR(155) NOT NULL,
+  rating INTEGER DEFAULT 0, 
+  num_reviews INTEGER DEFAULT 0, 
+  duration VARCHAR(25) NOT NULL, 
+  is_active BOOL DEFAULT FALSE,
+  sort_order INTEGER, 
+  created_at VARCHAR(40) NOT NULL
+);
+
+DROP TABLE IF EXISTS user_courses;
+CREATE TABLE user_courses (
+  user_id INTEGER NOT NULL,
+  course_id INTEGER NOT NULL,
+  created_at VARCHAR(40) NOT NULL,
+  PRIMARY KEY (user_id, course_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS special_apps;
@@ -37,21 +62,6 @@ CREATE TABLE apps (
   created_at VARCHAR(40) NOT NULL
 );
 
-DROP TABLE IF EXISTS courses;
-CREATE TABLE courses (
-  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  title VARCHAR(44) NOT NULL,
-  description VARCHAR(480) NOT NULL,
-  author VARCHAR(25) NOT NULL,
-  thumbnail VARCHAR(155) NOT NULL,
-  preview VARCHAR(155) NOT NULL,
-  rating INTEGER DEFAULT 0, 
-  num_reviews INTEGER DEFAULT 0, 
-  duration VARCHAR(25) NOT NULL, 
-  is_active BOOL DEFAULT FALSE,
-  sort_order INTEGER, 
-  created_at VARCHAR(40) NOT NULL
-);
 
 DROP TABLE IF EXISTS videos;
 CREATE TABLE videos (

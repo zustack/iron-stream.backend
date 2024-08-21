@@ -19,7 +19,6 @@ type User struct {
 	IsActive    bool   `json:"is_active"`
 	EmailToken  int    `json:"email_token"`
 	Verified    bool   `json:"verified"`
-	Courses     string `json:"courses"`
 	Pc          string `json:"pc"`
 	Os          string `json:"os"`
 	CreatedAt   string `json:"created_at"`
@@ -33,8 +32,8 @@ func UpdateUserSpecialApps(id int64, special_apps bool) error {
 	return nil
 }
 
+// change
 func DeactivateCourseForUser(userID, courseID int64) error {
-	// Verifica si el curso existe en la base de datos
 	var courseExists bool
 	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)", courseID).Scan(&courseExists)
 	if err != nil {
@@ -107,13 +106,12 @@ func GetUserIds() ([]User, error) {
 	return ids, nil
 }
 
+// change
 func DeactivateAllCoursesForAllUsers() error {
-	// Ejecuta la consulta para desactivar todos los cursos de todos los usuarios
 	_, err := DB.Exec("UPDATE users SET courses = ''")
 	if err != nil {
 		return fmt.Errorf("DeactivateAllCoursesForAllUsers: %v", err)
 	}
-
 	return nil
 }
 
@@ -132,7 +130,6 @@ func UpdateActiveStatusAllUsers(isActive bool) error {
 		return fmt.Errorf("UpdateActiveStatusAllUsers: no rows were updated")
 	}
 
-	fmt.Printf("UpdateActiveStatusAllUsers: %d rows were updated\n", rowsAffected)
 	return nil
 }
 
@@ -242,7 +239,7 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 		var u User
 		if err := rows.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
 			&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
-			&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+			&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 			return nil, fmt.Errorf("GetAdminUsers: %v", err)
 		}
 		users = append(users, u)
@@ -262,25 +259,18 @@ func UpdateEmailToken(email string, email_token int) error {
 }
 
 func UpdatePassword(password, email string) error {
-	// Trim any whitespace from email
 	email = strings.TrimSpace(email)
-
-	// Execute the update
 	result, err := DB.Exec(`UPDATE users SET password = ? WHERE LOWER(email) = LOWER(?)`, password, email)
 	if err != nil {
 		return fmt.Errorf("UpdatePassword: %v", err)
 	}
-
-	// Check if any rows were affected
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("UpdatePassword: couldn't get rows affected: %v", err)
 	}
-
 	if rowsAffected == 0 {
 		return fmt.Errorf("UpdatePassword: no user found with email %s", email)
 	}
-
 	return nil
 }
 
@@ -305,7 +295,7 @@ func GetUserByID(id string) (User, error) {
 	row := DB.QueryRow(`SELECT * FROM users WHERE id = ?`, id)
 	if err := row.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
 		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
-		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return u, fmt.Errorf("GetUserByID%s: no such user", id)
 		}
@@ -319,7 +309,7 @@ func GetUserByEmail(email string) (User, error) {
 	row := DB.QueryRow(`SELECT * FROM users WHERE email = ?`, email)
 	if err := row.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
 		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
-		&u.Courses, &u.Pc, &u.Os, &u.CreatedAt); err != nil {
+		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return u, fmt.Errorf("GetUserByEmail: %s: no such user", email)
 		}

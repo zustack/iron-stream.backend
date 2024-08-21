@@ -72,6 +72,7 @@ type ACUInput struct {
 }
 
 func AddCourseToUser(c *fiber.Ctx) error {
+	time.Sleep(2000 * time.Millisecond)
 	var payload ACUInput
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

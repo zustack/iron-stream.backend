@@ -91,6 +91,7 @@ func UpdateCourse(c Course) error {
 	return nil
 }
 
+/*
 func AddCourseToUser(userID, courseID int64) error {
 	var existingCourses string
 	row := DB.QueryRow(`SELECT courses FROM users WHERE id = ?`, userID)
@@ -132,6 +133,7 @@ func AddCourseToUser(userID, courseID int64) error {
 
 	return nil
 }
+*/
 
 func GetCourseClientCount(searchParam, isActiveParam string) (int, error) {
 	var count int

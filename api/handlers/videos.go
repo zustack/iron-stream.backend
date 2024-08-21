@@ -168,7 +168,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 	var thumbnailToDB string
 	// si no hay un thumbnail lo sobreescribo para que se quede el actual
 	thumbnailToDB = c.FormValue("old_thumbnail")
-  fmt.Println("old thumbnail", thumbnailToDB)
+	fmt.Println("old thumbnail", thumbnailToDB)
 	thumbnail, err := c.FormFile("thumbnail")
 	// hay un thumbnail !!
 	if err == nil {
@@ -190,17 +190,16 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 	}
 
-
 	var previewDir string
 	previewDir = c.FormValue("old_video")
-  fmt.Println("old video", previewDir)
+	fmt.Println("old video", previewDir)
 	length := c.FormValue("length")
 	if c.FormValue("video_tmp") != "" {
 
 		getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), c.FormValue("video_tmp"))
 		output, err := getLengthCmd.Output()
 		if err != nil {
-      fmt.Println("err", err.Error())
+			fmt.Println("err", err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
@@ -425,7 +424,7 @@ func CreateVideo(c *fiber.Ctx) error {
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
 		// VideoHLS:    c.FormValue("video_tmp"),
-		Duration:    c.FormValue("duration"),
+		Duration: c.FormValue("duration"),
 	}
 
 	cleanInput, err := inputs.CleanVideoInput(payloadToClean)
@@ -434,7 +433,6 @@ func CreateVideo(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-
 
 	courseID := c.FormValue("course_id")
 	courseID64, err := strconv.ParseInt(courseID, 10, 64)
@@ -469,7 +467,7 @@ func CreateVideo(c *fiber.Ctx) error {
 	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), c.FormValue("video_tmp"))
 	output, err := getLengthCmd.Output()
 	if err != nil {
-    fmt.Println("err", err)
+		fmt.Println("err", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
