@@ -21,7 +21,7 @@ type updateHistoryPayload struct {
 }
 
 func UpdateHistory(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	var payload updateHistoryPayload
 	if err := c.BodyParser(&payload); err != nil {
 		fmt.Println("el error", err)
@@ -89,7 +89,7 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 		// obtener el primer video del curso
 		video, err := database.GetFistVideoByCourseId(course_id)
 		if err != nil {
-      fmt.Println(err)
+			fmt.Println(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})

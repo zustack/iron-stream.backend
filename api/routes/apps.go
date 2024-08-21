@@ -16,7 +16,7 @@ func AppsRoutes(app *fiber.App) {
 	app.Post("/apps/create", middleware.AdminUser, handlers.CreateApp)
 	app.Post("/special/apps/create", middleware.AdminUser, handlers.CreateSpecialApp)
 
-  app.Get("special/apps/get/:user_id", middleware.AdminUser, handlers.GetAdminSpecialApps)
+	app.Get("special/apps/get/:user_id", middleware.AdminUser, handlers.GetAdminSpecialApps)
 
-  app.Get("/special/apps/get", middleware.AdminUser, handlers.GetUserApps)
+	app.Get("/special/apps/get", middleware.AdminUser, handlers.GetUserApps)
 }

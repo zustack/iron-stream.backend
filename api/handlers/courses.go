@@ -5,7 +5,6 @@ import (
 	"io"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,16 +34,16 @@ func SortCourse(c *fiber.Ctx) error {
 	}
 
 	for _, item := range payload.SortCourses {
-    if item.SortOrder == "" {
-      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-        "error": "Todos lo cursos deben tener un sort order.",
-      })
-    }
-    if item.ID > 0 {
-      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-        "error": "Todos lo cursos deben tener un ID.",
-      })
-    }
+		if item.SortOrder == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Todos lo cursos deben tener un sort order.",
+			})
+		}
+		if item.ID > 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Todos lo cursos deben tener un ID.",
+			})
+		}
 		err := database.EditSortCourses(item.ID, item.SortOrder)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -336,6 +335,12 @@ func DeleteCourse(c *fiber.Ctx) error {
 	return c.SendString(id)
 }
 
+// old_thumbnail O thumbnail deben estar presentes
+// old_video O video deben estar presentes
+/*
+  thumbnail ? actualiza con eso y pasa el valor a database
+  no hay thumbnail? pasa el -> old_thumbnail
+*/
 func UpdateCourse(c *fiber.Ctx) error {
 	payloadToClean := database.Course{
 		Title:       c.FormValue("title"),
@@ -378,6 +383,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 
 	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
 	var thumbnailToDB string
+  thumbnailToDB = c.FormValue("old_thumbnail")
 	thumbnail, err := c.FormFile("thumbnail")
 	if err == nil {
 		if thumbnail.Size > MaxFileSize {
@@ -394,13 +400,12 @@ func UpdateCourse(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al guardar el thumbnail"})
 		}
-
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
-
 	}
 
 	previewTmpDir := c.FormValue("preview_tmp")
 	var previewDir string
+  previewDir = c.FormValue("old_video")
 	if previewTmpDir != "" {
 		previewId := uuid.New()
 		previewDir = "/web/uploads/previews/" + previewId.String()
@@ -416,8 +421,13 @@ func UpdateCourse(c *fiber.Ctx) error {
 		if err != nil {
 			return c.SendStatus(500)
 		}
-
+    previewDir = previewDir + "/master.m3u8"
 	}
+
+  fmt.Println("isVideo", c.FormValue("isVideo"))
+  if c.FormValue("isVideo") == "false" {
+    previewDir = "" 
+  }
 
 	err = database.UpdateCourse(database.Course{
 		ID:          id64,
@@ -425,7 +435,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Description: cleanInput.Description,
 		Author:      cleanInput.Author,
 		Thumbnail:   thumbnailToDB,
-		Preview:     previewDir + "/master.m3u8",
+		Preview:     previewDir,
 		Duration:    cleanInput.Duration,
 		IsActive:    isActiveBool,
 		SortOrder:   int(sortOrderInt),
@@ -496,11 +506,11 @@ func CreateCourse(c *fiber.Ctx) error {
 		}
 	}
 
-  if previewTmp == "" {
-    previewDir = ""
-  } else {
-    previewDir = previewDir + "/master.m3u8"
-  }
+	if previewTmp == "" {
+		previewDir = ""
+	} else {
+		previewDir = previewDir + "/master.m3u8"
+	}
 
 	payloadToDB := database.Course{
 		Title:       cleanInput.Title,

@@ -9,80 +9,80 @@ import (
 )
 
 func GetAdminSpecialApps(c *fiber.Ctx) error {
-  userId := c.Params("user_id")
-  user, err := database.GetUserByID(userId)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	userId := c.Params("user_id")
+	user, err := database.GetUserByID(userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  fmt.Println("el os", user.Os)
+	fmt.Println("el os", user.Os)
 
-  userApps, err := database.GetSpecialAppsByUserId(user.Os, user.ID)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	userApps, err := database.GetSpecialAppsByUserId(user.Os, user.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  apps, err := database.GetAppsByOs(user.Os)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	apps, err := database.GetAppsByOs(user.Os)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  // Crear un mapa para facilitar la búsqueda de userApps
-  userAppMap := make(map[string]bool)
-  for _, userApp := range userApps {
-    userAppMap[userApp.Name] = true
-  }
+	// Crear un mapa para facilitar la búsqueda de userApps
+	userAppMap := make(map[string]bool)
+	for _, userApp := range userApps {
+		userAppMap[userApp.Name] = true
+	}
 
-  // Modificar las apps para agregar el campo "is"
-  modifiedApps := make([]map[string]interface{}, len(apps))
-  for i, app := range apps {
-    appMap := make(map[string]interface{})
+	// Modificar las apps para agregar el campo "is"
+	modifiedApps := make([]map[string]interface{}, len(apps))
+	for i, app := range apps {
+		appMap := make(map[string]interface{})
 
-    // Copiar todos los campos de la app al nuevo mapa
-    appMap["id"] = app.ID
-    appMap["name"] = app.Name
-    appMap["process_name"] = app.ProcessName
-    appMap["os"] = app.Os
-    appMap["active"] = app.IsActive
-    appMap["created_at"] = app.CreatedAt
+		// Copiar todos los campos de la app al nuevo mapa
+		appMap["id"] = app.ID
+		appMap["name"] = app.Name
+		appMap["process_name"] = app.ProcessName
+		appMap["os"] = app.Os
+		appMap["active"] = app.IsActive
+		appMap["created_at"] = app.CreatedAt
 
-    // Agregar el campo "is" si la app está en userApps
-    if userAppMap[app.Name] {
-      appMap["is"] = true
-    }
+		// Agregar el campo "is" si la app está en userApps
+		if userAppMap[app.Name] {
+			appMap["is"] = true
+		}
 
-    modifiedApps[i] = appMap
-  }
+		modifiedApps[i] = appMap
+	}
 
-  return c.JSON(modifiedApps)
+	return c.JSON(modifiedApps)
 }
 
 func GetUserApps(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 
-  if user.SpecialApps {
-    apps, err := database.GetSpecialAppsByUserId(user.Os, user.ID)
-    if err != nil {
-      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-        "error": err.Error(),
-      })
-    }
-    return c.JSON(apps)
-  }
+	if user.SpecialApps {
+		apps, err := database.GetSpecialAppsByUserId(user.Os, user.ID)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(apps)
+	}
 
-  apps, err := database.GetAppsByOsAndIsActive(user.Os)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.JSON(apps)
+	apps, err := database.GetAppsByOsAndIsActive(user.Os)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(apps)
 }
 
 type AppsPayload struct {
@@ -98,25 +98,25 @@ func CreateSpecialApp(c *fiber.Ctx) error {
 		})
 	}
 
-  err := database.UpdateUserSpecialApps(payload.UserId, true)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	err := database.UpdateUserSpecialApps(payload.UserId, true)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  err = database.DeleteAllSpecialAppsByUserId(payload.UserId)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	err = database.DeleteAllSpecialAppsByUserId(payload.UserId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  if len(payload.Apps) == 0 {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-      "error": "No se encontraron Apps.",
-    })
-  }
+	if len(payload.Apps) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No se encontraron Apps.",
+		})
+	}
 
 	for _, item := range payload.Apps {
 

@@ -28,7 +28,7 @@ type User struct {
 func UpdateUserSpecialApps(id int64, special_apps bool) error {
 	_, err := DB.Exec(`UPDATE users SET special_apps = ? WHERE id = ?`, special_apps, id)
 	if err != nil {
-    return fmt.Errorf("UpdateUserSpecialApps: %v", err)
+		return fmt.Errorf("UpdateUserSpecialApps: %v", err)
 	}
 	return nil
 }

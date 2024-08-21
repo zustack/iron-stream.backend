@@ -22,9 +22,9 @@ func DeleteAllSpecialAppsByUserId(userId int64) error {
 	if err != nil {
 		return fmt.Errorf("GetAppsCount: %v", err)
 	}
-  if count == 0 {
-    return nil
-  }
+	if count == 0 {
+		return nil
+	}
 
 	result, err := DB.Exec("DELETE FROM special_apps WHERE user_id = ?", userId)
 	if err != nil {
