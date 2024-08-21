@@ -19,7 +19,7 @@ import (
 func UpdateCourseActiveStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 	// err := database.UpdateActiveStatus(id)
-  err := database.UpdateCourseActiveStatus(id)
+	err := database.UpdateCourseActiveStatus(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -395,7 +395,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 
 	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
 	var thumbnailToDB string
-  thumbnailToDB = c.FormValue("old_thumbnail")
+	thumbnailToDB = c.FormValue("old_thumbnail")
 	thumbnail, err := c.FormFile("thumbnail")
 	if err == nil {
 		if thumbnail.Size > MaxFileSize {
@@ -417,7 +417,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 
 	previewTmpDir := c.FormValue("preview_tmp")
 	var previewDir string
-  previewDir = c.FormValue("old_video")
+	previewDir = c.FormValue("old_video")
 	if previewTmpDir != "" {
 		previewId := uuid.New()
 		previewDir = "/web/uploads/previews/" + previewId.String()
@@ -433,13 +433,13 @@ func UpdateCourse(c *fiber.Ctx) error {
 		if err != nil {
 			return c.SendStatus(500)
 		}
-    previewDir = previewDir + "/master.m3u8"
+		previewDir = previewDir + "/master.m3u8"
 	}
 
-  fmt.Println("isVideo", c.FormValue("isVideo"))
-  if c.FormValue("isVideo") == "false" {
-    previewDir = "" 
-  }
+	fmt.Println("isVideo", c.FormValue("isVideo"))
+	if c.FormValue("isVideo") == "false" {
+		previewDir = ""
+	}
 
 	err = database.UpdateCourse(database.Course{
 		ID:          id64,

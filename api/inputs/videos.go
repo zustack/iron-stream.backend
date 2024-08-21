@@ -45,12 +45,14 @@ func CleanVideoInput(input database.Video) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("La descripción no debe tener más de 480 caracteres.")
 	}
 
-	if input.VideoHLS == "" {
-		return database.Video{}, fmt.Errorf("El video es requerido.")
-	}
-	if len(input.VideoHLS) > 255 {
-		return database.Video{}, fmt.Errorf("El video no debe tener más de 255 caracteres.")
-	}
+	/*
+		if input.VideoHLS == "" {
+			return database.Video{}, fmt.Errorf("El video es requerido.")
+		}
+		if len(input.VideoHLS) > 255 {
+			return database.Video{}, fmt.Errorf("El video no debe tener más de 255 caracteres.")
+		}
+	*/
 
 	if input.Duration == "" {
 		return database.Video{}, fmt.Errorf("La duración es requerida.")
@@ -62,7 +64,6 @@ func CleanVideoInput(input database.Video) (database.Video, error) {
 	return database.Video{
 		Title:       input.Title,
 		Description: input.Description,
-		VideoHLS:    input.VideoHLS,
 		Duration:    input.Duration,
 	}, nil
 }

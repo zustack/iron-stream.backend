@@ -141,7 +141,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
 		Duration:    c.FormValue("duration"),
-		VideoHLS:    c.FormValue("video_tmp"),
+		// VideoHLS:    c.FormValue("video_tmp"),
 	}
 
 	cleanInput, err := inputs.CleanVideoInput(payloadToClean)
@@ -166,7 +166,11 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
 	var thumbnailToDB string
+	// si no hay un thumbnail lo sobreescribo para que se quede el actual
+	thumbnailToDB = c.FormValue("old_thumbnail")
+  fmt.Println("old thumbnail", thumbnailToDB)
 	thumbnail, err := c.FormFile("thumbnail")
+	// hay un thumbnail !!
 	if err == nil {
 		if thumbnail.Size > MaxFileSize {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -184,34 +188,26 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
-		// remove this path with Remove
-		oldThumbnail := c.FormValue("old_thumbnail")
-		if oldThumbnail != "" {
-			oldThumbnailFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldThumbnail)
-			fmt.Println("Delete this path", oldThumbnailFullPath)
-		}
-		/*
-		   err := os.RemoveAll(newPreviewTmp)
-		   if err != nil {
-		     fmt.Println("No se pudo eliminar el previewtmp", err)
-		   }
-		*/
-
 	}
 
-	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), cleanInput.VideoHLS)
-	output, err := getLengthCmd.Output()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	fmt.Println("duration", string(output))
-	length := strings.Trim(string(output), "\n")
 
 	var previewDir string
-	if cleanInput.VideoHLS != "" {
+	previewDir = c.FormValue("old_video")
+  fmt.Println("old video", previewDir)
+	length := c.FormValue("length")
+	if c.FormValue("video_tmp") != "" {
+
+		getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), c.FormValue("video_tmp"))
+		output, err := getLengthCmd.Output()
+		if err != nil {
+      fmt.Println("err", err.Error())
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+
+		length = strings.Trim(string(output), "\n")
+
 		videoId := uuid.New()
 		previewDir = "/web/uploads/videos/" + videoId.String()
 		previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
@@ -222,31 +218,18 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
 
-		cmd := exec.Command("sh", ffmpegPath, cleanInput.VideoHLS, previewFinalPath)
+		cmd := exec.Command("sh", ffmpegPath, c.FormValue("video_tmp"), previewFinalPath)
 		err = cmd.Run()
 		if err != nil {
 			return c.SendStatus(500)
 		}
-
-		// remove this path with RemoveAll
-		// cleanInput.VideoHLS
-		if cleanInput.VideoHLS != "" {
-			videoTmpFullPath := filepath.Join(os.Getenv("ROOT_PATH"), cleanInput.VideoHLS)
-			fmt.Println("Delete this path", videoTmpFullPath)
-		}
-
-		// remove this path RemoveAll
-		oldVideoHls := c.FormValue("old_video")
-		if oldVideoHls != "" {
-			oldVideoHlsFullPath := filepath.Join(os.Getenv("ROOT_PATH"), oldVideoHls)
-			fmt.Println("Delete this path", oldVideoHlsFullPath)
-		}
+		previewDir = previewDir + "/master.m3u8"
 	}
 
 	payloadToDB := database.Video{
 		Title:       cleanInput.Title,
 		Description: cleanInput.Description,
-		VideoHLS:    previewDir + "/master.m3u8",
+		VideoHLS:    previewDir,
 		Thumbnail:   thumbnailToDB,
 		Length:      length,
 		Duration:    cleanInput.Duration,
@@ -441,7 +424,7 @@ func CreateVideo(c *fiber.Ctx) error {
 	payloadToClean := database.Video{
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
-		VideoHLS:    c.FormValue("video_tmp"),
+		// VideoHLS:    c.FormValue("video_tmp"),
 		Duration:    c.FormValue("duration"),
 	}
 
@@ -451,6 +434,7 @@ func CreateVideo(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
 
 	courseID := c.FormValue("course_id")
 	courseID64, err := strconv.ParseInt(courseID, 10, 64)
@@ -480,11 +464,12 @@ func CreateVideo(c *fiber.Ctx) error {
 	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
 
 	// get the lenght of the video
-	fmt.Println("video", cleanInput.VideoHLS)
+	fmt.Println("video", c.FormValue("video_tmp"))
 	fmt.Println("root", os.Getenv("ROOT_PATH")+"/get-video-length.sh")
-	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), cleanInput.VideoHLS)
+	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), c.FormValue("video_tmp"))
 	output, err := getLengthCmd.Output()
 	if err != nil {
+    fmt.Println("err", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -503,7 +488,7 @@ func CreateVideo(c *fiber.Ctx) error {
 
 	ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
 
-	cmd := exec.Command("sh", ffmpegPath, cleanInput.VideoHLS, previewFinalPath)
+	cmd := exec.Command("sh", ffmpegPath, c.FormValue("video_tmp"), previewFinalPath)
 	err = cmd.Run()
 	if err != nil {
 		return c.SendStatus(500)
