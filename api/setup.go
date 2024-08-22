@@ -32,5 +32,6 @@ func Setup() *fiber.App {
 	routes.FilesRoutes(app)
 	routes.HistoryRoutes(app)
 	routes.UserCoursesRoutes(app)
+	routes.UserAppsRoutes(app)
 	return app
 }

@@ -44,6 +44,7 @@ func GetAppByID(id string) (App, error) {
 	return a, nil
 }
 
+// TODO fix the is_active NOT WORKING!
 func GetAdminApps(searchParam, isActiveParam string) ([]App, error) {
 	var apps []App
 	var args []interface{}

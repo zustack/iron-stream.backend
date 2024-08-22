@@ -8,6 +8,7 @@ import (
 )
 
 func UserRoutes(app *fiber.App) {
+  app.Put("make/special/apps/user/:userId/:specialApps", middleware.AdminUser, handlers.MakeSpecialAppUser)
 	app.Put("deactivate/all/courses", middleware.AdminUser, handlers.DeactivateAllCoursesForAllUsers)
 	app.Put("deactivate/course/for/all/users/:id", middleware.AdminUser, handlers.DeactivateSpecificCourseForAllUsers)
 

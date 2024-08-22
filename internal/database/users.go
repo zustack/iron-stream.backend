@@ -24,8 +24,8 @@ type User struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-func UpdateUserSpecialApps(id int64, special_apps bool) error {
-	_, err := DB.Exec(`UPDATE users SET special_apps = ? WHERE id = ?`, special_apps, id)
+func UpdateUserSpecialApps(userId, special_apps string) error {
+	_, err := DB.Exec(`UPDATE users SET special_apps = ? WHERE id = ?`, special_apps, userId)
 	if err != nil {
 		return fmt.Errorf("UpdateUserSpecialApps: %v", err)
 	}

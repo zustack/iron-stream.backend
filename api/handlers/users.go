@@ -15,6 +15,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func MakeSpecialAppUser(c *fiber.Ctx) error {
+  userId := c.Params("userId")
+  specialApps := c.Params("specialApps")
+  err := database.UpdateUserSpecialApps(userId, specialApps)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(fiber.StatusOK)
+}
+
 func DeactivateSpecificCourseForAllUsers(c *fiber.Ctx) error {
 	id := c.Params("id")
 	// convert id to int64

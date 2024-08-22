@@ -6,8 +6,6 @@ import (
 )
 
 func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error {
-  fmt.Println("courseId", courseId)
-  fmt.Println("userId", userId)
 	_, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ? AND user_id = ?;`, courseId, userId)
 	if err != nil {
 		return fmt.Errorf("DeleteUserCoursesByUserID: %v", err)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 
@@ -47,6 +48,7 @@ func GetAdminApps(c *fiber.Ctx) error {
 	isActiveParam := c.Query("a", "")
 
 	apps, err := database.GetAdminApps(searchParam, isActiveParam)
+  fmt.Println("admin apps", apps)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
