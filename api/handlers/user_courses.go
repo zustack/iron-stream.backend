@@ -2,9 +2,22 @@ package handlers
 
 import (
 	"iron-stream/internal/database"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+func DeleteUserCoursesByCourseIdAndUserId(c *fiber.Ctx) error {
+	userID := c.Params("userId")
+	courseID := c.Params("courseId")
+	err := database.DeleteUserCoursesByCourseIdAndUserId(userID, courseID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
 
 func DeleteUserCoursesByCourseId(c *fiber.Ctx) error {
 	courseId := c.Params("courseId")
@@ -28,11 +41,12 @@ func DeleteAllUserCourses(c *fiber.Ctx) error {
 }
 
 func GetUserCourses(c *fiber.Ctx) error {
-	user := c.Locals("user").(*database.User)
+  time.Sleep(2000 * time.Millisecond)
+  userId := c.Params("userId")
 	q := c.Query("q", "")
 	q = "%" + q + "%"
 
-	userCourseIDs, err := database.GetUserCourseIds(user.ID)
+	userCourseIDs, err := database.GetUserCourseIds(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

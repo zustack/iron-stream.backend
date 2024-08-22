@@ -41,8 +41,8 @@ CREATE TABLE user_courses (
   FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS special_apps;
-CREATE TABLE special_apps (
+DROP TABLE IF EXISTS user_apps;
+CREATE TABLE user_apps (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   user_id INTEGER NOT NULL,
   name VARCHAR(55) NOT NULL,
