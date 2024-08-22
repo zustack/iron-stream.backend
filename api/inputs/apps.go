@@ -22,18 +22,9 @@ func CleanAppInput(input database.App) (database.App, error) {
 		return database.App{}, fmt.Errorf("El nombre del proceso no debe tener más de 55 caracteres.")
 	}
 
-	if input.Os == "" {
-		return database.App{}, fmt.Errorf("El sistema operativo es requerido.")
-	}
-
-	if len(input.Os) > 55 {
-		return database.App{}, fmt.Errorf("El sistema operativo no debe tener más de 55 caracteres.")
-	}
-
 	return database.App{
 		Name:        input.Name,
 		ProcessName: input.ProcessName,
-		Os:          input.Os,
 		IsActive:    input.IsActive,
 	}, nil
 }

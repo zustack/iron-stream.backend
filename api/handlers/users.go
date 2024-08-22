@@ -74,6 +74,11 @@ func UpdateActiveStatusAllUsers(c *fiber.Ctx) error {
 
 func UpdateActiveStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
+  if id == "1" {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "El admin con id 1 no puede ser desactivado.",
+		})
+  }
 	err := database.UpdateActiveStatus(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
