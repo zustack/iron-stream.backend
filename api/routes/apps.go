@@ -8,6 +8,7 @@ import (
 )
 
 func AppsRoutes(app *fiber.App) {
+  app.Get("apps/forbidden", middleware.NormalUser, handlers.GetForbiddenApps)
   app.Put("apps/update/status/:id/:isActive", middleware.AdminUser, handlers.UpdateAppStatus)
 	app.Get("apps/active", middleware.NormalUser, handlers.GetActiveApps)
   app.Get("apps/by/id/:id", middleware.AdminUser, handlers.GetAppByID)

@@ -8,6 +8,36 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func GetForbiddenApps(c *fiber.Ctx) error {
+	user := c.Locals("user").(*database.User)
+  if user.SpecialApps {
+    // get the user_apps del usuario
+    userIdStr := fmt.Sprintln(user.ID)
+	  userAppIDs, err := database.GetUserAppsIds(userIdStr)
+	  if err != nil {
+		  return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			  "error": err.Error(),
+		  })
+    }
+    // get all the apps with the userAppIds
+    apps, err := database.GetAppsByIds(userAppIDs)
+    if err != nil {
+      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+        "error": err.Error(),
+      })
+    }
+    return c.JSON(apps)
+  } 
+
+  apps, err := database.GetActiveApps()
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.JSON(apps)
+}
+
 func UpdateAppStatus(c *fiber.Ctx) error {
   appId := c.Params("id")
   isActive := c.Params("isActive")
