@@ -15,6 +15,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func UpdateAdminStatus(c *fiber.Ctx) error {
+  // TODO: sanitize input
+  userId:= c.Params("userId")
+  isAdmin := c.Params("isAdmin")
+  err := database.UpdateAdminStatus(userId, isAdmin)
+  if err != nil {
+    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(fiber.StatusOK)
+}
+
 func MakeSpecialAppUser(c *fiber.Ctx) error {
   userId := c.Params("userId")
   specialApps := c.Params("specialApps")
@@ -122,7 +135,6 @@ func AdminUsers(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	fmt.Println(users)
 
 	searchCount, err := database.GetAdminUsersCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam)
 	if err != nil {

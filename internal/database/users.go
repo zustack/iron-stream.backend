@@ -24,6 +24,14 @@ type User struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func UpdateAdminStatus(userId, isAdmin string) error {
+	_, err := DB.Exec(`UPDATE users SET is_admin = ? WHERE id = ?`, isAdmin, userId)
+	if err != nil {
+    return fmt.Errorf("UpdateAdminStatus: %v", err)
+	}
+	return nil
+}
+
 func UpdateUserSpecialApps(userId, special_apps string) error {
 	_, err := DB.Exec(`UPDATE users SET special_apps = ? WHERE id = ?`, special_apps, userId)
 	if err != nil {

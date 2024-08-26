@@ -23,4 +23,5 @@ func UserRoutes(app *fiber.App) {
 	app.Put("/update/password", middleware.NormalUser, handlers.UpdatePassword)
 	app.Put("request/email/token/reset/password", handlers.RequestEmailTokenResetPassword)
 	app.Get("/users/admin", middleware.AdminUser, handlers.AdminUsers)
+	app.Put("/users/update/admin/status/:userId/:isAdmin", middleware.AdminUser, handlers.UpdateAdminStatus)
 }

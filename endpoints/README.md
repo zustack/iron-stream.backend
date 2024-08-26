@@ -1,5 +1,7 @@
 # new endpoints test
 
+## replicate video history like in video.tsx but with curl
+
 - create user
 ```bash
 curl -X POST http://localhost:8081/register \

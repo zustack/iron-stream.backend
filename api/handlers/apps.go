@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetForbiddenApps(c *fiber.Ctx) error {
+  time.Sleep(4000 * time.Millisecond)
 	user := c.Locals("user").(*database.User)
   if user.SpecialApps {
     // get the user_apps del usuario
