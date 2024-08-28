@@ -33,6 +33,7 @@ func GetAdminCourses(c *fiber.Ctx) error {
 
 // TODO: pass is active from the frontend!
 func UpdateCourseActiveStatus(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 	err := database.UpdateCourseActiveStatus(id)
 	if err != nil {

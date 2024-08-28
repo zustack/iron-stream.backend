@@ -74,6 +74,7 @@ func GetAppByID(c *fiber.Ctx) error {
 }
 
 func GetAdminApps(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	searchParam := c.Query("q", "")
 	searchParam = "%" + searchParam + "%"
 
@@ -128,6 +129,7 @@ func UpdateApp(c *fiber.Ctx) error {
 }
 
 func DeleteApp(c *fiber.Ctx) error {
+  time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
 
 	err := database.DeleteAppByID(id)

@@ -259,166 +259,33 @@ func DeleteVideo(c *fiber.Ctx) error {
 }
 
 func GetAdminVideos(c *fiber.Ctx) error {
-	time.Sleep(2000 * time.Millisecond)
-	id := c.Params("id")
-	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Course ID is required",
-		})
-	}
+	courseId := c.Params("courseId")
+	q := c.Query("q", "")
+	q = "%" + q + "%"
 
-	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
+	videos, err := database.GetVideos(courseId, q)
 	if err != nil {
-		fmt.Println("3", err)
-		return c.Status(400).SendString("Invalid cursor")
-	}
-	limit := 50
-
-	searchParam := c.Query("q", "")
-	searchParam = "%" + searchParam + "%"
-
-	videos, err := database.GetAdminVideos(id, searchParam, cursor, limit)
-	if err != nil {
-		fmt.Println("4", err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	totalCount, err := database.GetVideosCount(id, searchParam)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	var previousID, nextID *int
-	if cursor > 0 {
-		prev := cursor - limit
-		if prev < 0 {
-			prev = 0
-		}
-		previousID = &prev
-	}
-	if cursor+limit < totalCount {
-		next := cursor + limit
-		nextID = &next
-	}
-
-	response := struct {
-		Data       []database.Video `json:"data"`
-		TotalCount int              `json:"totalCount"`
-		PreviousID *int             `json:"previousId"`
-		NextID     *int             `json:"nextId"`
-	}{
-		Data:       videos,
-		TotalCount: totalCount,
-		PreviousID: previousID,
-		NextID:     nextID,
-	}
-
-	return c.JSON(response)
-}
-
-func GetVideos(c *fiber.Ctx) error {
-	user := c.Locals("user").(*database.User)
-	history, err := database.GetUserUniqueHistory(user.ID)
-	if err != nil {
-		fmt.Println("1", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	historyMap := make(map[int64]string)
-	for _, h := range history {
-		historyMap[h.VideoId] = h.VideoResume
-		fmt.Println("resume", h.VideoResume)
-	}
+	return c.JSON(videos)
+}
 
-	id := c.Params("id")
-	fmt.Println("id", id)
-	if id == "" {
-		fmt.Println("2", err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Course ID is required",
-		})
-	}
+func GetVideos(c *fiber.Ctx) error {
+	courseId := c.Params("courseId")
+	q := c.Query("q", "")
+	q = "%" + q + "%"
 
-	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
+	videos, err := database.GetVideos(courseId, q)
 	if err != nil {
-		fmt.Println("3", err)
-		return c.Status(400).SendString("Invalid cursor")
-	}
-	limit := 50
-
-	searchParam := c.Query("q", "")
-	searchParam = "%" + searchParam + "%"
-
-	videos, err := database.GetVideos(id, searchParam, cursor, limit)
-	if err != nil {
-		fmt.Println("4", err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	for i := range videos {
-		if resume, ok := historyMap[videos[i].ID]; ok {
-			parts := strings.Split(resume, ".")
-			resumeInt, err1 := strconv.Atoi(parts[0])
-			if err1 != nil {
-				fmt.Println("Error al convertir la parte entera:", err1)
-				continue
-			}
-
-			lengthInt, err2 := strconv.Atoi(videos[i].Length)
-			if err2 != nil {
-				fmt.Println("Error al convertir la longitud:", err2)
-				continue
-			}
-
-			if lengthInt == 0 {
-				fmt.Println("Longitud no puede ser cero")
-				continue
-			}
-			result := float64(resumeInt) / float64(lengthInt) * 100
-
-			videos[i].VideoResume = fmt.Sprintf("%.0f", result)
-			fmt.Println("Nuevo resumen:", videos[i].VideoResume)
-		} else {
-			videos[i].VideoResume = "0"
-		}
-	}
-
-	totalCount, err := database.GetVideosCount(id, searchParam)
-	if err != nil {
-		fmt.Println("5", err)
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	var previousID, nextID *int
-	if cursor > 0 {
-		prev := cursor - limit
-		if prev < 0 {
-			prev = 0
-		}
-		previousID = &prev
-	}
-	if cursor+limit < totalCount {
-		next := cursor + limit
-		nextID = &next
-	}
-
-	response := struct {
-		Data       []database.Video `json:"data"`
-		PreviousID *int             `json:"previousId"`
-		NextID     *int             `json:"nextId"`
-	}{
-		Data:       videos,
-		PreviousID: previousID,
-		NextID:     nextID,
-	}
-
-	return c.JSON(response)
+	return c.JSON(videos)
 }
 
 func CreateVideo(c *fiber.Ctx) error {

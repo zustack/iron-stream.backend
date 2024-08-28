@@ -193,39 +193,13 @@ func GetVideosCount(course_id, searchParam string) (int, error) {
 	return count, nil
 }
 
-func GetAdminVideos(course_id string, searchParam string, offset int, limit int) ([]Video, error) {
+func GetVideos(courseId, searchParam string) ([]Video, error) {
 	var videos []Video
 	rows, err := DB.Query(`SELECT * FROM videos
 		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
 		ORDER BY id DESC
-		LIMIT ? OFFSET ?`,
-		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("GetAdminVideos: %v", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var v Video
-		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
-			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID,
-			&v.CreatedAt); err != nil {
-			return nil, fmt.Errorf("GetAdminVideos: %v", err)
-		}
-		videos = append(videos, v)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAdminVideos: %v", err)
-	}
-	return videos, nil
-}
-
-func GetVideos(course_id string, searchParam string, offset int, limit int) ([]Video, error) {
-	var videos []Video
-	rows, err := DB.Query(`SELECT * FROM videos
-		WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)
-		ORDER BY id
-		LIMIT ? OFFSET ?`,
-		course_id, "%"+searchParam+"%", "%"+searchParam+"%", limit, offset)
+		`,
+		courseId, searchParam, searchParam)
 	if err != nil {
 		return nil, fmt.Errorf("GetVideos: %v", err)
 	}
