@@ -398,11 +398,14 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+  fullName := user.Name + " " + user.Surname
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token":   tokenString,
 		"userId":  user.ID,
 		"isAdmin": user.IsAdmin,
 		"exp":     now.Add(expDuration).Unix(),
+		"fullName": fullName,
 	})
 }
 
