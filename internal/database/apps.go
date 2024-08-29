@@ -15,19 +15,19 @@ type App struct {
 }
 
 func GetAppsByIds(ids []int64) ([]App, error) {
-  var apps []App
-  for _, id := range ids {
-    var a App
-    row := DB.QueryRow(`SELECT name, process_name FROM apps WHERE id = ?`, id)
-    if err := row.Scan(&a.Name, &a.ProcessName); err != nil {
-      if err == sql.ErrNoRows {
-        return nil, fmt.Errorf("GetAppByID: %v: no such app", id)
-      }
-      return nil, fmt.Errorf("GetAppByID: %v: %v", id, err)
-    }
-    apps = append(apps, a)
-  }
-  return apps, nil
+	var apps []App
+	for _, id := range ids {
+		var a App
+		row := DB.QueryRow(`SELECT name, process_name FROM apps WHERE id = ?`, id)
+		if err := row.Scan(&a.Name, &a.ProcessName); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, fmt.Errorf("GetAppByID: %v: no such app", id)
+			}
+			return nil, fmt.Errorf("GetAppByID: %v: %v", id, err)
+		}
+		apps = append(apps, a)
+	}
+	return apps, nil
 }
 
 func UpdateAppStatus(id, isActive string) error {
@@ -46,7 +46,6 @@ func UpdateAppStatus(id, isActive string) error {
 	}
 	return nil
 }
-
 
 func GetAppByID(id string) (App, error) {
 	var a App

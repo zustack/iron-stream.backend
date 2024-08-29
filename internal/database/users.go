@@ -27,7 +27,7 @@ type User struct {
 func UpdateAdminStatus(userId, isAdmin string) error {
 	_, err := DB.Exec(`UPDATE users SET is_admin = ? WHERE id = ?`, isAdmin, userId)
 	if err != nil {
-    return fmt.Errorf("UpdateAdminStatus: %v", err)
+		return fmt.Errorf("UpdateAdminStatus: %v", err)
 	}
 	return nil
 }
@@ -314,28 +314,36 @@ func GetUserByID(id string) (User, error) {
 
 func GetUserByEmail(email string) (User, error) {
 	var u User
-	row := DB.QueryRow(`SELECT * FROM users WHERE email = ?`, email)
-	if err := row.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
-		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
+	row := DB.QueryRow(`SELECT id, email, name, surname, is_admin, special_apps,
+  is_active, verified, pc, os, created_at FROM users WHERE email = ?`, email)
+	if err := row.Scan(&u.ID, &u.Email, &u.Name,
+		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.Verified,
 		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return u, fmt.Errorf("GetUserByEmail: %s: no such user", email)
+			return u, fmt.Errorf("User not found with email %s", email)
 		}
-		return u, fmt.Errorf("GetUserByEmail: %s: %v", email, err)
+		return u, fmt.Errorf("Error finding user with email %s: %v", email, err)
 	}
 	return u, nil
 }
 
 func CreateUser(u User) (int64, error) {
 	date := utils.FormattedDate()
-	result, err := DB.Exec(`
-  INSERT INTO users
-  (email, name, surname, password, is_admin, email_token, pc, os, created_at) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		u.Email, u.Name, u.Surname, u.Password, false, u.EmailToken, u.Pc, u.Os, date)
+	emailToken := utils.GenerateCode()
 
+	hashedPassword, err := utils.HashPassword(u.Password)
 	if err != nil {
 		return 0, fmt.Errorf("CreateUser: %v", err)
+	}
+
+	result, err := DB.Exec(`
+		INSERT INTO users
+		(email, name, surname, password, is_admin, email_token, pc, os, created_at) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		u.Email, u.Name, u.Surname, hashedPassword, false, emailToken, u.Pc, u.Os, date)
+
+	if err != nil {
+		return 0, fmt.Errorf("The email: %s already exists", u.Email)
 	}
 
 	id, err := result.LastInsertId()

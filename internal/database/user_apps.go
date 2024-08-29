@@ -8,7 +8,7 @@ import (
 func DeleteUserAppsByAppIdAndUserId(userId string, appId string) error {
 	_, err := DB.Exec(`DELETE FROM user_apps WHERE app_id = ? AND user_id = ?;`, appId, userId)
 	if err != nil {
-    return fmt.Errorf("DeleteUserAppsByAppIdAndUserId: %v", err)
+		return fmt.Errorf("DeleteUserAppsByAppIdAndUserId: %v", err)
 	}
 	return nil
 }
@@ -38,7 +38,6 @@ func GetUserAppsIds(userID string) ([]int64, error) {
 
 	return appsIDs, nil
 }
-
 
 func CreateUserApp(userId, appId string) error {
 	tx, err := DB.Begin()

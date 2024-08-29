@@ -21,14 +21,14 @@ func DeleteUserAppsByCourseIdAndUserId(c *fiber.Ctx) error {
 }
 
 func GetUserApps(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
-  userId := c.Params("userId")
+	time.Sleep(2000 * time.Millisecond)
+	userId := c.Params("userId")
 	q := c.Query("q", "")
 	q = "%" + q + "%"
 
 	// Obtener los IDs de las apps del usuario
 	userAppIDs, err := database.GetUserAppsIds(userId)
-  fmt.Println("user apps ids", userAppIDs)
+	fmt.Println("user apps ids", userAppIDs)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -37,7 +37,7 @@ func GetUserApps(c *fiber.Ctx) error {
 
 	// Obtener todas las apps activas que coincidan con la búsqueda
 	apps, err := database.GetAdminApps(q, "")
-  fmt.Println("admin apps", apps)
+	fmt.Println("admin apps", apps)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

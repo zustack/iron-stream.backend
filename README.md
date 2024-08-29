@@ -1,5 +1,8 @@
 # Iron Stream Backend API
 
+## Endpoints
+<a href="/endpoints/users">Users related endpoints</a><br>
+
 ## Overview
 This project uses the Go programming language along with the web framework Fiber 
 and uses FFmpeg under the hood to convert and stream audio and video.
@@ -28,6 +31,17 @@ export SECRET_KEY=someradomstring
 export EMAIL_SECRET_KEY=emailsecret
 export ROOT_PATH=/path/to/iron-stream.backend
 ```
+
+SELECT video_id, COUNT(DISTINCT page) AS total_pages
+FROM files
+WHERE video_id = 8
+GROUP BY video_id;
+
+SELECT video_id, COUNT(DISTINCT page) AS total_pages
+FROM files
+WHERE video_id = 8
+GROUP BY video_id;
+8|2
 
 ## Database
 #### Dev database 

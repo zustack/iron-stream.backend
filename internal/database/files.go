@@ -29,6 +29,16 @@ func DeleteFileByID(id int64) error {
 	return nil
 }
 
+func GetTotalPagesByVideoId(video_id int64) (int, error) {
+	var total int
+	// SELECT COUNT(DISTINCT page) AS total_pages FROM files WHERE video_id = 8;
+	row := DB.QueryRow(`SELECT COUNT(DISTINCT page) AS total_pages FROM files WHERE video_id = ?;`, video_id)
+	if err := row.Scan(&total); err != nil {
+		return 0, fmt.Errorf("GetTotalPagesByVideoId: %v", err)
+	}
+	return total, nil
+}
+
 func GetFiles(video_id, page int64) ([]File, error) {
 	var files []File
 	rows, err := DB.Query(`SELECT * FROM files

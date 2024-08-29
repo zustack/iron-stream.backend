@@ -13,7 +13,6 @@ func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error 
 	return nil
 }
 
-
 func DeleteUserCoursesByCourseId(courseId string) error {
 	_, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ?;`, courseId)
 	if err != nil {

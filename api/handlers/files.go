@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 func DeleteFile(c *fiber.Ctx) error {
+	time.Sleep(2000 * time.Millisecond)
 	id := c.Query("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -35,6 +37,8 @@ func DeleteFile(c *fiber.Ctx) error {
 }
 
 func GetFiles(c *fiber.Ctx) error {
+
+	time.Sleep(2000 * time.Millisecond)
 	videoID := c.Query("videoID")
 	page := c.Query("page")
 	if videoID == "" {
@@ -66,10 +70,23 @@ func GetFiles(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(files)
+
+	getTotalPages, err := database.GetTotalPagesByVideoId(videoID64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"files":     files,
+		"pageCount": getTotalPages,
+	})
 }
 
 func CreateFile(c *fiber.Ctx) error {
+
+	time.Sleep(2000 * time.Millisecond)
 	videoID := c.FormValue("videoID")
 	page := c.FormValue("page")
 

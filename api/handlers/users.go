@@ -16,28 +16,28 @@ import (
 )
 
 func UpdateAdminStatus(c *fiber.Ctx) error {
-  // TODO: sanitize input
-  userId:= c.Params("userId")
-  isAdmin := c.Params("isAdmin")
-  err := database.UpdateAdminStatus(userId, isAdmin)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.SendStatus(fiber.StatusOK)
+	// TODO: sanitize input
+	userId := c.Params("userId")
+	isAdmin := c.Params("isAdmin")
+	err := database.UpdateAdminStatus(userId, isAdmin)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func MakeSpecialAppUser(c *fiber.Ctx) error {
-  userId := c.Params("userId")
-  specialApps := c.Params("specialApps")
-  err := database.UpdateUserSpecialApps(userId, specialApps)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.SendStatus(fiber.StatusOK)
+	userId := c.Params("userId")
+	specialApps := c.Params("specialApps")
+	err := database.UpdateUserSpecialApps(userId, specialApps)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func DeactivateSpecificCourseForAllUsers(c *fiber.Ctx) error {
@@ -99,11 +99,11 @@ func UpdateActiveStatusAllUsers(c *fiber.Ctx) error {
 
 func UpdateActiveStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
-  if id == "1" {
+	if id == "1" {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "El admin con id 1 no puede ser desactivado.",
 		})
-  }
+	}
 	err := database.UpdateActiveStatus(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -269,15 +269,20 @@ func ResendEmailToken(c *fiber.Ctx) error {
 	}
 
 	code := utils.GenerateCode()
-
-	subjet := "Verifica tu correo electrónico en Iron Stream"
-	err := utils.SendEmail(code, payload.Email, subjet)
+	err := database.UpdateEmailToken(payload.Email, code)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
+	subjet := "Verifica tu correo electrónico en Iron Stream"
+	err = utils.SendEmail(code, payload.Email, subjet)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -326,85 +331,13 @@ func VerifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token":   tokenString,
-		"userId":  user.ID,
-		"isAdmin": user.IsAdmin,
-		"exp":     now.Add(expDuration).Unix(),
-	})
-}
-
-func Login(c *fiber.Ctx) error {
-	var payload database.User
-	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "No se pudo procesar la solicitud.",
-		})
-	}
-
-	if payload.Email == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "El correo electrónico es requerido.",
-		})
-	}
-
-	if payload.Password == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "La contraseña es requerida.",
-		})
-	}
-
-	if payload.Pc == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Ocurrio un error debido a una incompatibilidad con tu sistema operativo.",
-		})
-	}
-
-	user, err := database.GetUserByEmail(payload.Email)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "No se encontro el usuario con el nombre de usuario proporcionado.",
-		})
-	}
-
-	fmt.Println("payload.Pc", payload.Pc, "user.Pc", user.Pc)
-	if user.Pc != payload.Pc {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Esta cuenta esta registrada en otra computadora.",
-		})
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "La contraseña es incorrecta.",
-		})
-	}
-
-	tokenByte := jwt.New(jwt.SigningMethodHS256)
-
-	now := time.Now().UTC()
-	claims := tokenByte.Claims.(jwt.MapClaims)
-	expDuration := time.Hour * 24 * 30
-	claims["sub"] = user.ID
-	claims["exp"] = now.Add(expDuration).Unix()
-	claims["iat"] = now.Unix()
-	claims["nbf"] = now.Unix()
-
-	tokenString, err := tokenByte.SignedString([]byte(os.Getenv("SECRET_KEY")))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Ocurrio un error al generar el token de autenticación.",
-		})
-	}
-
-  fullName := user.Name + " " + user.Surname
+	fullName := user.Name + " " + user.Surname
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token":   tokenString,
-		"userId":  user.ID,
-		"isAdmin": user.IsAdmin,
-		"exp":     now.Add(expDuration).Unix(),
+		"token":    tokenString,
+		"userId":   user.ID,
+		"isAdmin":  user.IsAdmin,
+		"exp":      now.Add(expDuration).Unix(),
 		"fullName": fullName,
 	})
 }
@@ -473,5 +406,64 @@ func Register(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"id": id,
+	})
+}
+
+func Login(c *fiber.Ctx) error {
+	var payload database.User
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	payloadToClean := database.User{
+		Email:    payload.Email,
+		Password: payload.Password,
+		Pc:       payload.Pc,
+	}
+
+	cleanInput, err := inputs.LoginInput(payloadToClean)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	user, err := database.GetUserByEmail(cleanInput.Email)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err = utils.CheckPasswordHash(user.Password, cleanInput.Password)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if !user.IsAdmin {
+		if user.Pc != payload.Pc {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "The unique identifier does not match.",
+			})
+		}
+	}
+
+	token, exp, err := utils.MakeJWT(user.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"token":    token,
+		"userId":   user.ID,
+		"isAdmin":  user.IsAdmin,
+		"exp":      exp,
+		"fullName": user.Name + " " + user.Surname,
 	})
 }

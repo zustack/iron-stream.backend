@@ -1,12 +1,32 @@
-# Endpoints for users
+# User related endpoints
 
-{"exp":1726153719,"isAdmin":true,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNTM3MTksImlhdCI6MTcyMzU2MTcxOSwibmJmIjoxNzIzNTYxNzE5LCJzdWIiOjJ9.B1M7lPBPLbzC4D1qS4a1HZJjwPFuWY99vtBS_YhTo_o","userId":2}%
+## Signup
+```bash
+curl -X POST http://localhost:8081/users/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agustfricke@protonmail.com",
+    "name": "Agustin",
+    "surname": "Fricke",
+    "password": "some-password",
+    "pc": "agust@ubuntu",
+    "os": "Linux"
+  }'
+```
+UPDATE users SET is_admin = true WHERE id = 1
 
-## Get admin user 
-	isActiveParam := c.Query("a", "")
-  isAdminParam := c.Query("admin", "")
-  specialAppsParam := c.Query("special", "")
-  verifiedParam := c.Query("verified", "")
+## Signup response
+<h1>Login</h1>
+<h5>Login resquest</h5>
+```bash
+curl -X POST "http://localhost:8081/users/login" \
+     -H "Content-Type: application/json" \
+     -d '{"email": "agustfricke@gmail.com", "password": "some-password", "pc": "some-pc"}'
+```
+<h5>Login response</h5>
+```json
+{"exp":1727549719,"fullName":"Agustin Fricke","isAdmin":true,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc1NDk3MTksImlhdCI6MTcyNDk1NzcxOSwibmJmIjoxNzI0OTU3NzE5LCJzdWIiOjF9.ISV92LzwLtw8msrRCc8iI5i32f207No6qlsN6YziL3M","userId":1}%
+```
 
 
 ```bash
@@ -43,20 +63,6 @@ curl -X PUT "http://localhost:8081/update/active/status"  \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" 
 ```
 
-## Create a new user
-```bash
-curl -X POST http://localhost:8081/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "some",
-    "password": "caro",
-    "email": "carofricke@some.me",
-    "name": "caro",
-    "surname": "fricke",
-    "pc": "some-pc",
-    "os": "Mac"
-  }'
-```
 ## Login
 ```bash
 curl -X POST "http://localhost:8081/login" \

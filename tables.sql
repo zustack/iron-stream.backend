@@ -18,14 +18,14 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS courses;
 CREATE TABLE courses (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  title VARCHAR(44) NOT NULL,
-  description VARCHAR(480) NOT NULL,
-  author VARCHAR(25) NOT NULL,
-  thumbnail VARCHAR(155) NOT NULL,
-  preview VARCHAR(155) NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  description VARCHAR(270) NOT NULL,
+  author VARCHAR(30) NOT NULL,
+  thumbnail VARCHAR(255) NOT NULL,
+  preview VARCHAR(255) NOT NULL,
   rating INTEGER DEFAULT 0, 
   num_reviews INTEGER DEFAULT 0, 
-  duration VARCHAR(25) NOT NULL, 
+  duration VARCHAR(30) NOT NULL, 
   is_active BOOL DEFAULT FALSE,
   sort_order INTEGER, 
   created_at VARCHAR(40) NOT NULL
@@ -64,11 +64,11 @@ CREATE TABLE apps (
 DROP TABLE IF EXISTS videos;
 CREATE TABLE videos (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  title VARCHAR(15) NOT NULL,
-  description VARCHAR(55) NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  description VARCHAR(150) NOT NULL,
   video_hls VARCHAR(255) NOT NULL,
-  thumbnail VARCHAR(155) NOT NULL,
-  duration VARCHAR(155) NOT NULL, 
+  thumbnail VARCHAR(255) NOT NULL,
+  duration VARCHAR(20) NOT NULL, 
   length VARCHAR(155) NOT NULL, 
   views INTEGER DEFAULT 0, 
   course_id INTEGER NOT NULL, 

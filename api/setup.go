@@ -18,7 +18,6 @@ func Setup() *fiber.App {
 		AllowOrigins:     "*",
 		AllowCredentials: false,
 	}))
-	// TODO: add middleware for allowed courses
 	app.Use("/web/assets/videos", middleware.NormalUser)
 	staticPath := os.Getenv("ROOT_PATH") + "/web/uploads"
 	if _, err := os.Stat(staticPath); os.IsNotExist(err) {

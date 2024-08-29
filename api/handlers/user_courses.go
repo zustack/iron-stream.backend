@@ -8,7 +8,7 @@ import (
 )
 
 func DeleteUserCoursesByCourseIdAndUserId(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	userID := c.Params("userId")
 	courseID := c.Params("courseId")
 	err := database.DeleteUserCoursesByCourseIdAndUserId(userID, courseID)
@@ -21,7 +21,7 @@ func DeleteUserCoursesByCourseIdAndUserId(c *fiber.Ctx) error {
 }
 
 func DeleteUserCoursesByCourseId(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	courseId := c.Params("courseId")
 	err := database.DeleteUserCoursesByCourseId(courseId)
 	if err != nil {
@@ -33,7 +33,7 @@ func DeleteUserCoursesByCourseId(c *fiber.Ctx) error {
 }
 
 func DeleteAllUserCourses(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	err := database.DeleteAllUserCourses()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -44,8 +44,8 @@ func DeleteAllUserCourses(c *fiber.Ctx) error {
 }
 
 func GetUserCourses(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
-  userId := c.Params("userId")
+	time.Sleep(2000 * time.Millisecond)
+	userId := c.Params("userId")
 	q := c.Query("q", "")
 	q = "%" + q + "%"
 

@@ -7,6 +7,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func LoginInput(input database.User) (database.User, error) {
+	if input.Email == "" {
+		return database.User{}, fmt.Errorf("The email is required.")
+	}
+	if len(input.Email) > 55 {
+		return database.User{}, fmt.Errorf("The email should not have more than 55 characters.")
+	}
+	if input.Password == "" {
+		return database.User{}, fmt.Errorf("The password is required.")
+	}
+	if len(input.Password) > 55 {
+		return database.User{}, fmt.Errorf("The password should not have more than 55 characters.")
+	}
+	if input.Pc == "" {
+		return database.User{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
+	}
+	if len(input.Pc) > 255 {
+		return database.User{}, fmt.Errorf("The unique identifier should not have more than 55 characters. Please ensure that your system's configuration is correct.")
+	}
+	return database.User{
+		Email:    input.Email,
+		Password: input.Password,
+		Pc:       input.Pc,
+	}, nil
+}
+
 func CleanRegisterInput(input database.User) (database.User, error) {
 	if input.Password == "" {
 		return database.User{}, fmt.Errorf("La contraseña es requerida.")

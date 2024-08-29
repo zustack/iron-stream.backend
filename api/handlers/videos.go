@@ -16,17 +16,17 @@ import (
 )
 
 func GetFeed(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
-  user := c.Locals("user").(*database.User)
-  courseId := c.Params("courseId")
+	time.Sleep(2000 * time.Millisecond)
+	user := c.Locals("user").(*database.User)
+	courseId := c.Params("courseId")
 	searchParam := c.Query("q", "")
-  videos, err := database.GetFeed(user.ID, courseId, searchParam)
-  if err != nil {
-    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.JSON(videos)
+	videos, err := database.GetFeed(user.ID, courseId, searchParam)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(videos)
 }
 
 type updateHistoryPayload struct {
@@ -93,7 +93,7 @@ func WatchNewVideo(c *fiber.Ctx) error {
 }
 
 func GetCurrentVideo(c *fiber.Ctx) error {
-  time.Sleep(2000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	user := c.Locals("user").(*database.User)
 	course_id := c.Params("course_id")
 	record, err := database.GetLastVideoByUserIdAndCourseId(user.ID, course_id)
