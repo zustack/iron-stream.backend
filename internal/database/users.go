@@ -108,7 +108,7 @@ func UpdateUserSpecialApps(userId, special_apps string) error {
 }
 
 func UpdateActiveStatusAllUsers(isActive string) error {
-	result, err := DB.Exec(`UPDATE users SET is_active = ? WHERE is != 1`, isActive)
+	result, err := DB.Exec(`UPDATE users SET is_active = ? WHERE id != 1`, isActive)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
@@ -325,7 +325,6 @@ func GetUserByEmail(email string) (User, error) {
 
 func CreateUser(u User) error {
 	date := utils.FormattedDate()
-	emailToken := utils.GenerateCode()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -336,7 +335,7 @@ func CreateUser(u User) error {
 		INSERT INTO users
 		(email, name, surname, password, is_admin, email_token, pc, os, created_at) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		u.Email, u.Name, u.Surname, string(hashedPassword), false, emailToken, u.Pc, u.Os, date)
+		u.Email, u.Name, u.Surname, string(hashedPassword), false, u.EmailToken, u.Pc, u.Os, date)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {

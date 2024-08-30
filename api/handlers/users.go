@@ -320,7 +320,9 @@ func Login(c *fiber.Ctx) error {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cleanInput.Password))
 	if err != nil {
-		return err
+			return c.Status(401).JSON(fiber.Map{
+				"error": "Incorrect password, please try again.",
+			})
 	}
 
 	if !user.IsAdmin {
