@@ -231,7 +231,88 @@ make test
 ```
 
 # Deploy
+### Run the tests(recommended)
+If you want to run the tests before deploying, you can execute:
 ```bash
-make build
+make test
 ```
 
+### Edit server port
+Edit in `cmd/main.go` to set the port to 80.
+```go
+package main
+
+import (
+	"iron-stream/api"
+	"iron-stream/internal/database"
+	"log"
+)
+
+func main() {
+	database.ConnectDB("DB_DEV_PATH")
+	app := api.Setup()
+	log.Fatal(app.Listen(":80")) // this here!
+}
+```
+
+### Build the app
+Build the app, this make command will create a binary file called iron-stream and
+create the tables in the database.
+```bash
+make deploy
+```
+
+### Setup systemd service
+Create a new file called `iron-stream.service` with the the corresponding information.
+```bash
+[Unit]
+Description=iron-stream
+
+[Service]
+Environment=DB_DEV_PATH=/path/to/sqlite.db 
+Environment=SECRET_KEY=someradomstring
+Environment=EMAIL_SECRET_KEY=emailsecret
+Environment=ROOT_PATH=/path/to/iron-stream.backend
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/path/to/iron-stream/binary/iron-stream
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Move the file to `/etc/systemd/system`.
+```bash
+sudo mv iron-stream.service /etc/systemd/system
+```
+
+Run the service and check the status.
+```bash
+sudo service iron-stream start
+sudo service iron-stream status
+```
+
+You should see something like this:
+```bash
+● iron-stream.service - iron-stream
+     Loaded: loaded (/lib/systemd/system/iron-stream.service; disabled; vendor preset: enabled)
+     Active: active (running) since Fri 2024-08-30 14:44:31 -03; 15min ago
+   Main PID: 45633 (iron-stream)
+      Tasks: 6 (limit: 18713)
+     Memory: 2.3M
+        CPU: 849ms
+     CGroup: /system.slice/iron-stream.service
+             └─45633 /path/to/iron-stream/binary/iron-stream
+```
+
+### SSL certificates
+I personally let Cloudflare handle the SSL certificates. 
+Just point your domain to your server's IP address, as it's running on HTTP port (80).
+
+### Example DNS record:
+The `Proxy Status: Redirected via Proxy` will add a SSL certificate.
+- Type: A
+- Name: domain.com
+- Value: 420.69.420.73
+- Proxy Status: Redirected via Proxy
