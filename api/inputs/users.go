@@ -3,8 +3,6 @@ package inputs
 import (
 	"fmt"
 	"iron-stream/internal/database"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func LoginInput(input database.User) (database.User, error) {
@@ -24,7 +22,7 @@ func LoginInput(input database.User) (database.User, error) {
 		return database.User{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
 	}
 	if len(input.Pc) > 255 {
-		return database.User{}, fmt.Errorf("The unique identifier should not have more than 55 characters. Please ensure that your system's configuration is correct.")
+		return database.User{}, fmt.Errorf("The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.")
 	}
 	return database.User{
 		Email:    input.Email,
@@ -33,58 +31,53 @@ func LoginInput(input database.User) (database.User, error) {
 	}, nil
 }
 
-func CleanRegisterInput(input database.User) (database.User, error) {
-	if input.Password == "" {
-		return database.User{}, fmt.Errorf("La contraseña es requerida.")
-	}
-	if len(input.Password) > 55 {
-		return database.User{}, fmt.Errorf("La contraseña no debe tener más de 55 caracteres.")
-	}
-
+func RegisterInput(input database.User) (database.User, error) {
 	if input.Email == "" {
-		return database.User{}, fmt.Errorf("El email es requerido.")
+		return database.User{}, fmt.Errorf("The email is required.")
 	}
 	if len(input.Email) > 55 {
-		return database.User{}, fmt.Errorf("El email no debe tener más de 55 caracteres.")
+		return database.User{}, fmt.Errorf("The email should not have more than 55 characters.")
+	}
+
+	if input.Password == "" {
+		return database.User{}, fmt.Errorf("The password is required.")
+	}
+	if len(input.Password) > 55 {
+		return database.User{}, fmt.Errorf("The password should not have more than 55 characters.")
 	}
 
 	if input.Name == "" {
-		return database.User{}, fmt.Errorf("El nombre es requerido.")
+		return database.User{}, fmt.Errorf("The name is required.")
 	}
 	if len(input.Name) > 55 {
-		return database.User{}, fmt.Errorf("El nombre no debe tener más de 55 caracteres.")
+		return database.User{}, fmt.Errorf("The name should not have more than 55 characters.")
 	}
 
 	if input.Surname == "" {
-		return database.User{}, fmt.Errorf("El apellido es requerido.")
+		return database.User{}, fmt.Errorf("The surname is required.")
 	}
 	if len(input.Surname) > 55 {
-		return database.User{}, fmt.Errorf("El apellido no debe tener más de 55 caracteres.")
+		return database.User{}, fmt.Errorf("The surname should not have more than 55 characters.")
 	}
 
 	if input.Pc == "" {
-		return database.User{}, fmt.Errorf("No se pudo crear la cuenta debido a una incompatibilidad con tu sistema operativo.")
+		return database.User{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
 	}
 
 	if len(input.Pc) > 255 {
-		return database.User{}, fmt.Errorf("No se pudo crear la cuenta debido a una incompatibilidad con tu sistema operativo.")
+		return database.User{}, fmt.Errorf("The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.")
 	}
 
 	if input.Os == "" {
-		return database.User{}, fmt.Errorf("Foo No se pudo crear la cuenta debido a una incompatibilidad con tu sistema operativo.")
+		return database.User{}, fmt.Errorf("The os identifier is required. Please ensure that your system's configuration is correct.")
 	}
 
 	if len(input.Os) > 20 {
-		return database.User{}, fmt.Errorf("No se pudo crear la cuenta debido a una incompatibilidad con tu sistema operativo.")
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return database.User{}, fmt.Errorf("Ocurrio un error al generar encriptar la contraseña.")
+		return database.User{}, fmt.Errorf("The os identifier should not have more than 20 characters. Please ensure that your system's configuration is correct.")
 	}
 
 	return database.User{
-		Password: string(hashedPassword),
+		Password: input.Password,
 		Name:     input.Name,
 		Surname:  input.Surname,
 		Email:    input.Email,

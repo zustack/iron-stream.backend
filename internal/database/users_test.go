@@ -7,17 +7,17 @@ import (
 
 func TestGetUserByEmail(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
-	input := database.User{
+	err := database.CreateUser(database.User{
 		Email:    "agustfricke@gmail.com",
 		Name:     "Agustin",
 		Surname:  "Fricke",
 		Password: "some-password",
 		Pc:       "agust@ubuntu",
-	}
-	_, err := database.CreateUser(input)
+	})
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 	}
+
 	t.Run("success", func(t *testing.T) {
 		user, err := database.GetUserByEmail("agustfricke@gmail.com")
 		if err != nil {
@@ -27,6 +27,7 @@ func TestGetUserByEmail(t *testing.T) {
 			t.Errorf("expected 'agustfricke@gmail.com' but got: %v", user.Email)
 		}
 	})
+
 	t.Run("user not found", func(t *testing.T) {
 		_, err := database.GetUserByEmail("idontexist@email.com")
 		if err == nil {
@@ -54,7 +55,7 @@ func TestCreateUser(t *testing.T) {
 			Password: "some-password",
 			Pc:       "agust@ubuntu",
 		}
-		_, err := database.CreateUser(input)
+		err := database.CreateUser(input)
 		if err != nil {
 			t.Errorf("test failed because: %v", err)
 		}
@@ -68,7 +69,7 @@ func TestCreateUser(t *testing.T) {
 			Password: "some-password",
 			Pc:       "agust@ubuntu",
 		}
-		_, err := database.CreateUser(input)
+		err := database.CreateUser(input)
 		if err == nil {
 			t.Errorf("test failed because: %v", err)
 		}

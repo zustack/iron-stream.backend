@@ -61,7 +61,7 @@ func TestLoginInput(t *testing.T) {
 			input:   database.User{Email: "test@example.com", Password: "securepassword", Pc: strings.Repeat("a", 256)},
 			want:    database.User{},
 			wantErr: true,
-			errMsg:  "The unique identifier should not have more than 55 characters. Please ensure that your system's configuration is correct.",
+			errMsg:  "The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.",
 		},
 	}
 

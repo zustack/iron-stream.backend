@@ -3,7 +3,6 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -26,7 +25,7 @@ func TestLogin(t *testing.T) {
 	app := api.Setup()
 	database.ConnectDB("DB_DEV_PATH")
 
-	id, err := database.CreateUser(database.User{
+	err := database.CreateUser(database.User{
 		Email:    "agustfricke@gmail.com",
 		Name:     "Agustin",
 		Surname:  "Fricke",
@@ -36,12 +35,12 @@ func TestLogin(t *testing.T) {
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 	}
-	err = database.UpdateAdminStatus(fmt.Sprintf("%d", id), "true")
+	err = database.UpdateAdminStatusByEmail("agustfricke@gmail.com", "true")
 	if err != nil {
-		t.Errorf("test failed because of UpdateAdminStatus(): %v", err)
+		t.Errorf("test failed because of UpdateAdminStatusByEmail(): %v", err)
 	}
 
-	_, err = database.CreateUser(database.User{
+	err = database.CreateUser(database.User{
 		Email:    "agustfricke@protonmail.com",
 		Name:     "Agustin",
 		Surname:  "Fricke",
@@ -145,9 +144,13 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, 400, res.StatusCode)
 	})
 
-	_, err = database.DB.Exec(`DELETE FROM users WHERE email IN ('agustfricke@gmail.com', 'agustfricke@protonmail.com')`)
+	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@protonmail.com'`)
 	if err != nil {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
 
+	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@gmail.com'`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
