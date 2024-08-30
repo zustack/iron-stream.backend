@@ -8,11 +8,11 @@ web framework <a href="https://gofiber.io">Fiber</a>.
 
 Iron Stream is currently in beta and under active development.
 
-# Table of contents
-[Setup local development](#Setup) <br>
-[API endpoints](#Endpoints) <br>
-[Tests](#Tests) <br>
-[Deploy](#Deploy) <br>
+## Table of contents
+- [Setup local development](#Setup)
+- [API endpoints](#Endpoints) 
+- [Tests](#Tests)
+- [Deploy](#Deploy)
 
 # Setup
 To run this project locally, you will need: <a href="https://go.dev">Go</a>, 
@@ -29,6 +29,13 @@ Clone the repository
 ```bash
 git clone https://github.com/zustack/iron-stream.backend.git ~/
 cd ~/iron-stream.backend
+```
+
+Create the directories for static files
+```bash
+mkdir web/uploads
+cd web/uploads
+mkdir files previews thumbnails tmp videos
 ```
 
 For the environment variables, run this commands with the corresponding information.
