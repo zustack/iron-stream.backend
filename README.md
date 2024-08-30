@@ -1,7 +1,16 @@
 # Iron Stream Backend API
 
-## Endpoints
-<a href="/endpoints/users">Users related endpoints</a><br>
+## User tests
+```bash
+go test ./internal/database/users_test.go -v
+go test ./api/inputs/users_test.go -v 
+go test ./api/handlers/users_test.go -v
+```
+
+## Run all the tests available
+```bash
+go test ./... -v
+```
 
 ## Overview
 This project uses the Go programming language along with the web framework Fiber 
@@ -32,17 +41,6 @@ export EMAIL_SECRET_KEY=emailsecret
 export ROOT_PATH=/path/to/iron-stream.backend
 ```
 
-SELECT video_id, COUNT(DISTINCT page) AS total_pages
-FROM files
-WHERE video_id = 8
-GROUP BY video_id;
-
-SELECT video_id, COUNT(DISTINCT page) AS total_pages
-FROM files
-WHERE video_id = 8
-GROUP BY video_id;
-8|2
-
 ## Database
 #### Dev database 
 ```bash
@@ -54,7 +52,6 @@ sqlite3 sqlite.db ".read tables.sql"
 # test
 sqlite3 test_sqlite.db ".read tables.sql"
 ```
-
 
 ## Make file instuctions
 ```bash

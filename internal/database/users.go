@@ -314,10 +314,9 @@ func GetUserByID(id string) (User, error) {
 
 func GetUserByEmail(email string) (User, error) {
 	var u User
-	row := DB.QueryRow(`SELECT id, email, name, surname, is_admin, special_apps,
-  is_active, verified, pc, os, created_at FROM users WHERE email = ?`, email)
-	if err := row.Scan(&u.ID, &u.Email, &u.Name,
-		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.Verified,
+	row := DB.QueryRow(`SELECT * FROM users WHERE email = ?`, email)
+	if err := row.Scan(&u.ID, &u.Password, &u.Email, &u.Name,
+		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
 		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return u, fmt.Errorf("User not found with email %s", email)

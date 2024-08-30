@@ -81,4 +81,5 @@ func TestCreateUser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
+
 }
