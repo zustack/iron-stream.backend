@@ -7,8 +7,8 @@ import (
 
 func TestGetUserByEmail(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
-	err := database.CreateUser(database.User{
-		Email:    "agustfricke@gmail.com",
+  err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
 		Name:     "Agustin",
 		Surname:  "Fricke",
 		Password: "some-password",
@@ -19,12 +19,12 @@ func TestGetUserByEmail(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		user, err := database.GetUserByEmail("agustfricke@gmail.com")
+		user, err := database.GetUserByEmail("agustfricke@proton.me")
 		if err != nil {
 			t.Errorf("test failed because: %v", err)
 		}
-		if user.Email != "agustfricke@gmail.com" {
-			t.Errorf("expected 'agustfricke@gmail.com' but got: %v", user.Email)
+		if user.Email != "agustfricke@proton.me" {
+			t.Errorf("expected 'agustfricke@proton.me' but got: %v", user.Email)
 		}
 	})
 
@@ -38,7 +38,7 @@ func TestGetUserByEmail(t *testing.T) {
 		}
 	})
 
-	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@gmail.com'`)
+	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@proton.me'`)
 	if err != nil {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
