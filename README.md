@@ -306,6 +306,28 @@ You should see something like this:
              └─45633 /path/to/iron-stream/binary/iron-stream
 ```
 
+### Enable the Firewall 
+Enable the port 80
+```bash
+sudo ufw enable
+sudo ufw allow 80/tcp
+```
+Check the status
+```bash
+sudo ufw status
+```
+
+You should see something like this:
+```bash
+Status: active
+
+To                         Action      From
+--                         ------      ----
+80/tcp                     ALLOW       Anywhere
+80/tcp (v6)                ALLOW       Anywhere (v6)
+
+```
+
 ### SSL certificates
 I personally let Cloudflare handle the SSL certificates. 
 Just point your domain to your server's IP address, as it's running on HTTP port (80).
