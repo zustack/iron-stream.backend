@@ -221,6 +221,7 @@ curl -X PUT "http://localhost:8081/users/update/admin/status/3/true" \
 
 
 <h1 id="courses-endpoints">Courses endpoints</h1>
+
 ### ChunkUpload request
 ```bash
 curl -X POST http://localhost:8081/courses/chunk/upload \
@@ -231,6 +232,7 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
   -F "uuid=42069" \
   -F "file=@/home/agust/Videos/test.mp4"
 ```
+
 ### ChunkUpload response
 ```bash
 /home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4
@@ -249,6 +251,7 @@ curl -X POST http://localhost:8081/courses/create \
   -F "thumbnail=@/home/agust/Pictures/test.png" \
   -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4"
 ```
+
 ### Create course response
 ```bash
 200 OK
