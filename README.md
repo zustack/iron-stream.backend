@@ -11,6 +11,8 @@ Iron Stream is currently in beta and under active development.
 ## Table of contents
 - [Setup local development](#Setup)
 - [API endpoints](#Endpoints) 
+    - [Users](#Users-endpoints)
+    - [Courses](#Courses-endpoints)
 - [Tests](#Tests)
 - [Deploy](#Deploy)
 
@@ -58,8 +60,8 @@ make run
 ```
 
 # Endpoints
-## Users endpoints
 
+## Users endpoints
 ### Signup request
 ```bash
 curl -X POST "http://localhost:8081/users/signup" \
@@ -84,7 +86,7 @@ the endpoint [verify](##verify)
 ```bash
 curl -X POST "http://localhost:8081/users/login" \
      -H "Content-Type: application/json" \
-     -d '{"email": "agustfricke@gmail.com", "password": "new-password", "pc": "agust@ubuntu"}'
+     -d '{"email": "agustfricke@gmail.com", "password": "some-password", "pc": "agust@ubuntu"}'
 ```
 ### Login response
 ```json
@@ -214,6 +216,41 @@ curl -X PUT "http://localhost:8081/users/update/admin/status/3/true" \
 ```
 ### Update admin status response
 ```json
+200 OK
+```
+
+
+<h1 id="courses-endpoints">Courses endpoints</h1>
+### ChunkUpload request
+```bash
+curl -X POST http://localhost:8081/courses/chunk/upload \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Content-Type: multipart/form-data" \
+  -F "chunkNumber=0" \
+  -F "totalChunks=1" \
+  -F "uuid=42069" \
+  -F "file=@/home/agust/Videos/test.mp4"
+```
+### ChunkUpload response
+```bash
+/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4
+```
+
+### Create course request
+```bash
+curl -X POST http://localhost:8081/courses/create \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=Data Structures" \
+  -F "description=Description for Data Structures" \
+  -F "author=agustfricke" \
+  -F "duration=4 hours, 20 minutes" \
+  -F "is_active=true" \
+  -F "thumbnail=@/home/agust/Pictures/test.png" \
+  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4"
+```
+### Create course response
+```bash
 200 OK
 ```
 

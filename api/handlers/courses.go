@@ -210,113 +210,78 @@ func UpdateCourse(c *fiber.Ctx) error {
 }
 
 func CreateCourse(c *fiber.Ctx) error {
-	payloadToClean := database.Course{
+	thumbnail, err := c.FormFile("thumbnail")
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "The thumbnail is required.",
+		})
+	}
+
+	cleanInput, err := inputs.CourseInput(inputs.CreateCourseInput{
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
 		Author:      c.FormValue("author"),
 		Duration:    c.FormValue("duration"),
-	}
+		IsActive:    c.FormValue("is_active"),
+		Thumbnail:   thumbnail,
+		Preview:     c.FormValue("preview_tmp"),
+	})
 
-	cleanInput, err := inputs.CleanCourseInput(payloadToClean)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-	}
-
-	isActive := c.FormValue("is_active")
-	isActiveBool, err := strconv.ParseBool(isActive)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid boolean value for is_active"})
-	}
-
-	thumbnail, err := c.FormFile("thumbnail")
-	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
-	if thumbnail.Size > MaxFileSize {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "El archivo es demasiado grande. El tamaño máximo permitido es 10MB.",
-		})
-	}
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-	id := uuid.New()
-	ext := filepath.Ext(thumbnail.Filename)
-	newFilename := fmt.Sprintf("%s%s", id, ext)
-	thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
-	c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
-	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
-
-	previewTmp := c.FormValue("preview_tmp")
-	previewDir := "/web/uploads/previews/" + id.String()
-	previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
-	err = os.MkdirAll(previewFinalPath, 0755)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	if previewTmp != "" {
-		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-		cmd := exec.Command("sh", ffmpegPath, previewTmp, previewFinalPath)
-		err = cmd.Run()
-		if err != nil {
-			fmt.Println("the error22", err)
-			return c.SendStatus(500)
-		}
-	}
-
-	if previewTmp == "" {
-		previewDir = ""
-	} else {
-		previewDir = previewDir + "/master.m3u8"
 	}
 
 	payloadToDB := database.Course{
 		Title:       cleanInput.Title,
 		Description: cleanInput.Description,
 		Author:      cleanInput.Author,
-		Thumbnail:   thumbnailToDB,
-		Preview:     previewDir,
+		Thumbnail:   cleanInput.Thumbnail,
+		Preview:     cleanInput.Preview,
 		Duration:    cleanInput.Duration,
-		IsActive:    isActiveBool,
+		IsActive:    cleanInput.IsActive,
 	}
 
-	newCourseID, err := database.CreateCourse(payloadToDB)
+	err = database.CreateCourse(payloadToDB)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"id": newCourseID,
-	})
+  return c.SendStatus(200)
 }
 
 func ChunkUpload(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(400).SendString("Error retrieving the file")
+		return c.Status(400).JSON(fiber.Map{
+			"error": "The file is required",
+		})
 	}
 
 	chunkNumber, err := strconv.Atoi(c.FormValue("chunkNumber"))
 	if err != nil {
-		return c.Status(400).SendString("Invalid chunk number")
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Invalid chunk number",
+		})
 	}
 
 	totalChunks, err := strconv.Atoi(c.FormValue("totalChunks"))
 	if err != nil {
-		return c.Status(400).SendString("Invalid total chunks")
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Invalid total chunks",
+		})
 	}
 
 	uuid := c.FormValue("uuid")
 	if chunkNumber == 0 {
 		err = os.MkdirAll(filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "tmp", uuid), 0755)
 		if err != nil {
-			fmt.Println("the error", err)
-			return c.SendStatus(fiber.StatusInternalServerError)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Invalid total chunks",
+			})
 		}
 	}
 
@@ -325,26 +290,34 @@ func ChunkUpload(c *fiber.Ctx) error {
 	tempFilePath := filepath.Join(uploadDir, fmt.Sprintf("%s.part", file.Filename))
 	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return c.Status(500).SendString("Error opening temporary file")
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Error opening temporary file",
+		})
 	}
 	defer tempFile.Close()
 
 	src, err := file.Open()
 	if err != nil {
-		return c.Status(500).SendString("Error opening uploaded file")
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Error opening uploaded file",
+		})
 	}
 	defer src.Close()
 
 	_, err = io.Copy(tempFile, src)
 	if err != nil {
-		return c.Status(500).SendString("Error saving chunk")
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Error saving chunk",
+		})
 	}
 
 	if chunkNumber == totalChunks-1 {
 		finalPath := filepath.Join(uploadDir, file.Filename)
 		err = os.Rename(tempFilePath, finalPath)
 		if err != nil {
-			return c.Status(500).SendString("Error finalizing file")
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Error finalizing file",
+			})
 		}
 		return c.SendString(finalPath)
 	}

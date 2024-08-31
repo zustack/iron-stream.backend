@@ -32,7 +32,7 @@ curl -X POST http://localhost:8081/courses/create \
   -F "duration=4 hours, 20 minutes" \
   -F "is_active=true" \
   -F "thumbnail=@/home/agust/Pictures/test.png" \
-  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/c628f54d-b00b-4bc2-a86b-d9fc3e260d60/test.mp4"
+  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/test.mp4"
 ```
 
 ## Get user courses

@@ -130,39 +130,34 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	return courses, nil
 }
 
-func CreateCourse(c Course) (int64, error) {
+func CreateCourse(c Course) (error) {
 	date := utils.FormattedDate()
 	tx, err := DB.Begin()
 	if err != nil {
-		return 0, fmt.Errorf("CreateCourse: failed to begin transaction: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer tx.Rollback()
 
 	var maxSortOrder int
 	err = tx.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
 	if err != nil {
-		return 0, fmt.Errorf("CreateCourse: failed to get max sort_order: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-	result, err := tx.Exec(`
+  _, err = tx.Exec(`
         INSERT INTO courses
         (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
 	if err != nil {
-		return 0, fmt.Errorf("CreateCourse: failed to insert course: %v", err)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("CreateCourse: failed to get last insert ID: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	if err = tx.Commit(); err != nil {
-		return 0, fmt.Errorf("CreateCourse: failed to commit transaction: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-	return id, nil
+	return nil
 }
 
 func EditSortCourses(id int64, sort string) error {

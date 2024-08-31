@@ -7,7 +7,7 @@ import (
 
 func TestGetUserByEmail(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
-  err := database.CreateUser(database.User{
+	err := database.CreateUser(database.User{
 		Email:    "agustfricke@proton.me",
 		Name:     "Agustin",
 		Surname:  "Fricke",
@@ -49,7 +49,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		input := database.User{
-			Email:    "agustfricke@gmail.com",
+			Email:    "agustfricke@some.com",
 			Name:     "Agustin",
 			Surname:  "Fricke",
 			Password: "some-password",
@@ -63,7 +63,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("duplicate email", func(t *testing.T) {
 		input := database.User{
-			Email:    "agustfricke@gmail.com",
+			Email:    "agustfricke@some.com",
 			Name:     "Agustin",
 			Surname:  "Fricke",
 			Password: "some-password",
@@ -73,12 +73,12 @@ func TestCreateUser(t *testing.T) {
 		if err == nil {
 			t.Errorf("test failed because: %v", err)
 		}
-		if err.Error() != "The email: agustfricke@gmail.com already exists" {
+		if err.Error() != "The email: agustfricke@some.com already exists" {
 			t.Errorf("expected error to be 'agustfricke@gmail.com already exists' but got: %v", err.Error())
 		}
 	})
 
-	_, err := database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@gmail.com'`)
+	_, err := database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@some.com'`)
 	if err != nil {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
