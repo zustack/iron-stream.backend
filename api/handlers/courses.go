@@ -51,24 +51,23 @@ type SortPayload struct {
 	SortOrder string `json:"sort_order"`
 }
 
-// TODO: check que los ids existan
 func SortCourse(c *fiber.Ctx) error {
 	var payload SortCoursesInput
 	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "No se pudo procesar la solicitud.",
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
 		})
 	}
 
 	for _, item := range payload.SortCourses {
 		if item.SortOrder == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Todos lo cursos deben tener un sort order.",
+			return c.Status(400).JSON(fiber.Map{
+				"error": "All sort orders must be provided",
 			})
 		}
 		err := database.EditSortCourses(item.ID, item.SortOrder)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			return c.Status(500).JSON(fiber.Map{
 				"error": err.Error(),
 			})
 		}
