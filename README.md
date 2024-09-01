@@ -317,6 +317,115 @@ curl -X POST "http://localhost:8081/courses/sort" \
 200 OK
 ```
 
+### Update course active status request
+```bash
+curl -X PUT "http://localhost:8081/courses/update/active/5/true" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" 
+```
+### Update course active status response
+```bash
+200 OK
+```
+
+### admin courses
+This endpoint needs a valid admin token. The variables are:
+- cursor: the cursor 
+- q: the search query
+- a: the active status("": all, "1": active, "0": non-active)
+```bash
+curl -X GET "http://localhost:8081/courses/admin?cursor=0&q=&a="  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" | jq
+```
+### admin courses response
+```json
+[
+  {
+    "id": 2,
+    "title": "Data Structures",
+    "description": "Description for Data Structures",
+    "author": "agustfricke",
+    "thumbnail": "/web/uploads/thumbnails/ed73325d-9f37-4b94-b6f1-b98f258d4211.png",
+    "preview": "/home/agust/work/iron-stream/backend/web/uploads/previews/627e9d78-0698-4cf4-990c-afb0491276ed/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "4 hours, 20 minutes",
+    "is_active": true,
+    "sort_order": 8,
+    "created_at": "31/08/2024 15:53:24"
+  },
+  {
+    "id": 3,
+    "title": "new course",
+    "description": "some long ",
+    "author": "Created by  me!",
+    "thumbnail": "/web/uploads/thumbnails/fcf3d710-808b-4604-bc5a-08ce422fd65a.png",
+    "preview": "/home/agust/work/iron-stream/backend/web/uploads/previews/1d88fd82-bc15-4cd1-8423-c4c79172c070/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "lalala",
+    "is_active": true,
+    "sort_order": 7,
+    "created_at": "31/08/2024 15:55:49"
+  },
+  {
+    "id": 7,
+    "title": "some dsa",
+    "description": "some dsa",
+    "author": "some dsa",
+    "thumbnail": "/web/uploads/thumbnails/f08b6aad-d407-4402-8912-3a9025a13ea0.png",
+    "preview": "/web/uploads/previews/b2927bed-767e-47f8-b4af-9acca1ace537/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "hello",
+    "is_active": true,
+    "sort_order": 7,
+    "created_at": "31/08/2024 16:09:44"
+  },
+  {
+    "id": 4,
+    "title": "foo",
+    "description": "soso",
+    "author": "Created by ",
+    "thumbnail": "/web/uploads/thumbnails/c29bff9a-d440-40ff-b513-07bb8030e91e.png",
+    "preview": "/web/uploads/previews/65b1e13b-0ab7-4f9b-aa07-12beb2febaa8/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "sosoo",
+    "is_active": false,
+    "sort_order": 6,
+    "created_at": "31/08/2024 15:57:44"
+  },
+  {
+    "id": 6,
+    "title": "test",
+    "description": "test",
+    "author": "Created by ",
+    "thumbnail": "/web/uploads/thumbnails/d7af27d6-5936-451a-a185-84320f55781b.jpg",
+    "preview": "/web/uploads/previews/ea6a32ae-14cd-4065-be6d-2dd9a1069c90/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "sd",
+    "is_active": true,
+    "sort_order": 6,
+    "created_at": "31/08/2024 16:05:13"
+  },
+  {
+    "id": 5,
+    "title": "some",
+    "description": "somsom",
+    "author": "Created by ",
+    "thumbnail": "/web/uploads/thumbnails/24129485-951b-480d-90fb-3f5aae5b799c.png",
+    "preview": "/web/uploads/previews/e2a97d9a-db66-49cb-9fda-7c07ae0e67e5/master.m3u8",
+    "rating": 0,
+    "num_reviews": 0,
+    "duration": "somso",
+    "is_active": true,
+    "sort_order": 5,
+    "created_at": "31/08/2024 16:02:10"
+  }
+]
+```
+
 # Tests
 ## Users tests
 ```bash

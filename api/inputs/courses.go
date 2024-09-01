@@ -83,26 +83,26 @@ func CleanCreateCourse(input CreateCourseInput) (database.Course, error) {
 }
 
 type UpdateCourseInput struct {
-  ID          string
-	Title       string
-	Description string
-	Author      string
-	Thumbnail   *multipart.FileHeader
-  OldThumbnail string
-	Preview     string
-  OldPreview  string
-	Duration    string
-	IsActive    string
+	ID           string
+	Title        string
+	Description  string
+	Author       string
+	Thumbnail    *multipart.FileHeader
+	OldThumbnail string
+	Preview      string
+	OldPreview   string
+	Duration     string
+	IsActive     string
 }
 
 func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 	if input.ID == "" {
 		return database.Course{}, fmt.Errorf("The id is required.")
 	}
-  id, err := strconv.ParseInt(input.ID, 10, 64)
-  if err != nil {
-    return database.Course{}, fmt.Errorf(err.Error())
-  }
+	id, err := strconv.ParseInt(input.ID, 10, 64)
+	if err != nil {
+		return database.Course{}, fmt.Errorf(err.Error())
+	}
 
 	if input.Title == "" {
 		return database.Course{}, fmt.Errorf("The title is required.")
@@ -137,32 +137,32 @@ func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 		return database.Course{}, fmt.Errorf(err.Error())
 	}
 
-  var thumbnail string
-  if input.Thumbnail != nil {
-	  if input.Thumbnail.Size > MaxFileSize {
-		  return database.Course{}, fmt.Errorf("The thumbnail is too large. The maximum size is 10MB.")
-	  }
-    thumbnail, err = utils.ManageThumbnail(input.Thumbnail)
-    if err != nil {
-      return database.Course{}, err
-    }
-  } else {
-    thumbnail = input.OldThumbnail
-  }
+	var thumbnail string
+	if input.Thumbnail != nil {
+		if input.Thumbnail.Size > MaxFileSize {
+			return database.Course{}, fmt.Errorf("The thumbnail is too large. The maximum size is 10MB.")
+		}
+		thumbnail, err = utils.ManageThumbnail(input.Thumbnail)
+		if err != nil {
+			return database.Course{}, err
+		}
+	} else {
+		thumbnail = input.OldThumbnail
+	}
 
-  var previewToDB string
+	var previewToDB string
 	if input.Preview != "" {
 		preview, err := utils.ManagePreviews(input.Preview)
 		if err != nil {
 			return database.Course{}, err
 		}
-    previewToDB = preview
+		previewToDB = preview
 	} else {
-    previewToDB = input.OldPreview
-  }
+		previewToDB = input.OldPreview
+	}
 
 	return database.Course{
-    ID:          id,
+		ID:          id,
 		Title:       input.Title,
 		Description: input.Description,
 		Author:      input.Author,

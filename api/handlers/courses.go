@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,12 +15,11 @@ import (
 func GetAdminCourses(c *fiber.Ctx) error {
 	q := c.Query("q", "")
 	q = "%" + q + "%"
-
 	a := c.Query("a", "")
 
 	courses, err := database.GetCourses(a, q)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
@@ -29,17 +27,16 @@ func GetAdminCourses(c *fiber.Ctx) error {
 	return c.JSON(courses)
 }
 
-// TODO: pass is active from the frontend!
 func UpdateCourseActiveStatus(c *fiber.Ctx) error {
-	time.Sleep(2000 * time.Millisecond)
 	id := c.Params("id")
-	err := database.UpdateCourseActiveStatus(id)
+	active := c.Params("active")
+	err := database.UpdateCourseActiveStatus(id, active)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
-	return c.SendStatus(fiber.StatusOK)
+	return c.SendStatus(200)
 }
 
 type SortCoursesInput struct {
@@ -75,7 +72,6 @@ func SortCourse(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
-
 func GetSoloCourse(c *fiber.Ctx) error {
 	id := c.Params("id")
 	course, err := database.GetCourseById(id)
@@ -86,7 +82,6 @@ func GetSoloCourse(c *fiber.Ctx) error {
 	}
 	return c.JSON(course)
 }
-
 
 func DeleteCourse(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -99,20 +94,19 @@ func DeleteCourse(c *fiber.Ctx) error {
 	return c.SendStatus(204)
 }
 
-
 func UpdateCourse(c *fiber.Ctx) error {
 	thumbnail, _ := c.FormFile("thumbnail")
 	cleanInput, err := inputs.CleanUpdateCourse(inputs.UpdateCourseInput{
-    ID:          c.FormValue("id"),
-		Title:       c.FormValue("title"),
-		Description: c.FormValue("description"),
-		Author:      c.FormValue("author"),
-		Duration:    c.FormValue("duration"),
-		IsActive:    c.FormValue("is_active"),
-		Thumbnail:   thumbnail,
-    OldThumbnail: c.FormValue("old_thumbnail"),
-		Preview:     c.FormValue("preview_tmp"),
-    OldPreview:  c.FormValue("old_preview"),
+		ID:           c.FormValue("id"),
+		Title:        c.FormValue("title"),
+		Description:  c.FormValue("description"),
+		Author:       c.FormValue("author"),
+		Duration:     c.FormValue("duration"),
+		IsActive:     c.FormValue("is_active"),
+		Thumbnail:    thumbnail,
+		OldThumbnail: c.FormValue("old_thumbnail"),
+		Preview:      c.FormValue("preview_tmp"),
+		OldPreview:   c.FormValue("old_preview"),
 	})
 
 	if err != nil {
@@ -122,14 +116,14 @@ func UpdateCourse(c *fiber.Ctx) error {
 	}
 
 	err = database.UpdateCourse(database.Course{
-    ID:          cleanInput.ID,
-    Title:       cleanInput.Title,
-    Description: cleanInput.Description,
-    Author:      cleanInput.Author,
-    Thumbnail:   cleanInput.Thumbnail,
-    Preview:     cleanInput.Preview,
-    Duration:    cleanInput.Duration,
-    IsActive:    cleanInput.IsActive,
+		ID:          cleanInput.ID,
+		Title:       cleanInput.Title,
+		Description: cleanInput.Description,
+		Author:      cleanInput.Author,
+		Thumbnail:   cleanInput.Thumbnail,
+		Preview:     cleanInput.Preview,
+		Duration:    cleanInput.Duration,
+		IsActive:    cleanInput.IsActive,
 	})
 
 	if err != nil {
@@ -138,9 +132,8 @@ func UpdateCourse(c *fiber.Ctx) error {
 		})
 	}
 
-  return c.SendStatus(200)
+	return c.SendStatus(200)
 }
-
 
 func CreateCourse(c *fiber.Ctx) error {
 	thumbnail, err := c.FormFile("thumbnail")
@@ -182,7 +175,7 @@ func CreateCourse(c *fiber.Ctx) error {
 		})
 	}
 
-  return c.SendStatus(200)
+	return c.SendStatus(200)
 }
 
 func ChunkUpload(c *fiber.Ctx) error {

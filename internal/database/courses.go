@@ -21,31 +21,12 @@ type Course struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-func UpdateCourseActiveStatus(id string) error {
-	// TODO: get the is_active from the frontend, !memory allocation
-	var u User
-	row := DB.QueryRow(`SELECT is_active FROM courses WHERE id = ?`, id)
-	if err := row.Scan(&u.IsActive); err != nil {
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("%s: no such course", id)
-		}
-		return fmt.Errorf("%s: %v", id, err)
-	}
-
-	isActive := !u.IsActive
-	_, err := DB.Exec(`UPDATE courses SET is_active = ? WHERE id = ?`, isActive, id)
-	if err != nil {
-		return fmt.Errorf("UpdateCourseActiveStatus: %v", err)
-	}
-
-	return nil
-}
-
 func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	var courses []Course
 	query := `
 		SELECT * FROM courses 
-		WHERE (title LIKE ? OR description LIKE ? OR author LIKE ? OR duration LIKE ?)
+		WHERE (title LIKE ? OR description LIKE ? OR author LIKE ? OR 
+    duration LIKE ?)
 	`
 	args := []interface{}{
 		searchTerm, searchTerm, searchTerm, searchTerm,
@@ -60,7 +41,7 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 
 	rows, err := DB.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error executing query: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
 
@@ -69,18 +50,32 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Author, &c.Thumbnail,
 			&c.Preview, &c.Rating, &c.NumReviews, &c.Duration, &c.IsActive,
 			&c.SortOrder, &c.CreatedAt); err != nil {
-			return nil, fmt.Errorf("Error scanning row: %v", err)
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		courses = append(courses, c)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("Error iterating rows: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	return courses, nil
 }
 
+func UpdateCourseActiveStatus(id string, active string) error {
+	result, err := DB.Exec(`UPDATE courses SET is_active = ? WHERE id = ?`, active, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No course found with the id %v", id)
+	}
+	return nil
+}
 
 func EditSortCourses(id int64, sort string) error {
 	result, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
@@ -92,11 +87,10 @@ func EditSortCourses(id int64, sort string) error {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("No account found with the id %v", id)
+		return fmt.Errorf("No course found with the id %v", id)
 	}
 	return nil
 }
-
 
 func GetCourseById(id string) (Course, error) {
 	var c Course
@@ -112,7 +106,6 @@ func GetCourseById(id string) (Course, error) {
 	return c, nil
 }
 
-
 func DeleteCourseByID(id string) error {
 	result, err := DB.Exec("DELETE FROM courses WHERE id = ?", id)
 	if err != nil {
@@ -127,7 +120,6 @@ func DeleteCourseByID(id string) error {
 	}
 	return nil
 }
-
 
 func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
@@ -149,8 +141,7 @@ func UpdateCourse(c Course) error {
 	return nil
 }
 
-
-func CreateCourse(c Course) (error) {
+func CreateCourse(c Course) error {
 	date := utils.FormattedDate()
 	tx, err := DB.Begin()
 	if err != nil {
@@ -164,7 +155,7 @@ func CreateCourse(c Course) (error) {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-  _, err = tx.Exec(`
+	_, err = tx.Exec(`
         INSERT INTO courses
         (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -179,4 +170,3 @@ func CreateCourse(c Course) (error) {
 
 	return nil
 }
-
