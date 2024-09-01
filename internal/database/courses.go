@@ -41,21 +41,6 @@ func UpdateCourseActiveStatus(id string) error {
 	return nil
 }
 
-func GetCourseById(id string) (Course, error) {
-	var c Course
-	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
-	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author,
-		&c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration,
-		&c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
-		if err == sql.ErrNoRows {
-			return c, fmt.Errorf("GetCourseById: %s: no such course", id)
-		}
-		return c, fmt.Errorf("GetCourseById: %s: %v", id, err)
-	}
-	return c, nil
-}
-
-
 func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	var courses []Course
 	query := `
@@ -94,6 +79,21 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	}
 
 	return courses, nil
+}
+
+
+func GetCourseById(id string) (Course, error) {
+	var c Course
+	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
+	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author,
+		&c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration,
+		&c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return c, fmt.Errorf("No course found with the id %s", id)
+		}
+		return c, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	return c, nil
 }
 
 

@@ -76,11 +76,12 @@ func SortCourse(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
+
 func GetSoloCourse(c *fiber.Ctx) error {
 	id := c.Params("id")
 	course, err := database.GetCourseById(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
