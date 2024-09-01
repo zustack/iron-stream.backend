@@ -6,13 +6,11 @@ import (
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 func GetAdminCourses(c *fiber.Ctx) error {
@@ -103,111 +101,48 @@ func DeleteCourse(c *fiber.Ctx) error {
 	return c.SendString(id)
 }
 
+
 func UpdateCourse(c *fiber.Ctx) error {
-	payloadToClean := database.Course{
+	thumbnail, _ := c.FormFile("thumbnail")
+	cleanInput, err := inputs.CleanUpdateCourse(inputs.UpdateCourseInput{
+    ID:          c.FormValue("id"),
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
 		Author:      c.FormValue("author"),
 		Duration:    c.FormValue("duration"),
-	}
+		IsActive:    c.FormValue("is_active"),
+		Thumbnail:   thumbnail,
+    OldThumbnail: c.FormValue("old_thumbnail"),
+		Preview:     c.FormValue("preview_tmp"),
+    OldPreview:  c.FormValue("old_preview"),
+	})
 
-	sortOrder := c.FormValue("sortOrder")
-	sortOrderInt, err := strconv.ParseInt(sortOrder, 10, 0)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
-	}
-
-	id := c.FormValue("id")
-	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
-	}
-
-	id64, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid course ID"})
-	}
-
-	cleanInput, err := inputs.CleanUpdateCourseInput(payloadToClean)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	isActive := c.FormValue("is_active")
-	isActiveBool, err := strconv.ParseBool(isActive)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid boolean value for is_active",
-		})
-	}
-
-	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
-	var thumbnailToDB string
-	thumbnailToDB = c.FormValue("old_thumbnail")
-	thumbnail, err := c.FormFile("thumbnail")
-	if err == nil {
-		if thumbnail.Size > MaxFileSize {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "El archivo es demasiado grande. El tamaño máximo permitido es 10MB.",
-			})
-		}
-		thumbnail_id := uuid.New()
-		ext := filepath.Ext(thumbnail.Filename)
-		newFilename := fmt.Sprintf("%s%s", thumbnail_id, ext)
-		thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
-		// save the file in local disk
-		err = c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al guardar el thumbnail"})
-		}
-		thumbnailToDB = fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
-	}
-
-	previewTmpDir := c.FormValue("preview_tmp")
-	var previewDir string
-	previewDir = c.FormValue("old_video")
-	if previewTmpDir != "" {
-		previewId := uuid.New()
-		previewDir = "/web/uploads/previews/" + previewId.String()
-		previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
-		err = os.MkdirAll(previewFinalPath, 0755)
-		if err != nil {
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-
-		ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-		cmd := exec.Command("sh", ffmpegPath, previewTmpDir, previewFinalPath)
-		err = cmd.Run()
-		if err != nil {
-			return c.SendStatus(500)
-		}
-		previewDir = previewDir + "/master.m3u8"
-	}
-
-	fmt.Println("isVideo", c.FormValue("isVideo"))
-	if c.FormValue("isVideo") == "false" {
-		previewDir = ""
-	}
-
 	err = database.UpdateCourse(database.Course{
-		ID:          id64,
-		Title:       cleanInput.Title,
-		Description: cleanInput.Description,
-		Author:      cleanInput.Author,
-		Thumbnail:   thumbnailToDB,
-		Preview:     previewDir,
-		Duration:    cleanInput.Duration,
-		IsActive:    isActiveBool,
-		SortOrder:   int(sortOrderInt),
+    ID:          cleanInput.ID,
+    Title:       cleanInput.Title,
+    Description: cleanInput.Description,
+    Author:      cleanInput.Author,
+    Thumbnail:   cleanInput.Thumbnail,
+    Preview:     cleanInput.Preview,
+    Duration:    cleanInput.Duration,
+    IsActive:    cleanInput.IsActive,
 	})
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+  return c.SendStatus(200)
 }
+
 
 func CreateCourse(c *fiber.Ctx) error {
 	thumbnail, err := c.FormFile("thumbnail")
@@ -217,7 +152,7 @@ func CreateCourse(c *fiber.Ctx) error {
 		})
 	}
 
-	cleanInput, err := inputs.CourseInput(inputs.CreateCourseInput{
+	cleanInput, err := inputs.CleanCreateCourse(inputs.CreateCourseInput{
 		Title:       c.FormValue("title"),
 		Description: c.FormValue("description"),
 		Author:      c.FormValue("author"),
@@ -233,7 +168,7 @@ func CreateCourse(c *fiber.Ctx) error {
 		})
 	}
 
-	payloadToDB := database.Course{
+	err = database.CreateCourse(database.Course{
 		Title:       cleanInput.Title,
 		Description: cleanInput.Description,
 		Author:      cleanInput.Author,
@@ -241,9 +176,8 @@ func CreateCourse(c *fiber.Ctx) error {
 		Preview:     cleanInput.Preview,
 		Duration:    cleanInput.Duration,
 		IsActive:    cleanInput.IsActive,
-	}
+	})
 
-	err = database.CreateCourse(payloadToDB)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),

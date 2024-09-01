@@ -257,6 +257,28 @@ curl -X POST http://localhost:8081/courses/create \
 200 OK
 ```
 
+### Update course request
+```bash
+curl -X PUT "http://localhost:8081/courses/update" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Content-Type: multipart/form-data" \
+  -F "id=1" \
+  -F "title=Data Structures edit" \
+  -F "description=Description for Data Structures edit" \
+  -F "author=agustfricke edit" \
+  -F "duration=4 hours, 20 minutes edit" \
+  -F "is_active=true" \
+  -F "thumbnail=" \
+  -F "old_thumbnail=/web/uploads/thumbnails/2da28e22-33b6-42ec-9e21-8a46023ecb2b.png" \
+  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4" \
+  -F "old_preview=/web/uploads/tmp/42069/test.png" \
+```
+### Update course response
+```bash
+200 OK
+```
+
+
 # Tests
 ## Users tests
 ```bash
