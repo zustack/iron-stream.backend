@@ -55,40 +55,6 @@ func GetCourseById(id string) (Course, error) {
 	return c, nil
 }
 
-func DeleteCourseByID(id string) error {
-	result, err := DB.Exec("DELETE FROM courses WHERE id = ?", id)
-	if err != nil {
-		return fmt.Errorf("DeleteCourseByID: course id: %s: %v", id, err)
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("DeleteCourseByID: error getting rows affected %v", err)
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("DeleteCourseByID: no course found with ID: %s", id)
-	}
-	return nil
-}
-
-func UpdateCourse(c Course) error {
-	result, err := DB.Exec(`UPDATE courses SET 
-  title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
-  duration = ?, is_active = ? WHERE id = ?`,
-		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration,
-		c.IsActive, c.ID)
-	if err != nil {
-		return fmt.Errorf("UpdateCourse: %v", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("UpdateCourse: error getting rows affected %v", err)
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("UpdateCourse: no course found with ID: %d", c.ID)
-	}
-	return nil
-}
 
 func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	var courses []Course
@@ -129,6 +95,44 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 
 	return courses, nil
 }
+
+
+func DeleteCourseByID(id string) error {
+	result, err := DB.Exec("DELETE FROM courses WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No course found with the id %v", id)
+	}
+	return nil
+}
+
+
+func UpdateCourse(c Course) error {
+	result, err := DB.Exec(`UPDATE courses SET 
+  title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
+  duration = ?, is_active = ? WHERE id = ?`,
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration,
+		c.IsActive, c.ID)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No course found with the id %v", c.ID)
+	}
+	return nil
+}
+
 
 func CreateCourse(c Course) (error) {
 	date := utils.FormattedDate()

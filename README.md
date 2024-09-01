@@ -278,6 +278,15 @@ curl -X PUT "http://localhost:8081/courses/update" \
 200 OK
 ```
 
+### Delete course by ID request
+```bash
+curl -X DELETE "http://localhost:8081/courses/delete/1" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" 
+```
+### Delete course by ID response
+```bash
+204 No Content
+```
 
 # Tests
 ## Users tests

@@ -87,18 +87,16 @@ func GetSoloCourse(c *fiber.Ctx) error {
 	return c.JSON(course)
 }
 
-func DeleteCourse(c *fiber.Ctx) error {
-	time.Sleep(2000 * time.Millisecond)
-	id := c.Params("id")
 
+func DeleteCourse(c *fiber.Ctx) error {
+	id := c.Params("id")
 	err := database.DeleteCourseByID(id)
 	if err != nil {
-		fmt.Println("el error", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
-	return c.SendString(id)
+	return c.SendStatus(204)
 }
 
 
