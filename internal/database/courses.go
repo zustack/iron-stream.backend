@@ -82,6 +82,22 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 }
 
 
+func EditSortCourses(id int64, sort string) error {
+	result, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No account found with the id %v", id)
+	}
+	return nil
+}
+
+
 func GetCourseById(id string) (Course, error) {
 	var c Course
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
@@ -164,10 +180,3 @@ func CreateCourse(c Course) (error) {
 	return nil
 }
 
-func EditSortCourses(id int64, sort string) error {
-	_, err := DB.Exec("UPDATE courses SET sort_order = ? WHERE id = ?", sort, id)
-	if err != nil {
-		return fmt.Errorf("EditSortCourses: %v", err)
-	}
-	return nil
-}

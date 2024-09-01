@@ -288,6 +288,35 @@ curl -X DELETE "http://localhost:8081/courses/delete/1" \
 204 No Content
 ```
 
+### Get course by ID request
+```bash
+curl "http://localhost:8081/courses/solo/2" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" | jq
+```
+### Get course by ID response
+```bash
+204 No Content
+```
+
+### Update course sort request
+```bash
+curl -X POST "http://localhost:8081/courses/sort" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sort_courses": [
+      {"id": 2, "sort_order": "8"},
+      {"id": 3, "sort_order": "7"},
+      {"id": 4, "sort_order": "6"},
+      {"id": 5, "sort_order": "5"}
+    ]
+  }'
+```
+### Update course sort response
+```bash
+200 OK
+```
+
 # Tests
 ## Users tests
 ```bash
