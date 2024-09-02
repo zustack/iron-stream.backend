@@ -241,7 +241,7 @@ curl -X POST http://localhost:8081/courses/chunk/upload \
 ### Create course request
 ```bash
 curl -X POST http://localhost:8081/courses/create \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
   -H "Content-Type: multipart/form-data" \
   -F "title=Data Structures" \
   -F "description=Description for Data Structures" \
@@ -575,7 +575,7 @@ curl -X DELETE "http://localhost:8081/user/courses/solo/8/7" \
 ### Create video request
 ```bash
 curl -X POST http://localhost:8081/videos \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
   -H "Content-Type: multipart/form-data" \
   -F "title=Data Structures 420" \
   -F "description=Description for Data Structures 420" \
@@ -588,6 +588,55 @@ curl -X POST http://localhost:8081/videos \
 ```json
 200 OK
 ```
+
+### Get admin videos by course id request
+```bash
+curl -X GET "http://localhost:8081/videos/admin/1?q=" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+```
+### Get admin videos response
+```json
+[
+  {
+    "id": 2,
+    "title": "Data Structures 420",
+    "description": "Description for Data Structures 420",
+    "video_hls": "/web/uploads/previews/f059bce1-a9bc-479c-a738-f1d87ec63618/master.m3u8",
+    "thumbnail": "/web/uploads/thumbnails/0c364957-c0d9-4451-93e9-53e95c06897d.png",
+    "length": "119",
+    "duration": "4 hours, 20 minutes",
+    "views": 0,
+    "course_id": "1",
+    "created_at": "02/09/2024 14:54:44",
+    "video_resume": ""
+  }
+]
+```
+
+### Get video feed request
+```bash
+curl -X GET "http://localhost:8081/videos/feed/1?q=" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+```
+### Get video feed response
+```json
+[
+  {
+    "id": 2,
+    "title": "Data Structures 420",
+    "description": "Description for Data Structures 420",
+    "video_hls": "/web/uploads/previews/f059bce1-a9bc-479c-a738-f1d87ec63618/master.m3u8",
+    "thumbnail": "/web/uploads/thumbnails/0c364957-c0d9-4451-93e9-53e95c06897d.png",
+    "length": "119",
+    "duration": "4 hours, 20 minutes",
+    "views": 0,
+    "course_id": "1",
+    "created_at": "",
+    "video_resume": ""
+  }
+]
+```
+
 
 # Tests
 ## Users tests

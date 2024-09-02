@@ -72,7 +72,7 @@ CREATE TABLE videos (
   length VARCHAR(155) NOT NULL, 
   views INTEGER DEFAULT 0, 
   course_id INTEGER NOT NULL, 
-  created_at VARCHAR(40) NOT NULL
+  created_at VARCHAR(40) NOT NULL,
 );
 
 DROP TABLE IF EXISTS history;

@@ -43,6 +43,11 @@ type CreateVideoInput struct {
 }
 
 func CreateVideo(input CreateVideoInput) (database.Video, error) {
+  _, err := database.GetCourseById(input.CourseID)
+  if err != nil {
+    return database.Video{}, err
+  }
+
 	if input.Title == "" {
 		return database.Video{}, fmt.Errorf("The title is required.")
 	}

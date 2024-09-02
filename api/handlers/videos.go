@@ -15,20 +15,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetFeed(c *fiber.Ctx) error {
-	time.Sleep(2000 * time.Millisecond)
-	user := c.Locals("user").(*database.User)
-	courseId := c.Params("courseId")
-	searchParam := c.Query("q", "")
-	videos, err := database.GetFeed(user.ID, courseId, searchParam)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-	return c.JSON(videos)
-}
-
 type updateHistoryPayload struct {
 	Id     string `json:"id"`
 	Resume string `json:"resume"`
@@ -258,12 +244,13 @@ func DeleteVideo(c *fiber.Ctx) error {
 	return c.JSON(id)
 }
 
-func GetAdminVideos(c *fiber.Ctx) error {
+
+func GetVideos(c *fiber.Ctx) error {
 	courseId := c.Params("courseId")
 	q := c.Query("q", "")
 	q = "%" + q + "%"
 
-	videos, err := database.GetVideos(courseId, q)
+	videos, err := database.GetAdminVideos(courseId, q)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -273,14 +260,30 @@ func GetAdminVideos(c *fiber.Ctx) error {
 	return c.JSON(videos)
 }
 
-func GetVideos(c *fiber.Ctx) error {
+
+func GetFeed(c *fiber.Ctx) error {
+	user := c.Locals("user").(*database.User)
+	courseId := c.Params("courseId")
+	searchParam := c.Query("q", "")
+	videos, err := database.GetFeed(user.ID, courseId, searchParam)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(videos)
+}
+
+
+
+func GetAdminVideos(c *fiber.Ctx) error {
 	courseId := c.Params("courseId")
 	q := c.Query("q", "")
 	q = "%" + q + "%"
 
-	videos, err := database.GetVideos(courseId, q)
+	videos, err := database.GetAdminVideos(courseId, q)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
