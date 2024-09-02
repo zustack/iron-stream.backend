@@ -18,7 +18,7 @@ func Setup() *fiber.App {
 		AllowOrigins:     "*",
 		AllowCredentials: false,
 	}))
-	app.Use("/web/assets/videos", middleware.NormalUser)
+	app.Use("/web/uploads/videos", middleware.NormalUser)
 	staticPath := os.Getenv("ROOT_PATH") + "/web/uploads"
 	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
 		log.Fatalf("Static path does not exist: %s", staticPath)

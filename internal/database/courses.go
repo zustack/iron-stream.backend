@@ -19,6 +19,9 @@ type Course struct {
 	IsActive    bool   `json:"is_active"`
 	SortOrder   int    `json:"sort_order"`
 	CreatedAt   string `json:"created_at"`
+
+  // not in db
+  IsUserEnrolled bool `json:"is_user_enrolled"`
 }
 
 func GetCourses(isActive string, searchTerm string) ([]Course, error) {
