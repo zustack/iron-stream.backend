@@ -5,10 +5,18 @@ import (
 	"iron-stream/internal/utils"
 )
 
+
 func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error {
-	_, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ? AND user_id = ?;`, courseId, userId)
+	result, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ? AND user_id = ?;`, courseId, userId)
 	if err != nil {
-		return fmt.Errorf("DeleteUserCoursesByUserID: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No rows affected")
 	}
 	return nil
 }

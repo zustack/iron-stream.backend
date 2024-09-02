@@ -148,7 +148,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 		Duration:    c.FormValue("duration"),
 	}
 
-	cleanInput, err := inputs.CleanVideoInput(payloadToClean)
+	cleanInput, err := inputs.CleanUpdateVideoInput(payloadToClean)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
@@ -288,96 +288,46 @@ func GetVideos(c *fiber.Ctx) error {
 	return c.JSON(videos)
 }
 
+
 func CreateVideo(c *fiber.Ctx) error {
-	payloadToClean := database.Video{
-		Title:       c.FormValue("title"),
-		Description: c.FormValue("description"),
-		// VideoHLS:    c.FormValue("video_tmp"),
-		Duration: c.FormValue("duration"),
-	}
-
-	cleanInput, err := inputs.CleanVideoInput(payloadToClean)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	courseID := c.FormValue("course_id")
-	courseID64, err := strconv.ParseInt(courseID, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"status": "fail", "message": "Course ID is invalid"})
-	}
-
 	thumbnail, err := c.FormFile("thumbnail")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	const MaxFileSize = 10 * 1024 * 1024 // 10MB en bytes
-	if thumbnail.Size > MaxFileSize {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "El archivo es demasiado grande. El tamaño máximo permitido es 10MB.",
-		})
-	}
-	id := uuid.New()
-	ext := filepath.Ext(thumbnail.Filename)
-	newFilename := fmt.Sprintf("%s%s", id, ext)
-	thumbnailsPath := filepath.Join(os.Getenv("ROOT_PATH"), "web", "uploads", "thumbnails")
-	c.SaveFile(thumbnail, fmt.Sprintf("%s/%s", thumbnailsPath, newFilename))
-	thumbnailToDB := fmt.Sprintf("/web/uploads/thumbnails/%s", newFilename)
+	cleanInput, err := inputs.CreateVideo(inputs.CreateVideoInput{
+    Title:       c.FormValue("title"),
+    Description: c.FormValue("description"),
+    Duration:    c.FormValue("duration"),
+    CourseID:    c.FormValue("course_id"),
+    Video:       c.FormValue("video_tmp"),
+    Thumbnail:   thumbnail,
+  })
 
-	// get the lenght of the video
-	fmt.Println("video", c.FormValue("video_tmp"))
-	fmt.Println("root", os.Getenv("ROOT_PATH")+"/get-video-length.sh")
-	getLengthCmd := exec.Command("sh", filepath.Join(os.Getenv("ROOT_PATH"), "get-video-length.sh"), c.FormValue("video_tmp"))
-	output, err := getLengthCmd.Output()
 	if err != nil {
-		fmt.Println("err", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	fmt.Println("duration", string(output))
-	length := strings.Trim(string(output), "\n")
-
-	videoId := uuid.New()
-	previewDir := "/web/uploads/videos/" + videoId.String()
-	previewFinalPath := filepath.Join(os.Getenv("ROOT_PATH"), previewDir)
-	err = os.MkdirAll(previewFinalPath, 0755)
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
-
-	cmd := exec.Command("sh", ffmpegPath, c.FormValue("video_tmp"), previewFinalPath)
-	err = cmd.Run()
-	if err != nil {
-		return c.SendStatus(500)
-	}
-
-	fmt.Println("lenght", length)
-	fmt.Println("duration user", cleanInput.Duration)
-
-	payloadToDB := database.Video{
+	err = database.CreateVideo(database.Video{
 		Title:       cleanInput.Title,
 		Description: cleanInput.Description,
-		VideoHLS:    previewDir + "/master.m3u8",
-		Thumbnail:   thumbnailToDB,
+		VideoHLS:    cleanInput.VideoHLS,
+		Thumbnail:   cleanInput.Thumbnail,
 		Duration:    cleanInput.Duration,
-		Length:      length,
-		CourseID:    courseID64,
-	}
+		Length:      cleanInput.Length,
+		CourseID:    cleanInput.CourseID,
+	})
 
-	newVideoID, err := database.CreateVideo(payloadToDB)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"id": newVideoID})
+  return c.SendStatus(200)
 }
+

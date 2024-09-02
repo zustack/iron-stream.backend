@@ -15,7 +15,7 @@ type Video struct {
 	Length      string `json:"length"`
 	Duration    string `json:"duration"`
 	Views       int    `json:"views"`
-	CourseID    int64  `json:"course_id"`
+	CourseID    string `json:"course_id"`
 	CreatedAt   string `json:"created_at"`
 	// not in db
 	VideoResume string `json:"video_resume"`
@@ -219,22 +219,17 @@ func GetVideos(courseId, searchParam string) ([]Video, error) {
 	return videos, nil
 }
 
-func CreateVideo(v Video) (int64, error) {
+func CreateVideo(v Video) error {
 	date := utils.FormattedDate()
-	result, err := DB.Exec(`
+	_, err := DB.Exec(`
   INSERT INTO videos
   (title, description, video_hls, thumbnail, length, duration, course_id, created_at) 
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.CourseID, date)
 
 	if err != nil {
-		return 0, fmt.Errorf("CreateVideo: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("CreateVideo: %v", err)
-	}
-
-	return id, nil
+	return nil
 }

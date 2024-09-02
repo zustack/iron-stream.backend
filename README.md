@@ -570,6 +570,25 @@ curl -X DELETE "http://localhost:8081/user/courses/solo/8/7" \
 200 OK 
 ```
 
+## Videos
+
+### Create video request
+```bash
+curl -X POST http://localhost:8081/videos \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=Data Structures 420" \
+  -F "description=Description for Data Structures 420" \
+  -F "course_id=1" \
+  -F "duration=4 hours, 20 minutes" \
+  -F "thumbnail=@/home/agust/Pictures/test.png" \
+  -F "video_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/test.mp4"
+```
+### Create video response
+```json
+200 OK
+```
+
 # Tests
 ## Users tests
 ```bash
