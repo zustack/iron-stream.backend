@@ -5,7 +5,6 @@ import (
 	"iron-stream/internal/utils"
 )
 
-
 func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error {
 	result, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ? AND user_id = ?;`, courseId, userId)
 	if err != nil {
@@ -20,7 +19,6 @@ func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error 
 	}
 	return nil
 }
-
 
 func DeleteUserCoursesByCourseId(courseId string) error {
 	result, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ?;`, courseId)
@@ -78,7 +76,6 @@ func GetUserCourseIds(userID string) ([]int64, error) {
 	return courseIDs, nil
 }
 
-
 // this is for the middleware of the videos
 func UserCourseExists(userID int64, courseID string) (bool, error) {
 	query := `
@@ -96,7 +93,6 @@ func UserCourseExists(userID int64, courseID string) (bool, error) {
 
 	return exists, nil
 }
-
 
 func GetUserCourses(userID int64, q string) ([]Course, error) {
 	query := `

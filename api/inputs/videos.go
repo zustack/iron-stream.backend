@@ -8,14 +8,14 @@ import (
 )
 
 type UpdateVideoInput struct {
-  ID string
-	Title       string
-	Description string
-  Duration    string
-	Thumbnail   *multipart.FileHeader
-  OldThumbnail string
-	Video string
-  OldVideoHLS string
+	ID           string
+	Title        string
+	Description  string
+	Duration     string
+	Thumbnail    *multipart.FileHeader
+	OldThumbnail string
+	Video        string
+	OldVideoHLS  string
 }
 
 func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
@@ -23,10 +23,10 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("The video id is required.")
 	}
 
-  v, err := database.GetVideoById(input.ID)
-  if err != nil {
-    return database.Video{}, err
-  }
+	v, err := database.GetVideoById(input.ID)
+	if err != nil {
+		return database.Video{}, err
+	}
 
 	if input.Title == "" {
 		return database.Video{}, fmt.Errorf("The title is required.")
@@ -49,22 +49,22 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("The duration should not have more than 20 characters.")
 	}
 
-  var length string
-  var video string
-  if input.Video != "" {
-    length, err = utils.GetVideoLength(input.Video)
-    if err != nil {
-      return database.Video{}, err
-    }
+	var length string
+	var video string
+	if input.Video != "" {
+		length, err = utils.GetVideoLength(input.Video)
+		if err != nil {
+			return database.Video{}, err
+		}
 
-	  video, err = utils.ManageVideos(input.Video, v.CourseID)
-	  if err != nil {
-		  return database.Video{}, err
-	  }
-  } else {
-    video = input.OldVideoHLS
-    length = v.Length
-  }
+		video, err = utils.ManageVideos(input.Video, v.CourseID)
+		if err != nil {
+			return database.Video{}, err
+		}
+	} else {
+		video = input.OldVideoHLS
+		length = v.Length
+	}
 
 	var thumbnail string
 	if input.Thumbnail != nil {
@@ -80,22 +80,22 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 	}
 
 	return database.Video{
-    ID:          v.ID,
-    Title:       input.Title,
-    Description: input.Description,
-    Duration:    input.Duration,
-    Thumbnail:   thumbnail,
-    VideoHLS:    video,
-    Length:      length,
+		ID:          v.ID,
+		Title:       input.Title,
+		Description: input.Description,
+		Duration:    input.Duration,
+		Thumbnail:   thumbnail,
+		VideoHLS:    video,
+		Length:      length,
 	}, nil
 }
 
 type CreateVideoInput struct {
 	Title       string
 	Description string
-  CourseID    string
+	CourseID    string
 	Thumbnail   *multipart.FileHeader
-	Video string
+	Video       string
 	Duration    string
 }
 
@@ -104,10 +104,10 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("The course id is required.")
 	}
 
-  _, err := database.GetCourseById(input.CourseID)
-  if err != nil {
-    return database.Video{}, err
-  }
+	_, err := database.GetCourseById(input.CourseID)
+	if err != nil {
+		return database.Video{}, err
+	}
 
 	if input.Title == "" {
 		return database.Video{}, fmt.Errorf("The title is required.")
@@ -130,10 +130,10 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("The title should not have more than 20 characters.")
 	}
 
-  length, err := utils.GetVideoLength(input.Video)
-  if err != nil {
-    return database.Video{}, err
-  }
+	length, err := utils.GetVideoLength(input.Video)
+	if err != nil {
+		return database.Video{}, err
+	}
 
 	if input.Thumbnail.Size > MaxFileSize {
 		return database.Video{}, fmt.Errorf("The thumbnail is too large. The maximum size is 10MB.")
@@ -144,9 +144,9 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
 		return database.Video{}, err
 	}
 
-  if input.Video == "" {
-    return database.Video{}, fmt.Errorf("The video tmp path is required.")
-  }
+	if input.Video == "" {
+		return database.Video{}, fmt.Errorf("The video tmp path is required.")
+	}
 
 	video, err := utils.ManageVideos(input.Video, input.CourseID)
 	if err != nil {
@@ -157,9 +157,9 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
 		Title:       input.Title,
 		Description: input.Description,
 		Duration:    input.Duration,
-    CourseID:    input.CourseID,
-    Thumbnail:   thumbnail,
-    VideoHLS:    video,
-    Length:      length,
+		CourseID:    input.CourseID,
+		Thumbnail:   thumbnail,
+		VideoHLS:    video,
+		Length:      length,
 	}, nil
 }

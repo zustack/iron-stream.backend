@@ -666,6 +666,77 @@ curl -X PUT http://localhost:8081/videos \
 200 OK
 ```
 
+### Get current video request
+```bash
+curl -X GET "http://localhost:8081/history/current/3" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+```
+### Get current video response
+```json
+{
+  "history_id": "",
+  "resume": "",
+  "video": {
+    "id": 2,
+    "title": "Data Structures 420",
+    "description": "Description for Data Structures 420",
+    "video_hls": "/web/uploads/previews/f059bce1-a9bc-479c-a738-f1d87ec63618/master.m3u8",
+    "thumbnail": "/web/uploads/thumbnails/0c364957-c0d9-4451-93e9-53e95c06897d.png",
+    "length": "4 hours, 20 minutes",
+    "duration": "119",
+    "views": 0,
+    "course_id": "1",
+    "created_at": "02/09/2024 14:54:44",
+    "video_resume": ""
+  }
+}
+```
+
+### Watch new video request
+```bash
+curl -X PUT "http://localhost:8081/history/watch" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
+     -d '{"history_id": "21", "video_id": 7, "course_id": "3", "resume": "69", "current_video_id": 7}'
+```
+### Watch new video response
+```json
+{"id":22,"video_id":"","course_id":0,"user_id":0,"video_resume":"187.68","created_at":""}%
+```
+
+
+## History
+### Get user history request
+```bash
+curl -X GET "http://localhost:8081/history" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+```
+### Get user history response
+```json
+[
+  {
+    "id": 1,
+    "video_id": "2",
+    "course_id": 1,
+    "user_id": 1,
+    "video_resume": "",
+    "created_at": "02/09/2024 17:29:17"
+  }
+]
+```
+
+### Update history
+```bash
+curl -X PUT "http://localhost:8081/history/update" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
+     -d '{"id": "23", "resume": "6969"}'
+```
+### Update history response
+```json
+200 OK
+```
+
 # Tests
 ## Users tests
 ```bash

@@ -9,4 +9,5 @@ import (
 
 func HistoryRoutes(app *fiber.App) {
 	app.Get("/history", middleware.NormalUser, handlers.GetUserHistory)
+	app.Put("/history/update", middleware.NormalUser, handlers.UpdateHistory)
 }

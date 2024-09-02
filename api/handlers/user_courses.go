@@ -18,7 +18,6 @@ func DeleteUserCoursesByCourseIdAndUserId(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
-
 func DeleteUserCoursesByCourseId(c *fiber.Ctx) error {
 	courseId := c.Params("courseId")
 	err := database.DeleteUserCoursesByCourseId(courseId)
@@ -30,7 +29,6 @@ func DeleteUserCoursesByCourseId(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
-
 func DeleteAllUserCourses(c *fiber.Ctx) error {
 	err := database.DeleteAllUserCourses()
 	if err != nil {
@@ -41,17 +39,16 @@ func DeleteAllUserCourses(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
-
 func GetUserCourses(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 	q := c.Query("q", "")
-  courses, err := database.GetUserCourses(user.ID, q)
-  if err != nil {
+	courses, err := database.GetUserCourses(user.ID, q)
+	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-  }
-  return c.JSON(courses)
+	}
+	return c.JSON(courses)
 }
 
 func CreateUserCourse(c *fiber.Ctx) error {

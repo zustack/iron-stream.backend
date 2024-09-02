@@ -17,10 +17,8 @@ type Video struct {
 	Views       int    `json:"views"`
 	CourseID    string `json:"course_id"`
 	CreatedAt   string `json:"created_at"`
-	// not in db
 	VideoResume string `json:"video_resume"`
 }
-
 
 func GetVideoById(videoId string) (Video, error) {
 	var v Video
@@ -28,11 +26,40 @@ func GetVideoById(videoId string) (Video, error) {
 	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
 		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-		  return v, fmt.Errorf("No video found with id: %v", videoId)
+			return v, fmt.Errorf("No video found with id: %v", videoId)
 		}
 		return v, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return v, nil
+}
+
+func UpdateVideoViews(id int64) error {
+	var currentViews int
+	err := DB.QueryRow("SELECT views FROM videos WHERE id = ?", id).Scan(&currentViews)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("No video found with id %v", id)
+		}
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	newViews := currentViews + 1
+
+	result, err := DB.Exec(`UPDATE videos SET views = ? WHERE id = ?`, newViews, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("No video updated with ID: %d", id)
+	}
+
+	return nil
 }
 
 func GetFistVideoByCourseId(courseID string) (Video, error) {
@@ -44,45 +71,12 @@ func GetFistVideoByCourseId(courseID string) (Video, error) {
 		&video.Views, &video.CourseID, &video.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return video, fmt.Errorf("GetFistVideoByCourseId: no video found with course ID: %s", courseID)
+			return video, fmt.Errorf("No video found with course id %s", courseID)
 		}
-		return video, fmt.Errorf("GetFistVideoByCourseId: error fetching first video: %v", err)
+		return video, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return video, nil
 }
-
-func UpdateVideoViews(id int64) error {
-	// First, get the current view count
-	var currentViews int
-	err := DB.QueryRow("SELECT views FROM videos WHERE id = ?", id).Scan(&currentViews)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("UpdateVideoViews: no video found with ID: %d", id)
-		}
-		return fmt.Errorf("UpdateVideoViews: error fetching current views: %v", err)
-	}
-
-	// Increment the view count
-	newViews := currentViews + 1
-
-	// Update the database with the new view count
-	result, err := DB.Exec(`UPDATE videos SET views = ? WHERE id = ?`, newViews, id)
-	if err != nil {
-		return fmt.Errorf("UpdateVideoViews: %v", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("UpdateVideoViews: error getting rows affected: %v", err)
-	}
-
-	if rowsAffected == 0 {
-		return fmt.Errorf("UpdateVideoViews: no video updated with ID: %d", id)
-	}
-
-	return nil
-}
-
 
 func UpdateVideo(v Video) error {
 	result, err := DB.Exec(`UPDATE videos SET 
@@ -90,29 +84,17 @@ func UpdateVideo(v Video) error {
   WHERE id = ?`,
 		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.ID)
 	if err != nil {
-		return fmt.Errorf("UpdateVideo: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("UpdateVideo: error getting rows affected %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("UpdateVideo: no video found with ID: %d", v.ID)
+		return fmt.Errorf("No video found with id %d", v.ID)
 	}
 	return nil
 }
-
-func GetVideosCount(course_id, searchParam string) (int, error) {
-	var count int
-	err := DB.QueryRow(`SELECT COUNT(*) FROM videos 
-  WHERE course_id = ? AND (title LIKE ? OR description LIKE ?)`,
-		course_id, "%"+searchParam+"%", "%"+searchParam+"%").Scan(&count)
-	if err != nil {
-		return 0, fmt.Errorf("GetVideosCount: %v", err)
-	}
-	return count, nil
-}
-
 
 func DeleteVideoByID(id string) error {
 	result, err := DB.Exec("DELETE FROM videos WHERE id = ?", id)
@@ -128,7 +110,6 @@ func DeleteVideoByID(id string) error {
 	}
 	return nil
 }
-
 
 func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 	query := `
@@ -184,7 +165,7 @@ func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 			&video.VideoResume,
 		)
 		if err != nil {
-		  return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		videos = append(videos, video)
 	}
@@ -195,7 +176,6 @@ func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 
 	return videos, nil
 }
-
 
 func GetAdminVideos(courseId, searchParam string) ([]Video, error) {
 	var videos []Video
@@ -213,7 +193,7 @@ func GetAdminVideos(courseId, searchParam string) ([]Video, error) {
 		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
 			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID,
 			&v.CreatedAt); err != nil {
-		  return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		videos = append(videos, v)
 	}
@@ -222,7 +202,6 @@ func GetAdminVideos(courseId, searchParam string) ([]Video, error) {
 	}
 	return videos, nil
 }
-
 
 func CreateVideo(v Video) error {
 	date := utils.FormattedDate()

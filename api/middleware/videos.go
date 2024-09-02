@@ -52,19 +52,23 @@ func Videos(c *fiber.Ctx) error {
 	c.Locals("user", &user)
 	c.Locals("token", tokenString)
 
-  fullPath := c.Path()
-  segments := strings.Split(fullPath, "/")
-  if len(segments) > 4 {
-		id := segments[3]
-    allowed, err := database.UserCourseExists(user.ID, id)
-    if err != nil {
-      return c.SendStatus(500)
-    }
-    if !allowed {
-      return c.SendStatus(401)
-    }
-	  return c.Next()
+	fullPath := c.Path()
+	segments := strings.Split(fullPath, "/")
+	if len(segments) > 4 {
+		id := segments[4]
+		allowed, err := database.UserCourseExists(user.ID, id)
+		if err != nil {
+			return c.Status(401).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		if !allowed {
+			return c.Status(401).JSON(fiber.Map{
+				"error": "You do not have permission to access this resource",
+			})
+		}
+		return c.Next()
 	}
 
-  return c.SendStatus(401)
+	return c.SendStatus(401)
 }
