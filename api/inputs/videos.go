@@ -91,7 +91,7 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
     return database.Video{}, fmt.Errorf("The video tmp path is required.")
   }
 
-	video, err := utils.ManagePreviews(input.Video)
+	video, err := utils.ManageVideos(input.Video, input.CourseID)
 	if err != nil {
 		return database.Video{}, err
 	}

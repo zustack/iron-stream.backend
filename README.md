@@ -616,7 +616,7 @@ curl -X GET "http://localhost:8081/videos/admin/1?q=" \
 ### Get video feed request
 ```bash
 curl -X GET "http://localhost:8081/videos/feed/1?q=" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884"
 ```
 ### Get video feed response
 ```json

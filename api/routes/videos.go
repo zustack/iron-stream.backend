@@ -15,7 +15,7 @@ func VideosRoutes(app *fiber.App) {
 	app.Delete("/videos/:id", middleware.AdminUser, handlers.DeleteVideo)
 	app.Get("/videos/:courseId", middleware.NormalUser, handlers.GetVideos)
 
-  app.Get("/videos/feed/:courseId", middleware.NormalUser, handlers.GetFeed)
+  app.Get("/videos/feed/:courseId", middleware.Videos, handlers.GetFeed)
 	app.Get("/videos/admin/:courseId", middleware.AdminUser, handlers.GetAdminVideos)
   app.Post("/videos", middleware.AdminUser, handlers.CreateVideo)
 }

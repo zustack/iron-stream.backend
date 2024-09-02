@@ -80,7 +80,7 @@ func GetUserCourseIds(userID string) ([]int64, error) {
 
 
 // this is for the middleware of the videos
-func UserCourseExists(userID, courseID int64) (bool, error) {
+func UserCourseExists(userID int64, courseID string) (bool, error) {
 	query := `
 		SELECT EXISTS(
 			SELECT 1 

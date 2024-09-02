@@ -162,7 +162,7 @@ func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 
 	rows, err := DB.Query(query, userId, userId, courseId, "%"+searchParam+"%", "%"+searchParam+"%")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
 
@@ -182,13 +182,13 @@ func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 			&video.VideoResume,
 		)
 		if err != nil {
-			return nil, err
+		  return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		videos = append(videos, video)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	return videos, nil
