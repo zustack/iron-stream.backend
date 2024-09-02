@@ -22,15 +22,15 @@ type Video struct {
 }
 
 
-func GetVideoById(videoId int64) (Video, error) {
+func GetVideoById(videoId string) (Video, error) {
 	var v Video
 	row := DB.QueryRow(`SELECT * FROM videos WHERE id = ?`, videoId)
 	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
 		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return v, fmt.Errorf("GetVideoById: %d: no such video", videoId)
+		  return v, fmt.Errorf("No video found with id: %v", videoId)
 		}
-		return v, fmt.Errorf("GetVideoById: %d: %v", videoId, err)
+		return v, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return v, nil
 }
@@ -83,26 +83,12 @@ func UpdateVideoViews(id int64) error {
 	return nil
 }
 
-func DeleteVideoByID(id string) error {
-	result, err := DB.Exec("DELETE FROM videos WHERE id = ?", id)
-	if err != nil {
-		return fmt.Errorf("DeleteVideoByID: course id: %s: %v", id, err)
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("DeleteVideoByID: error getting rows affected %v", err)
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("DeleteVideoByID: no video found with ID: %s", id)
-	}
-	return nil
-}
 
 func UpdateVideo(v Video) error {
 	result, err := DB.Exec(`UPDATE videos SET 
-  title = ?, description = ?, video_hls = ?, thumbnail = ?, length = ?
+  title = ?, description = ?, video_hls = ?, thumbnail = ?, length = ?, duration = ?
   WHERE id = ?`,
-		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.ID)
+		v.Title, v.Description, v.VideoHLS, v.Thumbnail, v.Length, v.Duration, v.ID)
 	if err != nil {
 		return fmt.Errorf("UpdateVideo: %v", err)
 	}
@@ -125,6 +111,22 @@ func GetVideosCount(course_id, searchParam string) (int, error) {
 		return 0, fmt.Errorf("GetVideosCount: %v", err)
 	}
 	return count, nil
+}
+
+
+func DeleteVideoByID(id string) error {
+	result, err := DB.Exec("DELETE FROM videos WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No video found with the id %s", id)
+	}
+	return nil
 }
 
 

@@ -637,6 +637,34 @@ curl -X GET "http://localhost:8081/videos/feed/1?q=" \
 ]
 ```
 
+### Delete video
+```bash
+curl -X DELETE "http://localhost:8081/videos/1" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884"
+```
+### Delete video response
+```json
+204 No Content
+```
+
+### Update video request
+```bash
+curl -X PUT http://localhost:8081/videos \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=edit edit Data Structures" \
+  -F "description=edit edit Description for Data Structures" \
+  -F "id=4" \
+  -F "duration=edit edit 420" \
+  -F "thumbnail=@/home/agust/Pictures/test.png" \
+  -F "old_thumbnail=/web/uploads/thumbnails/b62d3919-0864-454c-bee3-e7c959c5b0a3.png" \
+  -F "old_video_hls=/web/uploads/videos/1/5b0f2475-6d88-4a75-bab1-284bdd375d29/master.m3u8" \
+  -F "video_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/test.mp4"
+```
+### Update video response
+```json
+200 OK
+```
 
 # Tests
 ## Users tests
