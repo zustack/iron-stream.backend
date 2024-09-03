@@ -1,65 +1,61 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"iron-stream/internal/utils"
 )
 
 type App struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	ProcessName string `json:"process_name"`
-	IsActive    bool   `json:"is_active"`
-	CreatedAt   string `json:"created_at"`
-}
-
-func GetAppsByIds(ids []int64) ([]App, error) {
-	var apps []App
-	for _, id := range ids {
-		var a App
-		row := DB.QueryRow(`SELECT name, process_name FROM apps WHERE id = ?`, id)
-		if err := row.Scan(&a.Name, &a.ProcessName); err != nil {
-			if err == sql.ErrNoRows {
-				return nil, fmt.Errorf("GetAppByID: %v: no such app", id)
-			}
-			return nil, fmt.Errorf("GetAppByID: %v: %v", id, err)
-		}
-		apps = append(apps, a)
-	}
-	return apps, nil
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	ProcessName    string `json:"process_name"`
+	IsActive       bool   `json:"is_active"`
+	ExecuteAlways  bool   `json:"execute_always"`
+	CreatedAt      string `json:"created_at"`
+	IsUserEnrolled bool   `json:"is_user_enrolled"`
 }
 
 func UpdateAppStatus(id, isActive string) error {
 	result, err := DB.Exec(`UPDATE apps SET is_active = ? WHERE id = ?`,
 		isActive, id)
 	if err != nil {
-		return fmt.Errorf("UpdateApp: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("UpdateApp: error getting rows affected %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("UpdateApp: no app found with ID: %s", id)
+		return fmt.Errorf("No apps found with the id %v", id)
 	}
 	return nil
 }
 
-func GetAppByID(id string) (App, error) {
-	var a App
-	row := DB.QueryRow(`SELECT * FROM apps WHERE id = ?`, id)
-	if err := row.Scan(&a.ID, &a.Name, &a.ProcessName, &a.IsActive, &a.CreatedAt); err != nil {
-		if err == sql.ErrNoRows {
-			return a, fmt.Errorf("GetAppByID: %s: no such app", id)
-		}
-		return a, fmt.Errorf("GetAppByID: %s: %v", id, err)
+func GetActiveApps() ([]App, error) {
+	var apps []App
+	rows, err := DB.Query(`SELECT process_name, name
+		FROM apps WHERE is_active = ?`, true)
+	if err != nil {
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
-	return a, nil
+	defer rows.Close()
+
+	for rows.Next() {
+		var a App
+		if err := rows.Scan(&a.ProcessName, &a.Name); err != nil {
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+		}
+		apps = append(apps, a)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	return apps, nil
 }
 
-// TODO fix the is_active NOT WORKING!
 func GetAdminApps(searchParam, isActiveParam string) ([]App, error) {
 	var apps []App
 	var args []interface{}
@@ -78,97 +74,67 @@ func GetAdminApps(searchParam, isActiveParam string) ([]App, error) {
 
 	rows, err := DB.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("GetApps: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
 		var a App
-		if err := rows.Scan(&a.ID, &a.Name, &a.ProcessName, &a.IsActive, &a.CreatedAt); err != nil {
-			return nil, fmt.Errorf("GetApps: %v", err)
+		if err := rows.Scan(&a.ID, &a.Name, &a.ProcessName, &a.IsActive, &a.ExecuteAlways, &a.CreatedAt); err != nil {
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		apps = append(apps, a)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetApps: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return apps, nil
 }
 
 func UpdateApp(app App) error {
 	result, err := DB.Exec(`UPDATE apps SET 
-  name = ?, process_name = ? , is_active = ? WHERE id = ?`,
-		app.Name, app.ProcessName, app.IsActive, app.ID)
+  name = ?, process_name = ? , is_active = ?, execute_always = ? WHERE id = ?`,
+		app.Name, app.ProcessName, app.IsActive, app.ExecuteAlways, app.ID)
 	if err != nil {
-		return fmt.Errorf("UpdateApp: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("UpdateApp: error getting rows affected %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("UpdateApp: no app found with ID: %d", app.ID)
+		return fmt.Errorf("No app found with the id %v", app.ID)
 	}
 	return nil
-}
-
-func GetActiveApps() ([]App, error) {
-	var apps []App
-	rows, err := DB.Query(`SELECT process_name, name
-		FROM apps WHERE is_active = ?`, true)
-	if err != nil {
-		return nil, fmt.Errorf("GetAppsByOsAndIsActive: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var a App
-		if err := rows.Scan(&a.ProcessName, &a.Name); err != nil {
-			return nil, fmt.Errorf("GetAppsByOsAndIsActive: %v", err)
-		}
-		apps = append(apps, a)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAppsByOsAndIsActive: %v", err)
-	}
-
-	return apps, nil
 }
 
 func DeleteAppByID(id string) error {
 	result, err := DB.Exec("DELETE FROM apps WHERE id = ?", id)
 	if err != nil {
-		return fmt.Errorf("DeleteAppByID: app id: %s: %v", id, err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("DeleteAppByID: error getting rows affected %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("DeleteAppByID: no app found with ID: %s", id)
+		return fmt.Errorf("No app found with the id %s", id)
 	}
 	return nil
 }
 
-func CreateApp(a App) (int64, error) {
+func CreateApp(a App) error {
 	date := utils.FormattedDate()
-	result, err := DB.Exec(`
+	_, err := DB.Exec(`
   INSERT INTO apps
-  (name, process_name, is_active, created_at) 
-  VALUES (?, ?, ?, ?)`,
-		a.Name, a.ProcessName, a.IsActive, date)
-
+  (name, process_name, is_active, execute_always, created_at) 
+  VALUES (?, ?, ?, ?, ?)`,
+		a.Name, a.ProcessName, a.IsActive, a.ExecuteAlways, date)
 	if err != nil {
-		return 0, fmt.Errorf("CreateApp: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("CreateApp: %v", err)
-	}
-
-	return id, nil
+	return nil
 }

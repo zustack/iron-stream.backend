@@ -737,6 +737,161 @@ curl -X PUT "http://localhost:8081/history/update" \
 200 OK
 ```
 
+## Apps
+### Create app request
+```bash
+curl -X POST "http://localhost:8081/apps/create" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" \
+     -d '{"name": "ZSH", "process_name": "zsh.app", "is_active": false, "execute_always": true}'
+```
+```json
+200 OK
+```
+
+### Delete app request
+```bash
+curl -X DELETE "http://localhost:8081/apps/delete/3" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" 
+```
+### Delete app response
+```json
+204 No Content
+```
+
+### Update app request
+```bash
+curl -X PUT "http://localhost:8081/apps/update" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" \
+     -d '{"id": 1, "name": "FireFox", "process_name": "firefox.app", "is_active": true, "execute_always": false}'
+```
+### Update app response
+```json
+200 OK
+```
+
+### Get admin apps request
+```bash
+curl -X GET "http://localhost:8081/apps/admin?q=&a=" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" | jq
+```
+### Get admin apps response
+```json
+[
+  {
+    "id": 4,
+    "name": "OBS",
+    "process_name": "obs.app",
+    "is_active": true,
+    "execute_always": false,
+    "created_at": "03/09/2024 14:24:22"
+  },
+  {
+    "id": 1,
+    "name": "FireFox",
+    "process_name": "firefox.app",
+    "is_active": true,
+    "execute_always": false,
+    "created_at": "03/09/2024 13:31:09"
+  }
+]
+```
+
+### Get forbidden apps request
+```bash
+curl -X GET "http://localhost:8081/apps/forbidden" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" | jq
+```
+### Get forbidden apps response
+```json
+[
+  {
+    "id": 0,
+    "name": "FireFox",
+    "process_name": "firefox.app",
+    "is_active": false,
+    "execute_always": false,
+    "created_at": ""
+  },
+  {
+    "id": 0,
+    "name": "OBS",
+    "process_name": "obs.app",
+    "is_active": false,
+    "execute_always": false,
+    "created_at": ""
+  }
+]
+```
+
+### Update app status request
+```bash
+curl -X PUT "http://localhost:8081/apps/update/status/5/false" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" 
+```
+
+### Update app status response
+```json
+200 OK
+```
+
+## User apps
+### Create user app
+```bash
+curl -X POST "http://localhost:8081/user/apps/create/1/5" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" 
+```
+### Get user apps(admin to get all the apps with field related)
+```bash
+curl -X GET "http://localhost:8081/user/apps/user/apps/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" | jq
+```
+### Get user apps response
+```json
+[
+  {
+    "id": 1,
+    "name": "FireFox",
+    "process_name": "firefox.app",
+    "is_active": false,
+    "execute_always": false,
+    "created_at": "",
+    "is_user_enrolled": false
+  },
+  {
+    "id": 4,
+    "name": "OBS",
+    "process_name": "obs.app",
+    "is_active": false,
+    "execute_always": false,
+    "created_at": "",
+    "is_user_enrolled": false
+  },
+  {
+    "id": 5,
+    "name": "ZSH",
+    "process_name": "zsh.app",
+    "is_active": false,
+    "execute_always": false,
+    "created_at": "",
+    "is_user_enrolled": true
+  }
+]
+```
+
+app.Delete("user/apps/delete/user/apps/:userId/:appId", middleware.NormalUser, handlers.DeleteUserAppsByCourseIdAndUserId)
+### Delete user app request
+```bash
+curl -X DELETE "http://localhost:8081/user/apps/delete/user/apps/1/5" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM"
+```
+### Delete user app response
+```json
+204 No Content
+```
+
+
 # Tests
 ## Users tests
 ```bash
@@ -748,6 +903,14 @@ go test ./api/handlers/users_test.go -v
 ## Run all the available tests 
 ```bash
 make test
+```
+
+## Files
+```bash
+cwebp image.jpg -o image.webp
+cwebp some-png.png -o image-png.webp
+cwebp -q 50 imagen.jpg -o imagen.webp
+du -h *
 ```
 
 # Deploy

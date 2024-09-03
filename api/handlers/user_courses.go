@@ -40,9 +40,9 @@ func DeleteAllUserCourses(c *fiber.Ctx) error {
 }
 
 func GetUserCourses(c *fiber.Ctx) error {
-	user := c.Locals("user").(*database.User)
+	userId := c.Params("userId")
 	q := c.Query("q", "")
-	courses, err := database.GetUserCourses(user.ID, q)
+	courses, err := database.GetUserCourses(userId, q)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),

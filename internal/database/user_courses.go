@@ -94,7 +94,7 @@ func UserCourseExists(userID int64, courseID string) (bool, error) {
 	return exists, nil
 }
 
-func GetUserCourses(userID int64, q string) ([]Course, error) {
+func GetUserCourses(userID, q string) ([]Course, error) {
 	query := `
 		SELECT 
 			c.id,
