@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 	"iron-stream/internal/database"
-	"os"
+	"iron-stream/internal/utils"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,42 +11,38 @@ import (
 )
 
 func Videos(c *fiber.Ctx) error {
-	var tokenString string
-	authorization := c.Get("Authorization")
-
-	if strings.HasPrefix(authorization, "Bearer ") {
-		tokenString = strings.TrimPrefix(authorization, "Bearer ")
-	} else if c.Cookies("token") != "" {
-		tokenString = c.Cookies("token")
-	}
+	tokenString := utils.ExtractTokenFromHeader(c.Get("Authorization"))
 
 	if tokenString == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "message": "You are not logged in"})
+		return c.Status(401).JSON(fiber.Map{
+			"error": "You are not logged in.",
+		})
 	}
 
-	tokenByte, err := jwt.Parse(tokenString, func(jwtToken *jwt.Token) (interface{}, error) {
-		if _, ok := jwtToken.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %s", jwtToken.Header["alg"])
-		}
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	})
-
+	token, err := utils.ParseAndValidateToken(tokenString)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "message": fmt.Sprintf("invalidate token: %v", err)})
+		return c.Status(401).JSON(fiber.Map{
+      "error": err.Error(),
+    })
 	}
 
-	claims, ok := tokenByte.Claims.(jwt.MapClaims)
-	if !ok || !tokenByte.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "message": "invalid token claim"})
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return c.Status(401).JSON(fiber.Map{
+      "error": "invalid token claim",
+    })
 	}
 
 	user, err := database.GetUserByID(fmt.Sprint(claims["sub"]))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "fail", "message": "El usuario con el token no exite"})
-	}
-
-	if float64(user.ID) != claims["sub"] {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": "the user belonging to this token no logger exists"})
+    if err.Error() == "No user found with id " + fmt.Sprint(claims["sub"]) {
+		  return c.Status(401).JSON(fiber.Map{
+        "error": "No user found with this token",
+      })
+    }
+		return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
 	}
 
 	c.Locals("user", &user)
@@ -64,7 +60,7 @@ func Videos(c *fiber.Ctx) error {
 		}
 		if !allowed {
 			return c.Status(401).JSON(fiber.Map{
-				"error": "You do not have permission to access this resource",
+			  "error": "You don't have permission to access this resource.",
 			})
 		}
 		return c.Next()

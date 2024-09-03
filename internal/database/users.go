@@ -62,6 +62,7 @@ func UpdateEmailToken(email string, email_token int) error {
 	return nil
 }
 
+// !
 func GetUserByID(id string) (User, error) {
 	var u User
 	row := DB.QueryRow(`SELECT * FROM users WHERE id = ?`, id)
@@ -69,14 +70,13 @@ func GetUserByID(id string) (User, error) {
 		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
 		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return u, fmt.Errorf("GetUserByID%s: no such user", id)
+			return u, fmt.Errorf("No user found with id %s", id)
 		}
-		return u, fmt.Errorf("GetUserByID: %s: %v", id, err)
+		return u, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return u, nil
 }
 
-// !
 func UpdateAdminStatus(userId, isAdmin string) error {
 	result, err := DB.Exec(`UPDATE users SET is_admin = ? WHERE id = ?`, isAdmin, userId)
 	if err != nil {
