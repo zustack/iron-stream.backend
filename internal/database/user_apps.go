@@ -118,7 +118,7 @@ func CreateUserApp(userId, appId string) error {
 func GetUserApps(userId int64) ([]App, error) {
 	var apps []App
 	query := `
-        SELECT a.name, a.process_name
+        SELECT a.name, a.process_name, a.execute_always 
         FROM user_apps ua
         JOIN apps a ON ua.app_id = a.id
         WHERE ua.user_id = ?;
@@ -131,7 +131,7 @@ func GetUserApps(userId int64) ([]App, error) {
 
 	for rows.Next() {
 		var a App
-		if err := rows.Scan(&a.ProcessName, &a.Name); err != nil {
+		if err := rows.Scan(&a.ProcessName, &a.Name, &a.ExecuteAlways); err != nil {
 			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		apps = append(apps, a)

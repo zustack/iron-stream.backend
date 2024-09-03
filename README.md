@@ -743,7 +743,7 @@ curl -X PUT "http://localhost:8081/history/update" \
 curl -X POST "http://localhost:8081/apps/create" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" \
-     -d '{"name": "ZSH", "process_name": "zsh.app", "is_active": false, "execute_always": true}'
+     -d '{"name": "OBS", "process_name": "obs", "is_active": true, "execute_always": true}'
 ```
 ```json
 200 OK
@@ -751,7 +751,7 @@ curl -X POST "http://localhost:8081/apps/create" \
 
 ### Delete app request
 ```bash
-curl -X DELETE "http://localhost:8081/apps/delete/3" \
+curl -X DELETE "http://localhost:8081/apps/delete/6" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" 
 ```
 ### Delete app response
@@ -759,14 +759,14 @@ curl -X DELETE "http://localhost:8081/apps/delete/3" \
 204 No Content
 ```
 
-### Update app request
+### Update app status request
 ```bash
 curl -X PUT "http://localhost:8081/apps/update" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" \
-     -d '{"id": 1, "name": "FireFox", "process_name": "firefox.app", "is_active": true, "execute_always": false}'
+     -d '{"id": 6, "name": "obs", "process_name": "obs", "is_active": true, "execute_always": true}'
 ```
-### Update app response
+### Update app status response
 ```json
 200 OK
 ```
@@ -832,6 +832,17 @@ curl -X PUT "http://localhost:8081/apps/update/status/5/false" \
 ```
 
 ### Update app status response
+```json
+200 OK
+```
+
+### Update app ea status request
+```bash
+curl -X PUT "http://localhost:8081/apps/update/ea/7/false" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" 
+```
+
+### Update app ea status response
 ```json
 200 OK
 ```

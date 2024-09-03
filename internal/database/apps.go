@@ -15,6 +15,23 @@ type App struct {
 	IsUserEnrolled bool   `json:"is_user_enrolled"`
 }
 
+func UpdateAppEa(id, isActive string) error {
+	result, err := DB.Exec(`UPDATE apps SET execute_always = ? WHERE id = ?`,
+		isActive, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No apps found with the id %v", id)
+	}
+	return nil
+}
+
 func UpdateAppStatus(id, isActive string) error {
 	result, err := DB.Exec(`UPDATE apps SET is_active = ? WHERE id = ?`,
 		isActive, id)
@@ -34,7 +51,7 @@ func UpdateAppStatus(id, isActive string) error {
 
 func GetActiveApps() ([]App, error) {
 	var apps []App
-	rows, err := DB.Query(`SELECT process_name, name
+	rows, err := DB.Query(`SELECT process_name, name, execute_always
 		FROM apps WHERE is_active = ?`, true)
 	if err != nil {
 		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
@@ -43,7 +60,7 @@ func GetActiveApps() ([]App, error) {
 
 	for rows.Next() {
 		var a App
-		if err := rows.Scan(&a.ProcessName, &a.Name); err != nil {
+		if err := rows.Scan(&a.ProcessName, &a.Name, &a.ExecuteAlways); err != nil {
 			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		apps = append(apps, a)

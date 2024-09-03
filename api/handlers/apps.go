@@ -7,6 +7,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func UpdateAppEa(c *fiber.Ctx) error {
+	appId := c.Params("id")
+	ea := c.Params("ea")
+	err := database.UpdateAppEa(appId, ea)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(200)
+}
+
 func UpdateAppStatus(c *fiber.Ctx) error {
 	appId := c.Params("id")
 	isActive := c.Params("isActive")
