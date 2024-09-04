@@ -70,59 +70,20 @@ func GetLastVideoByUserIdAndCourseId(user_id int64, course_id string) (History, 
 }
 
 func GetUserHistory(user_id int64) ([]History, error) {
-	var histories []History
-	rows, err := DB.Query(`SELECT 
-    *
-    FROM history WHERE user_id = ?`, user_id)
+	var hs []History
+	rows, err := DB.Query(`SELECT * FROM history WHERE user_id = ?`, user_id)
 	if err != nil {
-		return histories, fmt.Errorf("GetUserHistory: %v", err)
+		return hs, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var history History
-		if err := rows.Scan(&history.ID, &history.VideoId, &history.CourseId, &history.UserId, &history.VideoResume, &history.CreatedAt); err != nil {
-			return histories, fmt.Errorf("GetUserHistory: %v", err)
+		var h History
+		if err := rows.Scan(&h.ID, &h.VideoId, &h.CourseId, &h.UserId, &h.VideoResume, &h.CreatedAt); err != nil {
+			return hs, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
-		histories = append(histories, history)
+		hs = append(hs, h)
 	}
-	return histories, nil
-}
-
-func GetUserUniqueHistory(user_id int64) ([]History, error) {
-	var histories []History
-
-	query := `
-    SELECT video_id, video_resume
-    FROM history
-    WHERE user_id = ?
-    AND (video_id, created_at) IN (
-        SELECT video_id, MAX(created_at)
-        FROM history
-        WHERE user_id = ?
-        GROUP BY video_id
-    )
-    ORDER BY created_at DESC
-  `
-
-	rows, err := DB.Query(query, user_id, user_id)
-	if err != nil {
-		return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var history History
-		if err := rows.Scan(&history.VideoId, &history.VideoResume); err != nil {
-			return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
-		}
-		histories = append(histories, history)
-	}
-
-	if err := rows.Err(); err != nil {
-		return histories, fmt.Errorf("GetUserUniqueHistory: %v", err)
-	}
-
-	return histories, nil
+	return hs, nil
 }
 
 func CreateHistory(userId, videoId int64, courseId string, resume string) (History, error) {

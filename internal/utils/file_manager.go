@@ -90,3 +90,34 @@ func GetVideoLength(filePath string) (string, error) {
 	length := strings.Trim(string(output), "\n")
 	return length, nil
 }
+
+func ManageFile(file *multipart.FileHeader) (string, error) {
+	staticPath := "/web/uploads/files"
+	thumbnailsDir := filepath.Join(os.Getenv("ROOT_PATH"), staticPath)
+	err := os.MkdirAll(thumbnailsDir, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	id := uuid.New()
+	fileName := fmt.Sprintf("%s%s", id, filepath.Ext(file.Filename))
+	filePath := filepath.Join(thumbnailsDir, fileName)
+
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		return "", err
+	}
+
+	return staticPath + "/" + fileName, nil
+}

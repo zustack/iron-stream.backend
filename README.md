@@ -891,7 +891,6 @@ curl -X GET "http://localhost:8081/user/apps/user/apps/1" \
 ]
 ```
 
-app.Delete("user/apps/delete/user/apps/:userId/:appId", middleware.NormalUser, handlers.DeleteUserAppsByCourseIdAndUserId)
 ### Delete user app request
 ```bash
 curl -X DELETE "http://localhost:8081/user/apps/delete/user/apps/1/5" \
@@ -902,6 +901,64 @@ curl -X DELETE "http://localhost:8081/user/apps/delete/user/apps/1/5" \
 204 No Content
 ```
 
+## Files
+### Create file
+```bash
+curl -X POST http://localhost:8081/files \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDEzNzIsImlhdCI6MTcyNTQwOTM3MiwibmJmIjoxNzI1NDA5MzcyLCJzdWIiOjF9.sjhoW7xJcSsBcC4XqVYDyqGyas74OGwLz7dPobmmIjc" \
+  -H "Content-Type: multipart/form-data" \
+  -F "videoID=1" \
+  -F "page=1" \
+  -F "path=@/home/agust/Pictures/test.png"
+```
+### Create video response
+```json
+200 OK
+```
+
+### Get files request
+```bash
+curl -X GET "http://localhost:8081/files/2/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
+```
+### Get files response
+```json
+{
+  "files": [
+    {
+      "id": 1,
+      "path": "/web/uploads/files/43fb91b7-ecd6-4e0e-a43a-7ff0c55753a7.svg",
+      "video_id": "2",
+      "page": "1",
+      "created_at": "03/09/2024 22:13:59"
+    },
+    {
+      "id": 2,
+      "path": "/web/uploads/files/4ff3de3f-a344-4bd5-ad55-9fabd992b0d4.svg",
+      "video_id": "2",
+      "page": "1",
+      "created_at": "03/09/2024 22:27:57"
+    },
+    {
+      "id": 3,
+      "path": "/web/uploads/files/2d883b7d-cae3-4e74-9aa8-5267725d55a1.svg",
+      "video_id": "2",
+      "page": "1",
+      "created_at": "03/09/2024 22:28:20"
+    }
+  ],
+  "pageCount": 1
+}
+```
+### Delete file request
+```bash
+curl -X DELETE "http://localhost:8081/files/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzMwNDAsImlhdCI6MTcyNTM4MTA0MCwibmJmIjoxNzI1MzgxMDQwLCJzdWIiOjF9.e4RGUkZS75k8KkCNpczLhtl7mCtpMBz0EVXWH2fdZSM" | jq
+```
+### Delete file response
+```json
+204 No Content
+```
 
 # Tests
 ## Users tests

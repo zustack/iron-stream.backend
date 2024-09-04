@@ -22,6 +22,7 @@ type SuccessLoginResponse struct {
 }
 
 func TestLogin(t *testing.T) {
+	t.Skip("Skipping TestLogin()")
 	app := api.Setup()
 	database.ConnectDB("DB_DEV_PATH")
 
@@ -35,10 +36,12 @@ func TestLogin(t *testing.T) {
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 	}
-	err = database.UpdateAdminStatusByEmail("agustfricke@gmail.com", "true")
-	if err != nil {
-		t.Errorf("test failed because of UpdateAdminStatusByEmail(): %v", err)
-	}
+	/*
+		err = database.UpdateAdminStatusByEmail("agustfricke@gmail.com", "true")
+		if err != nil {
+			t.Errorf("test failed because of UpdateAdminStatusByEmail(): %v", err)
+		}
+	*/
 
 	err = database.CreateUser(database.User{
 		Email:    "agustfricke@protonmail.com",

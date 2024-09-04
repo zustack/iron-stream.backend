@@ -36,7 +36,7 @@ func GetEnrolledUserApps(userID, q string) ([]App, error) {
 			user_apps ua
 		ON 
 			a.id = ua.app_id
-			AND ua.user_id = $1
+			AND ua.user_id = ?
 		WHERE 
 		  LOWER(a.name) LIKE '%' || LOWER(?) || '%' 
 			OR LOWER(a.process_name) LIKE '%' || LOWER(?) || '%';`
@@ -71,21 +71,8 @@ func GetEnrolledUserApps(userID, q string) ([]App, error) {
 }
 
 func CreateUserApp(userId, appId string) error {
-	tx, err := DB.Begin()
-	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
 	var userExists bool
-	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)`,
+	err := DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)`,
 		userId).Scan(&userExists)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -95,7 +82,7 @@ func CreateUserApp(userId, appId string) error {
 	}
 
 	var appExists bool
-	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM apps WHERE id = ?)`,
+	err = DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM apps WHERE id = ?)`,
 		appId).Scan(&appExists)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -105,7 +92,7 @@ func CreateUserApp(userId, appId string) error {
 	}
 
 	date := utils.FormattedDate()
-	_, err = tx.Exec(`
+	_, err = DB.Exec(`
     INSERT INTO user_apps (user_id, app_id, created_at) VALUES (?, ?, ?)`,
 		userId, appId, date)
 	if err != nil {

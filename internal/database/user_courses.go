@@ -50,32 +50,6 @@ func DeleteAllUserCourses() error {
 	return nil
 }
 
-func GetUserCourseIds(userID string) ([]int64, error) {
-	var courseIDs []int64
-	rows, err := DB.Query(`
-		SELECT uc.course_id FROM user_courses uc
-		WHERE uc.user_id = ?;
-	`, userID)
-	if err != nil {
-		return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var courseID int64
-		if err := rows.Scan(&courseID); err != nil {
-			return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
-		}
-		courseIDs = append(courseIDs, courseID)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetUserCourseIDs: %v", err)
-	}
-
-	return courseIDs, nil
-}
-
 func UserCourseExists(userID int64, courseID string) (bool, error) {
 	query := `
 		SELECT EXISTS(
@@ -83,11 +57,10 @@ func UserCourseExists(userID int64, courseID string) (bool, error) {
 			FROM user_courses 
 			WHERE user_id = ? AND course_id = ?
 		);`
-
 	var exists bool
 	err := DB.QueryRow(query, userID, courseID).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	return exists, nil
@@ -118,7 +91,7 @@ func GetUserCourses(userID, q string) ([]Course, error) {
 			user_courses uc 
 		ON 
 			c.id = uc.course_id 
-			AND uc.user_id = $1
+			AND uc.user_id = ?
 		WHERE 
 		  LOWER(c.title) LIKE '%' || LOWER(?) || '%' 
 			OR LOWER(c.author) LIKE '%' || LOWER(?) || '%'
@@ -128,7 +101,7 @@ func GetUserCourses(userID, q string) ([]Course, error) {
 
 	rows, err := DB.Query(query, userID, q, q, q, q, q)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
 
@@ -152,34 +125,21 @@ func GetUserCourses(userID, q string) ([]Course, error) {
 			&course.IsUserEnrolled,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		courses = append(courses, course)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
 	return courses, nil
 }
 
 func CreateUserCourse(userID, courseID string) error {
-	tx, err := DB.Begin()
-	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
 	var userExists bool
-	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)`,
+	err := DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)`,
 		userID).Scan(&userExists)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -189,7 +149,7 @@ func CreateUserCourse(userID, courseID string) error {
 	}
 
 	var courseExists bool
-	err = tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)`,
+	err = DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)`,
 		courseID).Scan(&courseExists)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -199,7 +159,8 @@ func CreateUserCourse(userID, courseID string) error {
 	}
 
 	date := utils.FormattedDate()
-	_, err = tx.Exec(`
+
+	_, err = DB.Exec(`
     INSERT INTO user_courses (user_id, course_id, created_at) VALUES (?, ?, ?)`,
 		userID, courseID, date)
 	if err != nil {

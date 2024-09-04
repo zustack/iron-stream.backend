@@ -26,7 +26,7 @@ func GetVideoById(videoId string) (Video, error) {
 	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
 		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return v, fmt.Errorf("No video found with id: %v", videoId)
+			return v, fmt.Errorf("No video found with id %s", videoId)
 		}
 		return v, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
@@ -138,12 +138,15 @@ func GetFeed(userId int64, courseId, searchParam string) ([]Video, error) {
 			)
 		WHERE
 			v.course_id = ? 
-			AND (v.title LIKE ? OR v.description LIKE ?)
+			AND (
+		    LOWER(v.title) LIKE '%' || LOWER(?) || '%' 
+			  OR LOWER(v.description) LIKE '%' || LOWER(?) || '%'
+      )
 		ORDER BY
 			v.id;
 	`
 
-	rows, err := DB.Query(query, userId, userId, courseId, "%"+searchParam+"%", "%"+searchParam+"%")
+	rows, err := DB.Query(query, userId, userId, courseId, searchParam, searchParam)
 	if err != nil {
 		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}

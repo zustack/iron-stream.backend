@@ -25,12 +25,14 @@ func UpdateHistory(c *fiber.Ctx) error {
 	var payload Payload
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"error": "No se pudo procesar la solicitud.",
+			"error": err.Error(),
 		})
 	}
 	err := database.UpdateHistory(payload.Id, payload.Resume)
 	if err != nil {
-		return c.SendStatus(500)
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 	return c.SendStatus(200)
 }

@@ -92,7 +92,6 @@ CREATE TABLE files (
   path VARCHAR(255) NOT NULL,
   page INTEGER NOT NULL,
   video_id INTEGER NOT NULL, 
-  sort_order INTEGER, 
   created_at VARCHAR(40) NOT NULL
 );
 

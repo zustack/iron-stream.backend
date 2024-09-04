@@ -120,7 +120,7 @@ func CreateVideo(input CreateVideoInput) (database.Video, error) {
 		return database.Video{}, fmt.Errorf("The description is required.")
 	}
 	if len(input.Description) > 150 {
-		return database.Video{}, fmt.Errorf("The title should not have more than 150 characters.")
+		return database.Video{}, fmt.Errorf("The description should not have more than 150 characters.")
 	}
 
 	if input.Duration == "" {

@@ -21,27 +21,27 @@ func AdminUser(c *fiber.Ctx) error {
 	token, err := utils.ParseAndValidateToken(tokenString)
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{
-      "error": err.Error(),
-    })
+			"error": err.Error(),
+		})
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
 		return c.Status(401).JSON(fiber.Map{
-      "error": "invalid token claim",
-    })
+			"error": "invalid token claim",
+		})
 	}
 
 	user, err := database.GetUserByID(fmt.Sprint(claims["sub"]))
 	if err != nil {
-    if err.Error() == "No user found with id " + fmt.Sprint(claims["sub"]) {
-		  return c.Status(401).JSON(fiber.Map{
-        "error": "No user found with this token",
-      })
-    }
+		if err.Error() == "No user found with id "+fmt.Sprint(claims["sub"]) {
+			return c.Status(401).JSON(fiber.Map{
+				"error": "No user found with this token",
+			})
+		}
 		return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
+			"error": err.Error(),
+		})
 	}
 
 	if !user.IsAdmin {

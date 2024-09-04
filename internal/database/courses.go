@@ -7,21 +7,19 @@ import (
 )
 
 type Course struct {
-	ID          int64  `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Author      string `json:"author"`
-	Thumbnail   string `json:"thumbnail"`
-	Preview     string `json:"preview"`
-	Rating      int    `json:"rating"`
-	NumReviews  int    `json:"num_reviews"`
-	Duration    string `json:"duration"`
-	IsActive    bool   `json:"is_active"`
-	SortOrder   int    `json:"sort_order"`
-	CreatedAt   string `json:"created_at"`
-
-	// not in db
-	IsUserEnrolled bool `json:"is_user_enrolled"`
+	ID             int64  `json:"id"`
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	Author         string `json:"author"`
+	Thumbnail      string `json:"thumbnail"`
+	Preview        string `json:"preview"`
+	Rating         int    `json:"rating"`
+	NumReviews     int    `json:"num_reviews"`
+	Duration       string `json:"duration"`
+	IsActive       bool   `json:"is_active"`
+	SortOrder      int    `json:"sort_order"`
+	CreatedAt      string `json:"created_at"`
+	IsUserEnrolled bool   `json:"is_user_enrolled"`
 }
 
 func GetCourses(isActive string, searchTerm string) ([]Course, error) {
@@ -145,29 +143,18 @@ func UpdateCourse(c Course) error {
 }
 
 func CreateCourse(c Course) error {
-	date := utils.FormattedDate()
-	tx, err := DB.Begin()
-	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-	defer tx.Rollback()
-
 	var maxSortOrder int
-	err = tx.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
+	err := DB.QueryRow("SELECT COALESCE(MAX(sort_order), 0) FROM courses").Scan(&maxSortOrder)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
-
-	_, err = tx.Exec(`
+	date := utils.FormattedDate()
+	_, err = DB.Exec(`
         INSERT INTO courses
         (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
 	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-
-	if err = tx.Commit(); err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 

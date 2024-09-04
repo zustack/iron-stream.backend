@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 
@@ -70,6 +71,7 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 					"error": err.Error(),
 				})
 			}
+
 			err = database.UpdateVideoViews(video.ID)
 			if err != nil {
 				return c.Status(500).JSON(fiber.Map{
@@ -84,10 +86,18 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 				})
 			}
 
+			isFile, err := database.FileExistsByVideoId(video.ID)
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{
+					"error": err.Error(),
+				})
+			}
+
 			return c.Status(200).JSON(fiber.Map{
 				"video":      video,
 				"resume":     "",
 				"history_id": "",
+				"isFile":     isFile,
 			})
 
 		} else {
@@ -111,10 +121,18 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 		})
 	}
 
+	isFile, err := database.FileExistsByVideoId(video.ID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
 		"video":      video,
 		"resume":     record.VideoResume,
 		"history_id": record.ID,
+		"isFile":     isFile,
 	})
 
 }
@@ -175,7 +193,8 @@ func GetFeed(c *fiber.Ctx) error {
 	searchParam := c.Query("q", "")
 	videos, err := database.GetFeed(user.ID, courseId, searchParam)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		fmt.Println("the f error", err)
+		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}

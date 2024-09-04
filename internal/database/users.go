@@ -25,44 +25,21 @@ type User struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-func UpdateAdminStatusByEmail(email, isAdmin string) error {
-	_, err := DB.Exec(`UPDATE users SET is_admin = ? WHERE email = ?`, isAdmin, email)
-	if err != nil {
-		return fmt.Errorf("UpdateAdminStatus: %v", err)
-	}
-	return nil
-}
-
-func GetUserIds() ([]User, error) {
-	var ids []User
-	rows, err := DB.Query(`SELECT ID FROM users`)
-	if err != nil {
-		return nil, fmt.Errorf("GetUserIds: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(&i.ID); err != nil {
-			return nil, fmt.Errorf("GetUserIds: %v", err)
-		}
-		ids = append(ids, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetUserIds: %v", err)
-	}
-	return ids, nil
-}
-
 func UpdateEmailToken(email string, email_token int) error {
-	_, err := DB.Exec(`UPDATE users SET email_token = ? WHERE email = ?`, email_token, email)
+	result, err := DB.Exec(`UPDATE users SET email_token = ? WHERE email = ?`, email_token, email)
 	if err != nil {
-		return fmt.Errorf("UpdateEmailToken: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No account found with the email %s", email)
 	}
 	return nil
 }
 
-// !
 func GetUserByID(id string) (User, error) {
 	var u User
 	row := DB.QueryRow(`SELECT * FROM users WHERE id = ?`, id)

@@ -8,82 +8,80 @@ import (
 type File struct {
 	ID        int64  `json:"id"`
 	Path      string `json:"path"`
-	VideoID   int64  `json:"video_id"`
-	Page      int64  `json:"page"`
-	SortOrder int64  `json:"sort_order"`
+	VideoID   string `json:"video_id"`
+	Page      string `json:"page"`
 	CreatedAt string `json:"created_at"`
 }
 
-func DeleteFileByID(id int64) error {
+func FileExistsByVideoId(videoId int64) (bool, error) {
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM files WHERE video_id = ?)"
+	err := DB.QueryRow(query, videoId).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func DeleteFileByID(id string) error {
 	result, err := DB.Exec("DELETE FROM files WHERE id = ?", id)
 	if err != nil {
-		return fmt.Errorf("DeleteFileByID: video id: %d: %v", id, err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("DeleteFileByID: error getting rows affected %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("DeleteFileByID: no file found with ID: %d", id)
+		return fmt.Errorf("No video found with the id %s", id)
 	}
 	return nil
 }
 
-func GetTotalPagesByVideoId(video_id int64) (int, error) {
+func GetTotalPagesByVideoId(video_id string) (int, error) {
 	var total int
-	// SELECT COUNT(DISTINCT page) AS total_pages FROM files WHERE video_id = 8;
-	row := DB.QueryRow(`SELECT COUNT(DISTINCT page) AS total_pages FROM files WHERE video_id = ?;`, video_id)
+	row := DB.QueryRow(`SELECT COUNT(DISTINCT page) AS total_pages 
+  FROM files WHERE video_id = ?;`, video_id)
 	if err := row.Scan(&total); err != nil {
-		return 0, fmt.Errorf("GetTotalPagesByVideoId: %v", err)
+		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return total, nil
 }
 
-func GetFiles(video_id, page int64) ([]File, error) {
+func GetFiles(videoID, page string) ([]File, error) {
 	var files []File
 	rows, err := DB.Query(`SELECT * FROM files
   WHERE video_id = ? AND page = ? 
-  ORDER BY sort_order`,
-		video_id, page)
+  ORDER BY id`,
+		videoID, page)
 	if err != nil {
-		return nil, fmt.Errorf("GetFiles: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var f File
-		if err := rows.Scan(&f.ID, &f.Path, &f.Page, &f.VideoID, &f.SortOrder, &f.CreatedAt); err != nil {
-			return nil, fmt.Errorf("GetFiles: %v", err)
+		if err := rows.Scan(&f.ID, &f.Path, &f.Page, &f.VideoID, &f.CreatedAt); err != nil {
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		files = append(files, f)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetFiles: %v", err)
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	return files, nil
 }
 
-func CreateFile(f File) (int64, error) {
+func CreateFile(f File) error {
 	date := utils.FormattedDate()
-	result, err := DB.Exec(`
-  INSERT INTO files
-  (path, video_id, page, sort_order, created_at) 
-  VALUES (?, ?, ?, ?, ?)`,
-		f.Path, f.VideoID, f.Page, 0, date)
+	_, err := DB.Exec(`INSERT INTO files
+   (path, video_id, page, created_at) 
+    VALUES (?, ?, ?, ?)`,
+		f.Path, f.VideoID, f.Page, date)
 
 	if err != nil {
-		return 0, fmt.Errorf("CreateFile: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("CreateFile: %v", err)
-	}
-
-	_, err = DB.Exec("UPDATE files SET sort_order = ? WHERE id = ?", id, id)
-	if err != nil {
-		return 0, fmt.Errorf("CreateFile/updateSortOrder: %v", err)
-	}
-
-	return id, nil
+	return nil
 }
