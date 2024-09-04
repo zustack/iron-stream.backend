@@ -959,6 +959,77 @@ curl -X DELETE "http://localhost:8081/files/1" \
 ```json
 204 No Content
 ```
+curl -X POST http://localhost:8081/courses/create \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
+  -H "Content-Type: multipart/form-data" \
+  -F "title=Data Structures" \
+  -F "description=Description for Data Structures 2222" \
+  -F "author=agustfricke foo" \
+  -F "duration=4 hours, 20 minutes" \
+  -F "is_active=true" \
+  -F "thumbnail=@/home/agust/Pictures/test.png" \
+  -F "preview_tmp="
+
+## Reviews
+### Create review request
+```bash
+curl -X POST "http://localhost:8081/reviews" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
+  -d '{
+    "course_id": "2",
+    "description": "I like this course v2",
+    "rating": 4.3
+  }'
+```
+### Create review response
+```json
+200 OK
+```
+
+### Admin reviews
+```bash
+curl -X GET "http://localhost:8081/reviews/admin?q=v2&p=" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
+```
+### Admin reviews response
+```json
+[
+  {
+    "id": 2,
+    "course_id": 2,
+    "user_id": 1,
+    "author": "Agustin Fricke",
+    "description": "I like this course v2",
+    "rating": 4.3,
+    "public": false,
+    "course_title": "Data Structures",
+    "created_at": "04/09/2024 12:30:44"
+  }
+]
+```
+
+### Reviews public by course id
+```bash
+curl -X GET "http://localhost:8081/reviews/public/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
+```
+
+```json
+[
+  {
+    "id": 2,
+    "course_id": 2,
+    "user_id": 1,
+    "author": "Agustin Fricke",
+    "description": "I like this course v2",
+    "rating": 4.3,
+    "public": true,
+    "course_title": "Data Structures",
+    "created_at": "04/09/2024 12:30:44"
+  }
+]
+```
 
 # Tests
 ## Users tests
