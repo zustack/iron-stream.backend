@@ -17,6 +17,37 @@ type Review struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+func DeleteReview(id string) error {
+	result, err := DB.Exec(`DELETE FROM reviews WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No review found with the id %v", id)
+	}
+	return nil
+
+}
+
+func UpdatePublicStatus(public, id string) error {
+	result, err := DB.Exec(`UPDATE reviews SET public = ? WHERE id = ?`, public, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No review found with the id %v", id)
+	}
+	return nil
+}
+
 func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 	var reviews []Review
 	query := `
@@ -61,7 +92,7 @@ func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 func GetPublicReviewsByCourseId(courseId string) ([]Review, error) {
   var reviews []Review
   rows, err := DB.Query(`SELECT * FROM reviews 
-  WHERE course_id = ? AND public = true;`, courseId)
+  WHERE course_id = ? AND public = 1;`, courseId)
   if err != nil {
     return nil, fmt.Errorf("An unexpected error occurred: %v", err)
   }

@@ -7,6 +7,29 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func DeleteReview(c *fiber.Ctx) error {
+  id := c.Params("id")
+  err := database.DeleteReview(id)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(204)
+}
+
+func UpdatePublicStatus(c *fiber.Ctx) error {
+  public := c.Params("public")
+  id := c.Params("id")
+  err := database.UpdatePublicStatus(public, id)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+  return c.SendStatus(200)
+}
+
 func GetAdminReviews(c *fiber.Ctx) error {
 	searchParam := c.Query("q", "")
 	publicParam := c.Query("p", "")

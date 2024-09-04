@@ -989,7 +989,7 @@ curl -X POST "http://localhost:8081/reviews" \
 
 ### Admin reviews
 ```bash
-curl -X GET "http://localhost:8081/reviews/admin?q=v2&p=" \
+curl -X GET "http://localhost:8081/reviews/admin?q=&p=" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
 ```
 ### Admin reviews response
@@ -1029,6 +1029,26 @@ curl -X GET "http://localhost:8081/reviews/public/1" \
     "created_at": "04/09/2024 12:30:44"
   }
 ]
+```
+
+### Update public status  request
+```bash
+curl -X PUT "http://localhost:8081/reviews/update/public/1/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk"
+```
+### Update public status response
+```json
+200 OK
+```
+
+### Delete Review request
+```bash
+curl -X DELETE "http://localhost:8081/reviews/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk"
+```
+### Delete Review response
+```json
+204 No Content
 ```
 
 # Tests
