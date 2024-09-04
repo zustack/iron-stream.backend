@@ -61,10 +61,10 @@ func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 	`
 
 	if isPublic != "" {
-    if isPublic == "1" {
-      query += " AND reviews.public = 1"
+    if isPublic == "true" {
+      query += " AND reviews.public = 'true'"
     } else {
-      query += " AND reviews.public = 0"
+      query += " AND reviews.public = 'false'"
     }
 	}
 
@@ -92,7 +92,7 @@ func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 func GetPublicReviewsByCourseId(courseId string) ([]Review, error) {
   var reviews []Review
   rows, err := DB.Query(`SELECT * FROM reviews 
-  WHERE course_id = ? AND public = 1;`, courseId)
+  WHERE course_id = ? AND public = 'true'`, courseId)
   if err != nil {
     return nil, fmt.Errorf("An unexpected error occurred: %v", err)
   }

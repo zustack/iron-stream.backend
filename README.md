@@ -60,6 +60,8 @@ make run
 ```
 
 # Endpoints
+curl -X GET "http://localhost:8081/reviews/admin?q=&p=false" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
 
 ## Users endpoints
 ### Signup request

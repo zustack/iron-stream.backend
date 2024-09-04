@@ -43,6 +43,7 @@ func GetAdminReviews(c *fiber.Ctx) error {
 }
 
 func GetPublicReviewsByCourseId(c *fiber.Ctx) error {
+  user := c.Locals("user").(*database.User)
   courseId := c.Params("courseId")
   reviews, err := database.GetPublicReviewsByCourseId(courseId)
   if err != nil {
@@ -50,7 +51,34 @@ func GetPublicReviewsByCourseId(c *fiber.Ctx) error {
       "error": err.Error(),
     })
   }
-  return c.JSON(reviews)
+
+
+  userHasReviewed, err := database.UserReviewExists(user.ID, courseId)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+	userHasAccess, err := database.UserCourseExists(user.ID, courseId)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+  show := !userHasReviewed && userHasAccess
+
+
+	response := struct {
+		Data       []database.Review `json:"data"`
+		Show bool `json:"show"`
+	}{
+		Data:       reviews,
+    Show: show,
+	}
+
+  return c.JSON(response)
 }
 
 func CreateReview(c *fiber.Ctx) error {
