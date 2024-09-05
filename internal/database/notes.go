@@ -6,12 +6,12 @@ import (
 )
 
 type Note struct {
-	ID             int64  `json:"id"`
-  Body           string `json:"body"`
-  VideoTitle     string `json:"video_title"`
-  Time           string `json:"time"`
-  CourseID       string `json:"course_id"`
-  UserID         int64  `json:"user_id"`
+	ID         int64  `json:"id"`
+	Body       string `json:"body"`
+	VideoTitle string `json:"video_title"`
+	Time       string `json:"time"`
+	CourseID   string `json:"course_id"`
+	UserID     int64  `json:"user_id"`
 }
 
 func GetNoteOwner(id string) (int64, error) {
@@ -27,7 +27,7 @@ func GetNoteOwner(id string) (int64, error) {
 }
 
 func DeleteNoteById(id string) error {
-  // check that the user owns the note!
+	// check that the user owns the note!
 	result, err := DB.Exec("DELETE FROM notes WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -87,7 +87,7 @@ func CreateNote(n Note) error {
   INSERT INTO notes
   (body, video_title, time, course_id, user_id) 
   VALUES (?, ?, ?, ?, ?)`,
-    n.Body, n.VideoTitle, n.Time, n.CourseID, n.UserID)
+		n.Body, n.VideoTitle, n.Time, n.CourseID, n.UserID)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}

@@ -3,9 +3,16 @@ package inputs
 import (
 	"fmt"
 	"iron-stream/internal/database"
+	"math"
 )
 
-func CreateNote(input database.Note) (database.Note, error) {
+type CreateNotePayload struct {
+	Body       string  `json:"body"`
+	VideoTitle string  `json:"video_title"`
+	Time       float64 `json:"time"`
+}
+
+func CreateNote(input CreateNotePayload) (database.Note, error) {
 	if input.Body == "" {
 		return database.Note{}, fmt.Errorf("The body is required.")
 	}
@@ -20,16 +27,13 @@ func CreateNote(input database.Note) (database.Note, error) {
 		return database.Note{}, fmt.Errorf("The video title should not have more than 255 characters.")
 	}
 
-	if input.Time == "" {
-		return database.Note{}, fmt.Errorf("The video time is required.")
-	}
-	if len(input.Time) > 50 {
-		return database.Note{}, fmt.Errorf("The video time should not have more than 50 characters.")
-	}
+	minutes := int(math.Floor(input.Time / 60))
+	remainingSeconds := int(math.Floor(math.Mod(input.Time, 60)))
+	noteTime := fmt.Sprintf("%02d:%02d", minutes, remainingSeconds)
 
 	return database.Note{
-    Body:       input.Body,
-    VideoTitle: input.VideoTitle,
-    Time:       input.Time,
+		Body:       input.Body,
+		VideoTitle: input.VideoTitle,
+		Time:       noteTime,
 	}, nil
 }

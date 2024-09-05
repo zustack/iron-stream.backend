@@ -6,15 +6,15 @@ import (
 )
 
 type Review struct {
-	ID          int64  `json:"id"`
-	CourseId    int64  `json:"course_id"`
-	UserId      int64  `json:"user_id"`
-	Author      string `json:"author"`
-	Description string `json:"description"`
+	ID          int64   `json:"id"`
+	CourseId    int64   `json:"course_id"`
+	UserId      int64   `json:"user_id"`
+	Author      string  `json:"author"`
+	Description string  `json:"description"`
 	Rating      float64 `json:"rating"`
-	Public      bool   `json:"public"`
-  CourseTitle string `json:"course_title"`
-	CreatedAt   string `json:"created_at"`
+	Public      bool    `json:"public"`
+	CourseTitle string  `json:"course_title"`
+	CreatedAt   string  `json:"created_at"`
 }
 
 func DeleteReview(id string) error {
@@ -61,11 +61,11 @@ func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 	`
 
 	if isPublic != "" {
-    if isPublic == "true" {
-      query += " AND reviews.public = 'true'"
-    } else {
-      query += " AND reviews.public = 'false'"
-    }
+		if isPublic == "true" {
+			query += " AND reviews.public = 'true'"
+		} else {
+			query += " AND reviews.public = 'false'"
+		}
 	}
 
 	rows, err := DB.Query(query, searchParam, searchParam, searchParam)
@@ -90,12 +90,12 @@ func GetAdminReviews(searchParam string, isPublic string) ([]Review, error) {
 }
 
 func GetPublicReviewsByCourseId(courseId string) ([]Review, error) {
-  var reviews []Review
-  rows, err := DB.Query(`SELECT * FROM reviews 
+	var reviews []Review
+	rows, err := DB.Query(`SELECT * FROM reviews 
   WHERE course_id = ? AND public = 'true'`, courseId)
-  if err != nil {
-    return nil, fmt.Errorf("An unexpected error occurred: %v", err)
-  }
+	if err != nil {
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
 	defer rows.Close()
 
 	for rows.Next() {
@@ -110,7 +110,7 @@ func GetPublicReviewsByCourseId(courseId string) ([]Review, error) {
 		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 
-  return reviews, nil
+	return reviews, nil
 }
 
 func UserReviewExists(userId int64, courseId string) (bool, error) {
@@ -123,14 +123,18 @@ func UserReviewExists(userId int64, courseId string) (bool, error) {
 	return exists, nil
 }
 
-func CreateReview(userId int64, courseId, author, description string, rating float64) error {
+func CreateReview(userId int64, courseId, author, description string, rating float64) (int64, error) {
 	date := utils.FormattedDate()
-	_, err := DB.Exec(`
+	result, err := DB.Exec(`
   INSERT INTO reviews
   (user_id, course_id, author, description, rating, created_at) 
   VALUES (?, ?, ?, ?, ?, ?)`, userId, courseId, author, description, rating, date)
 	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
+		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
-	return nil
+  id, err := result.LastInsertId()
+  if err != nil {
+    return 0, fmt.Errorf("An unexpected error occurred: %v", err)
+  }
+	return id, nil
 }

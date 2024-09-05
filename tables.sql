@@ -117,3 +117,11 @@ CREATE TABLE notes (
   course_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL
 );
+
+DROP TABLE IF EXISTS notifications;
+CREATE TABLE notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  n_type VARCHAR(40) NOT NULL,
+  info VARCHAR(255) NOT NULL,
+  created_at VARCHAR(40) NOT NULL
+);

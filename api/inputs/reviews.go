@@ -18,8 +18,7 @@ func CreateReview(input database.Review) (database.Review, error) {
 	}
 
 	return database.Review{
-		Rating:        input.Rating,
+		Rating:      input.Rating,
 		Description: input.Description,
 	}, nil
 }
-

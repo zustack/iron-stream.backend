@@ -8,45 +8,45 @@ import (
 )
 
 func DeleteNote(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
-  noteId := c.Params("noteId")
-  owner, err := database.GetNoteOwner(noteId)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  if owner != user.ID {
-    return c.Status(403).JSON(fiber.Map{
-      "error": "You are not the owner of this note.",
-    })
-  }
-  err = database.DeleteNoteById(noteId)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.SendStatus(204)
+	user := c.Locals("user").(*database.User)
+	noteId := c.Params("noteId")
+	owner, err := database.GetNoteOwner(noteId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	if owner != user.ID {
+		return c.Status(403).JSON(fiber.Map{
+			"error": "You are not the owner of this note.",
+		})
+	}
+	err = database.DeleteNoteById(noteId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(204)
 }
 
 func UpdateNote(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
-  noteId := c.Params("noteId")
-  owner, err := database.GetNoteOwner(noteId)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  if owner != user.ID {
-    return c.Status(403).JSON(fiber.Map{
-      "error": "You are not the owner of this note.",
-    })
-  }
-  type payload struct {
-    Body string `json:"body"` 
-  }
+	user := c.Locals("user").(*database.User)
+	noteId := c.Params("noteId")
+	owner, err := database.GetNoteOwner(noteId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	if owner != user.ID {
+		return c.Status(403).JSON(fiber.Map{
+			"error": "You are not the owner of this note.",
+		})
+	}
+	type payload struct {
+		Body string `json:"body"`
+	}
 
 	var p payload
 	if err := c.BodyParser(&p); err != nil {
@@ -55,49 +55,43 @@ func UpdateNote(c *fiber.Ctx) error {
 		})
 	}
 
-  if p.Body == "" {
-    return c.Status(400).JSON(fiber.Map{
-      "error": "Body is required.",
-    })
-  }
-
-	if len(p.Body) > 255 {
-    return c.Status(400).JSON(fiber.Map{
-      "error": "The body should not have more than 255 characters.",
-    })
+	if p.Body == "" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Body is required.",
+		})
 	}
 
-  err = database.UpdateNote(noteId, p.Body)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	if len(p.Body) > 255 {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "The body should not have more than 255 characters.",
+		})
+	}
 
-  return c.SendStatus(200)
+	err = database.UpdateNote(noteId, p.Body)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.SendStatus(200)
 }
 
 func CreateNote(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
-  courseId := c.Params("courseId")
+	user := c.Locals("user").(*database.User)
+	courseId := c.Params("courseId")
 
-  type payload struct {
-    Body string `json:"body"` 
-    VideoTitle string `json:"video_title"` 
-    Time string `json:"time"` 
-  }
-
-	var p payload
+	var p inputs.CreateNotePayload
 	if err := c.BodyParser(&p); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	cleanInput, err := inputs.CreateNote(database.Note{
-    Body: p.Body,
-    VideoTitle: p.VideoTitle,
-    Time: p.Time,
+	cleanInput, err := inputs.CreateNote(inputs.CreateNotePayload{
+		Body:       p.Body,
+		VideoTitle: p.VideoTitle,
+		Time:       p.Time,
 	})
 
 	if err != nil {
@@ -106,31 +100,31 @@ func CreateNote(c *fiber.Ctx) error {
 		})
 	}
 
-  err = database.CreateNote(database.Note{
-    Body: cleanInput.Body,
-    VideoTitle: cleanInput.VideoTitle,
-    Time: cleanInput.Time,
-    CourseID: courseId,
-    UserID: user.ID,
-  })
+	err = database.CreateNote(database.Note{
+		Body:       cleanInput.Body,
+		VideoTitle: cleanInput.VideoTitle,
+		Time:       cleanInput.Time,
+		CourseID:   courseId,
+		UserID:     user.ID,
+	})
 
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  return c.SendStatus(200)
+	return c.SendStatus(200)
 }
 
 func GetNotes(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
-  courseId := c.Params("courseId")
-  notes, err := database.GetNotes(courseId, user.ID)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
-  return c.JSON(notes)
+	user := c.Locals("user").(*database.User)
+	courseId := c.Params("courseId")
+	notes, err := database.GetNotes(courseId, user.ID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(notes)
 }

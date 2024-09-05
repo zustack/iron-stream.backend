@@ -1056,7 +1056,7 @@ curl -X DELETE "http://localhost:8081/reviews/1" \
 ## Notes
 ### Create note request
 ```bash
-curl -X POST "http://localhost:8081/notes/1" \
+curl -X POST "http://localhost:8081/notes/2" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
   -d '{
@@ -1107,10 +1107,16 @@ curl -X PUT "http://localhost:8081/notes/1" \
 curl -X DELETE "http://localhost:8081/notes/1" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" 
 ```
-
 ### Delete note response
 ```json
 204 No Content
+```
+
+## Notifications
+### Get admin notifications
+```bash
+curl -X GET "http://localhost:8081/notifications" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" 
 ```
 
 # Tests

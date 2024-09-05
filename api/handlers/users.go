@@ -166,6 +166,12 @@ func DeleteAccountByEmail(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+  err = database.DeleteNotification(email)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
 	return c.SendStatus(200)
 }
 
@@ -286,6 +292,13 @@ func SignUp(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
+  err = database.CreateNotification("user", cleanInput.Email)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
 
 	return c.SendStatus(200)
 }
