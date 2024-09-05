@@ -9,4 +9,5 @@ import (
 
 func NotificationsRoutes(app *fiber.App) {
 	app.Get("/notifications", middleware.AdminUser, handlers.GetAdminNotifications)
+	app.Post("/notifications", middleware.AdminUser, handlers.DeleteNotifications)
 }

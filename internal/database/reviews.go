@@ -132,9 +132,9 @@ func CreateReview(userId int64, courseId, author, description string, rating flo
 	if err != nil {
 		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
-  id, err := result.LastInsertId()
-  if err != nil {
-    return 0, fmt.Errorf("An unexpected error occurred: %v", err)
-  }
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
 	return id, nil
 }

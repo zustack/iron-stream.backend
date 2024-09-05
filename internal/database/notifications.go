@@ -8,7 +8,7 @@ import (
 type Notification struct {
 	ID        int64  `json:"id"`
 	NType     string `json:"n_type"`
-  Info      string `json:"info"`
+	Info      string `json:"info"`
 	CreatedAt string `json:"created_at"`
 }
 
@@ -25,6 +25,29 @@ func DeleteNotification(info string) error {
 		return fmt.Errorf("No notification found with the info %s", info)
 	}
 	return nil
+}
+
+func GetInfoNotifications(nType string) ([]Notification, error) {
+	var ns []Notification
+	rows, err := DB.Query(`SELECT info FROM notifications WHERE n_type = ?`, nType)
+	if err != nil {
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var n Notification
+		if err := rows.Scan(&n.Info); err != nil {
+			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+		}
+		ns = append(ns, n)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+
+	return ns, nil
 }
 
 func GetNotifications(nType string) (int, error) {

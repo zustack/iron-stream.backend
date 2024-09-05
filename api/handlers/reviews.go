@@ -145,19 +145,19 @@ func CreateReview(c *fiber.Ctx) error {
 	}
 
 	author := user.Name + " " + user.Surname
-  id, err := database.CreateReview(user.ID, p.CourseId, author, cleanInput.Description, cleanInput.Rating)
+	id, err := database.CreateReview(user.ID, p.CourseId, author, cleanInput.Description, cleanInput.Rating)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-  err = database.CreateNotification("review", fmt.Sprintf("%v", id))
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	err = database.CreateNotification("review", fmt.Sprintf("%v", id))
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	return c.SendStatus(200)
 }
