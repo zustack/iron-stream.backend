@@ -1053,6 +1053,27 @@ curl -X DELETE "http://localhost:8081/reviews/1" \
 204 No Content
 ```
 
+## Notes
+### Create note request
+```bash
+curl -X POST "http://localhost:8081/reviews" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
+  -d '{
+    "course_id": "2",
+    "description": "I like this course v2",
+    "rating": 4.3
+  }'
+```
+### Create note response
+```json
+200 OK
+```
+
+### Get notes response
+### Edit note response
+### Delete note response
+
 # Tests
 ## Users tests
 ```bash
