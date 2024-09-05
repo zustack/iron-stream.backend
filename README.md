@@ -1056,13 +1056,13 @@ curl -X DELETE "http://localhost:8081/reviews/1" \
 ## Notes
 ### Create note request
 ```bash
-curl -X POST "http://localhost:8081/reviews" \
+curl -X POST "http://localhost:8081/notes/1" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
   -d '{
-    "course_id": "2",
-    "description": "I like this course v2",
-    "rating": 4.3
+    "body": "Note for some video",
+    "video_title": "The video title",
+    "time": "420.69"
   }'
 ```
 ### Create note response
@@ -1071,8 +1071,47 @@ curl -X POST "http://localhost:8081/reviews" \
 ```
 
 ### Get notes response
+```bash
+curl -X GET "http://localhost:8081/notes/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
+```
+### Get notes response
+```json
+[
+  {
+    "id": 1,
+    "body": "Note for some video",
+    "video_title": "The video title",
+    "time": "420.69",
+    "course_id": "1",
+    "user_id": 1
+  }
+]
+```
+### Edit note request
+```bash
+curl -X PUT "http://localhost:8081/notes/1" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
+  -d '{
+    "body": "edit Note for some video"
+  }'
+```
 ### Edit note response
+```json
+200 OK
+```
+
 ### Delete note response
+```bash
+curl -X DELETE "http://localhost:8081/notes/1" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" 
+```
+
+### Delete note response
+```json
+204 No Content
+```
 
 # Tests
 ## Users tests

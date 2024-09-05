@@ -33,5 +33,6 @@ func Setup() *fiber.App {
 	routes.UserCoursesRoutes(app)
 	routes.UserAppsRoutes(app)
 	routes.ReviewRoutes(app)
+	routes.NotesRoutes(app)
 	return app
 }

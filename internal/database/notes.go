@@ -84,7 +84,7 @@ func GetNotes(courseId string, userId int64) ([]Note, error) {
 
 func CreateNote(n Note) error {
 	_, err := DB.Exec(`
-  INSERT INTO apps
+  INSERT INTO notes
   (body, video_title, time, course_id, user_id) 
   VALUES (?, ?, ?, ?, ?)`,
     n.Body, n.VideoTitle, n.Time, n.CourseID, n.UserID)
