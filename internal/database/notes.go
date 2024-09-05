@@ -1,17 +1,33 @@
 package database
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type Note struct {
 	ID             int64  `json:"id"`
   Body           string `json:"body"`
   VideoTitle     string `json:"video_title"`
   Time           string `json:"time"`
-  CourseID       int64  `json:"course_id"`
+  CourseID       string `json:"course_id"`
   UserID         int64  `json:"user_id"`
 }
 
+func GetNoteOwner(id string) (int64, error) {
+	var n Note
+	row := DB.QueryRow(`SELECT user_id FROM notes WHERE id = ?`, id)
+	if err := row.Scan(&n.UserID); err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("No note found with the id %s", id)
+		}
+		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	return n.UserID, nil
+}
+
 func DeleteNoteById(id string) error {
+  // check that the user owns the note!
 	result, err := DB.Exec("DELETE FROM notes WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -43,7 +59,7 @@ func UpdateNote(id, body string) error {
 	return nil
 }
 
-func GetNotesByCourseIdAndUserId(courseId string, userId int64) ([]Note, error) {
+func GetNotes(courseId string, userId int64) ([]Note, error) {
 	var notes []Note
 	rows, err := DB.Query(`SELECT * FROM notes WHERE course_id = ? AND user_id = ?`, courseId, userId)
 	if err != nil {
