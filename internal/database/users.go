@@ -168,7 +168,7 @@ func GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialA
 	return count, nil
 }
 
-func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam string, limit, cursor int) ([]User, error) {
+func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, from, to string, limit, cursor int) ([]User, error) {
 	var users []User
 	var args []interface{}
 	query := `SELECT * FROM users WHERE 
@@ -198,6 +198,11 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 		query += ` AND special_apps = ?`
 		specialApps := specialAppsParam == "1"
 		args = append(args, specialApps)
+	}
+ 
+	if from != "" && to != "" {
+		query += ` AND created_at BETWEEN ? AND ?`
+		args = append(args, from, to)
 	}
 
 	query += ` ORDER BY ID DESC LIMIT ? OFFSET ?`

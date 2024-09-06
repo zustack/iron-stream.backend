@@ -83,7 +83,10 @@ func AdminUsers(c *fiber.Ctx) error {
 	specialAppsParam := c.Query("special", "")
 	verifiedParam := c.Query("verified", "")
 
-	users, err := database.GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, limit, cursor)
+	from := c.Query("from", "")
+	to  := c.Query("to", "")
+
+	users, err := database.GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, from, to, limit, cursor)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),

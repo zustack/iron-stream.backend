@@ -147,8 +147,11 @@ This endpoint needs a valid admin token. The variables are:
 - admin: the admin status
 - special: the special apps status
 - verified: the verified status
+- from: from date example: 12/09/2024%00:00:00
+- to: to date example: 12:09:2024%00:00:00
+
 ```bash
-curl -X GET "http://localhost:8081/users/admin?cursor=0&q=&a=&admin=&special=&verified="  \
+curl -X GET "http://localhost:8081/users/admin?cursor=0&q=&a=&admin=&special=&verified=&from=&to="  \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc2Mjg3NjQsImlhdCI6MTcyNTAzNjc2NCwibmJmIjoxNzI1MDM2NzY0LCJzdWIiOjF9.8ptujSrdymZ7z5GdQAydWsVn4fmkgVg8rPOW4L37dxU" | jq
 ```
 ### Get users response
