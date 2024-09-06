@@ -199,7 +199,7 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 		specialApps := specialAppsParam == "1"
 		args = append(args, specialApps)
 	}
- 
+
 	if from != "" && to != "" {
 		query += ` AND created_at BETWEEN ? AND ?`
 		args = append(args, from, to)
