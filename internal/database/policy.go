@@ -1,9 +1,7 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
-	"iron-stream/internal/utils"
 )
 
 type Policy struct {
@@ -34,7 +32,7 @@ func DeletePolicy(id string) error {
 
 
 func DeletePolicyItem(id string) error {
-	result, err := DB.Exec("DELETE FROM policy_item WHERE id = ?", id)
+	result, err := DB.Exec("DELETE FROM policy_items WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
@@ -50,7 +48,7 @@ func DeletePolicyItem(id string) error {
 
 func GetPolicyItemsByPolicyId(policyId string) ([]PolicyItem, error) {
 	var ps []PolicyItem
-	rows, err := DB.Query("SELECT * FROM policy_item WHERE policy_id = ?", policyId)
+	rows, err := DB.Query("SELECT * FROM policy_items WHERE policy_id = ?", policyId)
 	if err != nil {
 		return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 	}

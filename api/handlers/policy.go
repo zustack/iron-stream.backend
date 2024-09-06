@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"iron-stream/internal/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +21,7 @@ func GetPolicyItems(c *fiber.Ctx) error {
   policyId := c.Params("policyId")
   data, err := database.GetPolicyItemsByPolicyId(policyId)
   if err != nil {
+    fmt.Println(err)
     return c.Status(500).JSON(fiber.Map{
       "error": err.Error(),
     })
