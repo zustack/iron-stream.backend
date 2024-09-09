@@ -1,5 +1,7 @@
 # Iron Stream Backend API
 
+
+
 ## Overview
 Iron Stream REST API that powers the ui 
 <a href="https://github.com/zustack/ui-iron-stream">Iron Stream</a>.
@@ -7,6 +9,34 @@ This project uses the <a href="https://go.dev">Go</a> programming language along
 web framework <a href="https://gofiber.io">Fiber</a>.
 
 Iron Stream is currently in beta and under active development.
+
+## New features
+- [ ] get the privacy policy at register
+- [ ] password update
+- [ ] account details
+- [ ] history
+- [ ] % of course watch(where you left off)
+- [ ] admin log login
+- [ ] admin log logout
+- [ ] admin log watch the video while (x) app was open
+- [ ] admin log get all user history 
+- [ ] admin export data via csv to email
+
+## admin logs
+- [ ] all admin mutations have to be logged to table admin_log
+
+## admin statistics
+- [ ] users count in x time
+- [ ] user_courses count in x time
+- [ ] add $ to courses
+- [ ] $ of user_courses count in x time
+
+## todo 
+- [ ] delete unused files
+- [ ] get the pc and host user on linux
+- [ ] hash the pc in server
+- [ ] video has should_review bool * if true, 
+      show the create review form instead of the video
 
 ## Table of contents
 - [Setup local development](#Setup)
@@ -964,16 +994,6 @@ curl -X DELETE "http://localhost:8081/files/1" \
 ```json
 204 No Content
 ```
-curl -X POST http://localhost:8081/courses/create \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwNTU1NzksImlhdCI6MTcyNTQ2MzU3OSwibmJmIjoxNzI1NDYzNTc5LCJzdWIiOjF9.E0Q8S1gl7Ka560mM-8mSE0sepJQZHhbXIry9Qc7JMHA" \
-  -H "Content-Type: multipart/form-data" \
-  -F "title=Data Structures" \
-  -F "description=Description for Data Structures 2222" \
-  -F "author=agustfricke foo" \
-  -F "duration=4 hours, 20 minutes" \
-  -F "is_active=true" \
-  -F "thumbnail=@/home/agust/Pictures/test.png" \
-  -F "preview_tmp="
 
 ## Reviews
 ### Create review request
@@ -1120,6 +1140,49 @@ curl -X DELETE "http://localhost:8081/notes/1" \
 ```bash
 curl -X GET "http://localhost:8081/notifications" \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk"  | jq
+```
+
+## Policy
+### Create policy request
+```bash
+curl -X POST "http://localhost:8081/policy" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1MDMyNDksImlhdCI6MTcyNTkxMTI0OSwibmJmIjoxNzI1OTExMjQ5LCJzdWIiOjF9.0nxdOjcn6yyxLzkVwsF0sLKP3FiXfZQaTFd7QPnJ7mk" \
+  -d '{
+    "content": "Información básica sobre protección de datos.",
+    "p_type": "title"
+  }'
+```
+### Create policy response
+```json
+200 OK
+```
+
+### Get policy request
+```bash
+curl -X GET "http://localhost:8081/policy" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1MDMyNDksImlhdCI6MTcyNTkxMTI0OSwibmJmIjoxNzI1OTExMjQ5LCJzdWIiOjF9.0nxdOjcn6yyxLzkVwsF0sLKP3FiXfZQaTFd7QPnJ7mk" | jq
+```
+### Get policy response
+```json
+[
+  {
+    "id": 1,
+    "content": "Información básica sobre protección de datos.",
+    "p_type": "title",
+    "created_at": "09/09/2024 16:47:54"
+  }
+]
+```
+
+### Delete policy request
+```bash
+curl -X DELETE "http://localhost:8081/policy/1" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1MDMyNDksImlhdCI6MTcyNTkxMTI0OSwibmJmIjoxNzI1OTExMjQ5LCJzdWIiOjF9.0nxdOjcn6yyxLzkVwsF0sLKP3FiXfZQaTFd7QPnJ7mk"
+```
+### Delete policy response
+```json
+204 No Content
 ```
 
 # Tests
