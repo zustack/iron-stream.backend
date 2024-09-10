@@ -7,8 +7,8 @@ import (
 
 type Policy struct {
 	ID        int64  `json:"id"`
-	Content string `json:"content"`
-	PType string `json:"p_type"`
+	Content   string `json:"content"`
+	PType     string `json:"p_type"`
 	CreatedAt string `json:"created_at"`
 }
 

@@ -90,13 +90,21 @@ func GetUserHistoryWithVideos(userID int64) ([]HistoryWithVideo, error) {
 	var userHistory []HistoryWithVideo
 
 	query := `
-		SELECT h.id, h.video_id, h.course_id, h.user_id, h.video_resume, h.created_at, 
-		       v.title, v.description, v.video_hls, v.thumbnail, v.duration, v.length, v.views, v.created_at
-		FROM history h
-		INNER JOIN videos v ON h.video_id = v.id
-		WHERE h.user_id = ?`
+SELECT h.id, h.video_id, h.course_id, h.user_id, h.video_resume, h.created_at, 
+       v.title, v.description, v.video_hls, v.thumbnail, v.duration, v.length, v.views, v.created_at
+FROM history h
+INNER JOIN videos v ON h.video_id = v.id
+INNER JOIN (
+    SELECT video_id, MAX(created_at) as latest_history
+    FROM history
+    WHERE user_id = ?
+    GROUP BY video_id
+) latest ON h.video_id = latest.video_id AND h.created_at = latest.latest_history
+WHERE h.user_id = ?
+ORDER BY h.created_at DESC;
+`
 
-	rows, err := DB.Query(query, userID)
+	rows, err := DB.Query(query, userID, userID)
 	if err != nil {
 		return userHistory, fmt.Errorf("An unexpected error occurred: %v", err)
 	}

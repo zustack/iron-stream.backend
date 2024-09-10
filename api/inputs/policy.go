@@ -19,8 +19,7 @@ func CreatePolicy(p database.Policy) (database.Policy, error) {
 		return database.Policy{}, fmt.Errorf("The policy type should not have more than 455 characters.")
 	}
 	return database.Policy{
-    Content:     p.Content,
-    PType:     p.PType,
+		Content: p.Content,
+		PType:   p.PType,
 	}, nil
 }
-

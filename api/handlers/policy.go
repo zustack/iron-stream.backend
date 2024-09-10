@@ -36,16 +36,16 @@ func CreatePolicy(c *fiber.Ctx) error {
 		})
 	}
 
-  cleanInput, err := inputs.CreatePolicy(database.Policy{
-    Content: p.Content,
-    PType: p.PType,
-  })
+	cleanInput, err := inputs.CreatePolicy(database.Policy{
+		Content: p.Content,
+		PType:   p.PType,
+	})
 
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-  }
+	}
 
 	err = database.CreatePolicy(cleanInput.Content, cleanInput.PType)
 	if err != nil {

@@ -11,13 +11,13 @@ import (
 )
 
 func GetCurrentUser(c *fiber.Ctx) error {
-  user := c.Locals("user").(*database.User)
+	user := c.Locals("user").(*database.User)
 	return c.Status(200).JSON(fiber.Map{
-		"id": user.ID,
-		"email": user.Email,
-		"name": user.Name,
-		"surname": user.Surname,
-    "created_at": user.CreatedAt,
+		"id":         user.ID,
+		"email":      user.Email,
+		"name":       user.Name,
+		"surname":    user.Surname,
+		"created_at": user.CreatedAt,
 	})
 }
 
