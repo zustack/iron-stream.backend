@@ -727,21 +727,47 @@ curl -X PUT "http://localhost:8081/history/watch" \
 ### Get user history request
 ```bash
 curl -X GET "http://localhost:8081/history" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" | jq
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1NzM4NjIsImlhdCI6MTcyNTk4MTg2MiwibmJmIjoxNzI1OTgxODYyLCJzdWIiOjF9.g9MhXLOzQIoSMPmfey4XlJvbOdknNysLLNINgblVcGU" | jq
 ```
+
 ### Get user history response
 ```json
 [
   {
-    "id": 1,
-    "video_id": "2",
+    "history_id": 1,
+    "video_id": 1,
+    "course_id": 1,
+    "user_id": 1,
+    "video_resume": "120.8820645161291",
+    "history_date": "10/09/2024 15:36:42",
+    "video_title": "video 1",
+    "description": "some long ass",
+    "video_hls": "/web/uploads/videos/1/8e0a486f-ba98-4847-92e1-cb677d40bb8d/master.m3u8",
+    "thumbnail": "/web/uploads/thumbnails/dd046c69-07b3-4192-a756-0a1bfd5edf11.png",
+    "duration": "4",
+    "length": "187",
+    "views": 3,
+    "video_created": "10/09/2024 15:35:33"
+  },
+  {
+    "history_id": 2,
+    "video_id": 2,
     "course_id": 1,
     "user_id": 1,
     "video_resume": "",
-    "created_at": "02/09/2024 17:29:17"
+    "history_date": "10/09/2024 15:38:18",
+    "video_title": "2222",
+    "description": "sdsdsd",
+    "video_hls": "/web/uploads/videos/1/fed969d9-bc0a-445f-a327-6c76fa6a0c62/master.m3u8",
+    "thumbnail": "/web/uploads/thumbnails/3416c96d-6dd1-4673-9ea6-5e4c3950dd6e.png",
+    "duration": "ddf",
+    "length": "119",
+    "views": 1,
+    "video_created": "10/09/2024 15:36:28"
   }
 ]
 ```
+
 
 ### Update history
 ```bash

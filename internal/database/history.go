@@ -69,21 +69,53 @@ func GetLastVideoByUserIdAndCourseId(user_id int64, course_id string) (History, 
 	return history, nil
 }
 
-func GetUserHistory(user_id int64) ([]History, error) {
-	var hs []History
-	rows, err := DB.Query(`SELECT * FROM history WHERE user_id = ?`, user_id)
+type HistoryWithVideo struct {
+	HistoryID    int64  `json:"history_id"`
+	VideoID      int64  `json:"video_id"`
+	CourseID     int64  `json:"course_id"`
+	UserID       int64  `json:"user_id"`
+	VideoResume  string `json:"video_resume"`
+	HistoryDate  string `json:"history_date"`
+	VideoTitle   string `json:"video_title"`
+	Description  string `json:"description"`
+	VideoHLS     string `json:"video_hls"`
+	Thumbnail    string `json:"thumbnail"`
+	Duration     string `json:"duration"`
+	Length       string `json:"length"`
+	Views        int64  `json:"views"`
+	VideoCreated string `json:"video_created"`
+}
+
+func GetUserHistoryWithVideos(userID int64) ([]HistoryWithVideo, error) {
+	var userHistory []HistoryWithVideo
+
+	query := `
+		SELECT h.id, h.video_id, h.course_id, h.user_id, h.video_resume, h.created_at, 
+		       v.title, v.description, v.video_hls, v.thumbnail, v.duration, v.length, v.views, v.created_at
+		FROM history h
+		INNER JOIN videos v ON h.video_id = v.id
+		WHERE h.user_id = ?`
+
+	rows, err := DB.Query(query, userID)
 	if err != nil {
-		return hs, fmt.Errorf("An unexpected error occurred: %v", err)
+		return userHistory, fmt.Errorf("An unexpected error occurred: %v", err)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
-		var h History
-		if err := rows.Scan(&h.ID, &h.VideoId, &h.CourseId, &h.UserId, &h.VideoResume, &h.CreatedAt); err != nil {
-			return hs, fmt.Errorf("An unexpected error occurred: %v", err)
+		var hv HistoryWithVideo
+		if err := rows.Scan(&hv.HistoryID, &hv.VideoID, &hv.CourseID, &hv.UserID, &hv.VideoResume, &hv.HistoryDate,
+			&hv.VideoTitle, &hv.Description, &hv.VideoHLS, &hv.Thumbnail, &hv.Duration, &hv.Length, &hv.Views, &hv.VideoCreated); err != nil {
+			return userHistory, fmt.Errorf("An unexpected error occurred while scanning rows: %v", err)
 		}
-		hs = append(hs, h)
+		userHistory = append(userHistory, hv)
 	}
-	return hs, nil
+
+	if err := rows.Err(); err != nil {
+		return userHistory, fmt.Errorf("An unexpected error occurred with rows: %v", err)
+	}
+
+	return userHistory, nil
 }
 
 func CreateHistory(userId, videoId int64, courseId string, resume string) (History, error) {

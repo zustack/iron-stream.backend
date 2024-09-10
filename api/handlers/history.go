@@ -8,7 +8,7 @@ import (
 
 func GetUserHistory(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
-	history, err := database.GetUserHistory(user.ID)
+  history, err := database.GetUserHistoryWithVideos(user.ID)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
