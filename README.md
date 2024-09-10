@@ -1,7 +1,5 @@
 # Iron Stream Backend API
 
-
-
 ## Overview
 Iron Stream REST API that powers the ui 
 <a href="https://github.com/zustack/ui-iron-stream">Iron Stream</a>.
@@ -9,34 +7,6 @@ This project uses the <a href="https://go.dev">Go</a> programming language along
 web framework <a href="https://gofiber.io">Fiber</a>.
 
 Iron Stream is currently in beta and under active development.
-
-## New features
-- [ ] get the privacy policy at register
-- [ ] password update
-- [ ] account details
-- [ ] history
-- [ ] % of course watch(where you left off)
-- [ ] admin log login
-- [ ] admin log logout
-- [ ] admin log watch the video while (x) app was open
-- [ ] admin log get all user history 
-- [ ] admin export data via csv to email
-
-## admin logs
-- [ ] all admin mutations have to be logged to table admin_log
-
-## admin statistics
-- [ ] users count in x time
-- [ ] user_courses count in x time
-- [ ] add $ to courses
-- [ ] $ of user_courses count in x time
-
-## todo 
-- [ ] delete unused files
-- [ ] get the pc and host user on linux
-- [ ] hash the pc in server
-- [ ] video has should_review bool * if true, 
-      show the create review form instead of the video
 
 ## Table of contents
 - [Setup local development](#Setup)
@@ -90,9 +60,6 @@ make run
 ```
 
 # Endpoints
-curl -X GET "http://localhost:8081/reviews/admin?q=&p=false" \
-     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjgwMDQ5NTMsImlhdCI6MTcyNTQxMjk1MywibmJmIjoxNzI1NDEyOTUzLCJzdWIiOjF9._VLiflVTJ5tTP2Li0l0XE7TPFfqONkB341m6F_XFgOk" | jq
-
 ## Users endpoints
 ### Signup request
 ```bash
@@ -252,6 +219,22 @@ curl -X PUT "http://localhost:8081/users/update/admin/status/3/true" \
 ### Update admin status response
 ```json
 200 OK
+```
+
+### Get current user request
+```bash
+curl -X GET "http://localhost:8081/users/current" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1NzM4NjIsImlhdCI6MTcyNTk4MTg2MiwibmJmIjoxNzI1OTgxODYyLCJzdWIiOjF9.g9MhXLOzQIoSMPmfey4XlJvbOdknNysLLNINgblVcGU" | jq
+```
+### Get current user response
+```json
+{
+  "created_at": "09/09/2024 16:46:56",
+  "email": "agustfricke@gmail.com",
+  "id": 1,
+  "name": "Agustin",
+  "surname": "Fricke"
+}
 ```
 
 
@@ -1149,8 +1132,8 @@ curl -X POST "http://localhost:8081/policy" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg1MDMyNDksImlhdCI6MTcyNTkxMTI0OSwibmJmIjoxNzI1OTExMjQ5LCJzdWIiOjF9.0nxdOjcn6yyxLzkVwsF0sLKP3FiXfZQaTFd7QPnJ7mk" \
   -d '{
-    "content": "Información básica sobre protección de datos.",
-    "p_type": "title"
+    "content": "La actual **Política** de Privacidad establece los límites y parámetros que Carolina Fricke emplea para el uso y protección del conjunto de datos de carácter personal proporcionados por los usuarios de “https://www.carofricke.com”, comprometida en la seguridad de todos ellos, para evitar su uso indebido.",
+    "p_type": "text"
   }'
 ```
 ### Create policy response
@@ -1169,7 +1152,7 @@ curl -X GET "http://localhost:8081/policy" \
   {
     "id": 1,
     "content": "Información básica sobre protección de datos.",
-    "p_type": "title",
+    "p_type": "li",
     "created_at": "09/09/2024 16:47:54"
   }
 ]

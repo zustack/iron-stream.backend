@@ -8,6 +8,7 @@ import (
 )
 
 func UserRoutes(app *fiber.App) {
+	app.Get("/users/current", middleware.NormalUser, handlers.GetCurrentUser)
 	app.Put("/users/update/admin/status/:userId/:isAdmin", middleware.AdminUser, handlers.UpdateAdminStatus)
 	app.Put("/users/update/special/apps/user/:userId/:specialApps", middleware.AdminUser, handlers.UpdateSpecialAppUser)
 	app.Put("/users/update/all/active/status/:active", middleware.AdminUser, handlers.UpdateActiveStatusAllUsers)

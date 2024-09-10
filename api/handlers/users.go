@@ -10,6 +10,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func GetCurrentUser(c *fiber.Ctx) error {
+  user := c.Locals("user").(*database.User)
+	return c.Status(200).JSON(fiber.Map{
+		"id": user.ID,
+		"email": user.Email,
+		"name": user.Name,
+		"surname": user.Surname,
+    "created_at": user.CreatedAt,
+	})
+}
+
 func UpdateAdminStatus(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	isAdmin := c.Params("isAdmin")

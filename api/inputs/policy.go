@@ -9,13 +9,13 @@ func CreatePolicy(p database.Policy) (database.Policy, error) {
 	if p.Content == "" {
 		return database.Policy{}, fmt.Errorf("The policy content is required.")
 	}
-	if len(p.Content) > 55 {
-		return database.Policy{}, fmt.Errorf("The policy content should not have more than 55 characters.")
+	if len(p.Content) > 455 {
+		return database.Policy{}, fmt.Errorf("The policy content should not have more than 455 characters.")
 	}
 	if p.PType == "" {
 		return database.Policy{}, fmt.Errorf("The policy type is required.")
 	}
-	if len(p.PType) > 455 {
+	if len(p.PType) > 55 {
 		return database.Policy{}, fmt.Errorf("The policy type should not have more than 455 characters.")
 	}
 	return database.Policy{
