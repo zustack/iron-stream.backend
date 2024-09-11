@@ -1194,6 +1194,77 @@ curl -X DELETE "http://localhost:8081/policy/1" \
 204 No Content
 ```
 
+## User log
+### Create logout user log request
+```bash
+curl -X POST "http://localhost:8081/log/user/logout" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM"
+```
+### Create logout user log response
+```json
+200 OK
+```
+
+### Create login user log request
+- This is created at login
+
+### Get user log request
+```bash
+curl -X GET "http://localhost:8081/log/user/1" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" | jq
+```
+### Get user log response
+```json
+[
+  {
+    "id": 5,
+    "content": "The user has logged in.",
+    "l_type": "1",
+    "user_id": 1,
+    "created_at": "11/09/2024 16:42:40"
+  },
+  {
+    "id": 6,
+    "content": "The user has logged out.",
+    "l_type": "1",
+    "user_id": 1,
+    "created_at": "11/09/2024 16:42:47"
+  },
+  {
+    "id": 7,
+    "content": "The app OBS was open while watching the video Data structures.",
+    "l_type": "3",
+    "user_id": 1,
+    "created_at": "11/09/2024 16:42:57"
+  },
+  {
+    "id": 8,
+    "content": "The apps OBS, Google Chrome where open while watching the video Data structures.",
+    "l_type": "3",
+    "user_id": 1,
+    "created_at": "11/09/2024 16:43:16"
+  }
+]
+```
+
+### Create log found apps request
+```bash
+curl -X POST "http://localhost:8081/log/user/found/apps" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" \
+  -d '{
+      "video_title": "Data structures",
+      "apps": [
+      { "name": "OBS" },
+      { "name": "Google Chrome" }
+      ]
+  }'
+```
+### Create log found apps response
+```json
+200 OK
+```
+
 # Tests
 ## Users tests
 ```bash

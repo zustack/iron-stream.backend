@@ -367,6 +367,13 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	err = database.CreateUserLog("The user has logged in.", "1", user.ID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	return c.Status(200).JSON(fiber.Map{
 		"token":    token,
 		"userId":   user.ID,
