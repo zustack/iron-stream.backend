@@ -58,6 +58,19 @@ func UpdateActiveStatusAllUsers(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+  var content string
+  if active == "true" {
+    content = "All users were deactivated."
+  } else {
+    content = "All users were activated."
+  }
+  l_type := "3"
+  err = database.CreateAdminLog(content, l_type)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
 	return c.SendStatus(200)
 }
 
