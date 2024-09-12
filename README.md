@@ -1265,6 +1265,40 @@ curl -X POST "http://localhost:8081/log/user/found/apps" \
 200 OK
 ```
 
+## Admin log
+### Create admin log request
+```bash
+curl -X POST "http://localhost:8081/log/admin" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" \
+  -d '{
+      "content": "The user pepe@gmail.com was deleted.",
+      "l_type": "3"
+  }'
+```
+### Create admin log response
+```json
+204 No Content
+```
+### Get Admin log request
+```bash
+curl -X GET "http://localhost:8081/log/admin" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" | jq
+```
+### Get Admin log response
+```json
+[
+  {
+    "id": 1,
+    "content": "The user pepe@gmail.com was deleted.",
+    "l_type": "3",
+    "created_at": "12/09/2024 15:46:03"
+  }
+]
+```
+
+
+
 # Tests
 ## Users tests
 ```bash

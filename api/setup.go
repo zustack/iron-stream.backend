@@ -37,5 +37,6 @@ func Setup() *fiber.App {
 	routes.NotificationsRoutes(app)
 	routes.PolicyRoutes(app)
 	routes.UserLogRoutes(app)
+	routes.AdminLogRoutes(app)
 	return app
 }

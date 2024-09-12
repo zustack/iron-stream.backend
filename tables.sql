@@ -142,3 +142,11 @@ CREATE TABLE user_log (
   user_id INTEGER NOT NULL,
   created_at VARCHAR(40) NOT NULL
 );
+
+DROP TABLE IF EXISTS admin_log;
+CREATE TABLE admin_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  content VARCHAR(255) NOT NULL,
+  l_type VARCHAR(40) NOT NULL,
+  created_at VARCHAR(40) NOT NULL
+);
