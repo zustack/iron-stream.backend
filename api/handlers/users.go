@@ -20,21 +20,37 @@ type Statistics struct {
 }
 
 func GetUserStatistics(c *fiber.Ctx) error {
-	year, month := 2024, time.September
-	startDate := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
-	endDate := startDate.AddDate(0, 1, -1)
+	from := c.Query("from", "")
+	to := c.Query("to", "")
+
+	var startDate, endDate time.Time
+	var err error
+
+	if from == "" || to == "" {
+		// Si no se proporcionan fechas, usar el mes actual
+		now := time.Now()
+		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+		endDate = startDate.AddDate(0, 1, -1)
+	} else {
+		// Parsear las fechas proporcionadas
+		startDate, err = time.Parse("2006-01-02", from)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Formato de fecha 'from' inválido. Use YYYY-MM-DD"})
+		}
+		endDate, err = time.Parse("2006-01-02", to)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Formato de fecha 'to' inválido. Use YYYY-MM-DD"})
+		}
+	}
 
 	var stats []Statistics
-
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
-		dateForDB := d.Format("02/01/2006") 
-		dateForJSON := d.Format("2006/01/02") 
-
+		dateForDB := d.Format("02/01/2006")
+		dateForJSON := d.Format("2006/01/02")
 		linuxCount, _ := database.GetUserCount(dateForDB, "Linux")
 		windowsCount, _ := database.GetUserCount(dateForDB, "Windows")
 		macCount, _ := database.GetUserCount(dateForDB, "Mac")
 		allCount := linuxCount + windowsCount + macCount
-
 		stat := Statistics{
 			Date:    dateForJSON,
 			Windows: windowsCount,
@@ -42,7 +58,6 @@ func GetUserStatistics(c *fiber.Ctx) error {
 			Linux:   linuxCount,
 			All:     allCount,
 		}
-
 		stats = append(stats, stat)
 	}
 

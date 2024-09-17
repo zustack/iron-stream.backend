@@ -1302,27 +1302,69 @@ curl -X GET "http://localhost:8081/log/admin" \
 ### Get user statistics request
 - Get basic data from September 2024
 ```bash
-curl -X GET "http://localhost:8081/users/statis"  \
+curl -X GET "http://localhost:8081/users/stats?from=2024-09-09&to=2024-09-16"  \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" | jq
 ```
 ### Get user statistics response
 ```json
 [
   {
-    "date": "01/09/2024",
+    "date": "2024/09/09",
+    "windows": 0,
+    "mac": 0,
+    "linux": 1,
+    "all": 1
+  },
+  {
+    "date": "2024/09/10",
     "windows": 0,
     "mac": 0,
     "linux": 0,
     "all": 0
   },
   {
-    "date": "02/09/2024",
+    "date": "2024/09/11",
     "windows": 0,
     "mac": 0,
     "linux": 0,
     "all": 0
   },
-  /....
+  {
+    "date": "2024/09/12",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  {
+    "date": "2024/09/13",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  {
+    "date": "2024/09/14",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  {
+    "date": "2024/09/15",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  {
+    "date": "2024/09/16",
+    "windows": 0,
+    "mac": 0,
+    "linux": 1,
+    "all": 1
+  }
+]
 ```
 
 
