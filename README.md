@@ -1297,6 +1297,33 @@ curl -X GET "http://localhost:8081/log/admin" \
 ]
 ```
 
+## Statistics
+
+### Get user statistics request
+- Get basic data from September 2024
+```bash
+curl -X GET "http://localhost:8081/users/statis"  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" | jq
+```
+### Get user statistics response
+```json
+[
+  {
+    "date": "01/09/2024",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  {
+    "date": "02/09/2024",
+    "windows": 0,
+    "mac": 0,
+    "linux": 0,
+    "all": 0
+  },
+  /....
+```
 
 
 # Tests

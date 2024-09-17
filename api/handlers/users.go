@@ -5,10 +5,49 @@ import (
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type Statistics struct {
+	Date    string `json:"date"`
+	Windows int    `json:"windows"`
+	Mac     int    `json:"mac"`
+	Linux   int    `json:"linux"`
+	All     int    `json:"all"`
+}
+
+func GetUserStatistics(c *fiber.Ctx) error {
+	year, month := 2024, time.September
+	startDate := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 1, -1)
+
+	var stats []Statistics
+
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		dateForDB := d.Format("02/01/2006") 
+		dateForJSON := d.Format("2006/01/02") 
+
+		linuxCount, _ := database.GetUserCount(dateForDB, "Linux")
+		windowsCount, _ := database.GetUserCount(dateForDB, "Windows")
+		macCount, _ := database.GetUserCount(dateForDB, "Mac")
+		allCount := linuxCount + windowsCount + macCount
+
+		stat := Statistics{
+			Date:    dateForJSON,
+			Windows: windowsCount,
+			Mac:     macCount,
+			Linux:   linuxCount,
+			All:     allCount,
+		}
+
+		stats = append(stats, stat)
+	}
+
+	return c.JSON(stats)
+}
 
 func GetCurrentUser(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
@@ -58,19 +97,19 @@ func UpdateActiveStatusAllUsers(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-  var content string
-  if active == "true" {
-    content = "All users were deactivated."
-  } else {
-    content = "All users were activated."
-  }
-  l_type := "3"
-  err = database.CreateAdminLog(content, l_type)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	var content string
+	if active == "true" {
+		content = "All users were deactivated."
+	} else {
+		content = "All users were activated."
+	}
+	l_type := "3"
+	err = database.CreateAdminLog(content, l_type)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	return c.SendStatus(200)
 }
 

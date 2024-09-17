@@ -25,6 +25,24 @@ type User struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+type UserStatisticsResponse struct {
+	CreatedAt string `json:"created_at"`
+	Linux     int64  `json:"linux"`
+	Windows   int64  `json:"windows"`
+	Mac       int64  `json:"mac"`
+	Total     int64  `json:"total"`
+}
+
+func GetUserCount(day, os string) (int, error) {
+	var count int
+  day = "%" + day + "%"
+	err := DB.QueryRow(`SELECT COUNT(*) FROM users WHERE created_at LIKE ? AND os = ?;`, day, os).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	return count, nil
+}
+
 func UpdateEmailToken(email string, email_token int) error {
 	result, err := DB.Exec(`UPDATE users SET email_token = ? WHERE email = ?`, email_token, email)
 	if err != nil {
