@@ -1367,6 +1367,21 @@ curl -X GET "http://localhost:8081/users/stats?from=2024-09-09&to=2024-09-16"  \
 ]
 ```
 
+### Get course profit statistics request
+```bash
+curl -X GET "http://localhost:8081/courses/stats?from=19/09/2024&to=19/09/2024"  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjg2NzU0NDQsImlhdCI6MTcyNjA4MzQ0NCwibmJmIjoxNzI2MDgzNDQ0LCJzdWIiOjF9.UoA5afV7b4blotaaFfcyKnojjVMWupBRzAwF08dBPbM" | jq
+```
+
+### Get course profit statistics response
+```json
+[
+  {
+    "Title": "new course",
+    "Profit": 138
+  }
+]
+```
 
 # Tests
 ## Users tests

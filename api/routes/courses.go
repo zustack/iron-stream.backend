@@ -8,6 +8,7 @@ import (
 )
 
 func CoursesRoutes(app *fiber.App) {
+	app.Get("/courses/stats", middleware.AdminUser, handlers.GetCourseStats)
 	app.Get("/courses/admin", middleware.AdminUser, handlers.GetAdminCourses)
 	app.Put("/courses/update/active/:id/:active", middleware.AdminUser, handlers.UpdateCourseActiveStatus)
 	app.Post("/courses/sort", middleware.AdminUser, handlers.SortCourse)

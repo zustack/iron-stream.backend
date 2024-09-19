@@ -12,6 +12,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func GetCourseStats(c *fiber.Ctx) error {
+	from := c.Query("from", "")
+	to := c.Query("to", "")
+  courses, err := database.GetCoursesProfit(from, to)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+	return c.JSON(courses)
+}
+
 func GetAdminCourses(c *fiber.Ctx) error {
 	q := c.Query("q", "")
 	q = "%" + q + "%"

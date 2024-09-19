@@ -27,6 +27,7 @@ CREATE TABLE courses (
   num_reviews INTEGER DEFAULT 0, 
   duration VARCHAR(30) NOT NULL, 
   is_active BOOL DEFAULT FALSE,
+  price INTEGER DEFAULT 0,
   sort_order INTEGER, 
   created_at VARCHAR(40) NOT NULL
 );

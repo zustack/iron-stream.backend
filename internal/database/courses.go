@@ -17,6 +17,7 @@ type Course struct {
 	NumReviews     int    `json:"num_reviews"`
 	Duration       string `json:"duration"`
 	IsActive       bool   `json:"is_active"`
+  Price int `json:"price"`
 	SortOrder      int    `json:"sort_order"`
 	CreatedAt      string `json:"created_at"`
 	IsUserEnrolled bool   `json:"is_user_enrolled"`
@@ -49,7 +50,7 @@ func GetCourses(isActive string, searchTerm string) ([]Course, error) {
 	for rows.Next() {
 		var c Course
 		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Author, &c.Thumbnail,
-			&c.Preview, &c.Rating, &c.NumReviews, &c.Duration, &c.IsActive,
+			&c.Preview, &c.Rating, &c.NumReviews, &c.Duration, &c.IsActive, &c.Price,
 			&c.SortOrder, &c.CreatedAt); err != nil {
 			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
@@ -98,7 +99,7 @@ func GetCourseById(id string) (Course, error) {
 	row := DB.QueryRow(`SELECT * FROM courses WHERE id = ?`, id)
 	if err := row.Scan(&c.ID, &c.Title, &c.Description, &c.Author,
 		&c.Thumbnail, &c.Preview, &c.Rating, &c.NumReviews, &c.Duration,
-		&c.IsActive, &c.SortOrder, &c.CreatedAt); err != nil {
+		&c.IsActive, &c.Price, &c.SortOrder, &c.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return c, fmt.Errorf("No course found with the id %s", id)
 		}

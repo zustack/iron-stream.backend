@@ -5,6 +5,43 @@ import (
 	"iron-stream/internal/utils"
 )
 
+type CourseProfit struct {
+    Title  string `json:"course"`
+    Profit int    `json:"profit"`
+}
+
+func GetCoursesProfit(from, to string) ([]CourseProfit, error) {
+    query := `
+        SELECT c.title, SUM(c.price) as profit
+        FROM courses c
+        JOIN user_courses uc ON c.id = uc.course_id
+        WHERE uc.created_at BETWEEN ? AND ?
+        GROUP BY c.id, c.title
+        ORDER BY profit DESC
+    `
+
+    rows, err := DB.Query(query, from, to)
+    if err != nil {
+        return nil, fmt.Errorf("failed to execute query: %v", err)
+    }
+    defer rows.Close()
+
+    var results []CourseProfit
+    for rows.Next() {
+        var cp CourseProfit
+        if err := rows.Scan(&cp.Title, &cp.Profit); err != nil {
+            return nil, fmt.Errorf("failed to scan row: %v", err)
+        }
+        results = append(results, cp)
+    }
+
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("error iterating over rows: %v", err)
+    }
+
+    return results, nil
+}
+
 func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error {
 	result, err := DB.Exec(`DELETE FROM user_courses WHERE course_id = ? AND user_id = ?;`, courseId, userId)
 	if err != nil {
