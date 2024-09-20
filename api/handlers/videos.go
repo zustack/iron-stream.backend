@@ -8,6 +8,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func UpdateVideoSReview(c *fiber.Ctx) error {
+	id := c.Params("id")
+	sReview := c.Params("s_review")
+	err := database.UpdateVideoSReview(sReview, id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.SendStatus(200)
+}
+
 func WatchNewVideo(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 	type createHistoryInput struct {

@@ -8,6 +8,7 @@ import (
 )
 
 func VideosRoutes(app *fiber.App) {
+	app.Put("/videos/s_review/:id/:s_review", middleware.AdminUser, handlers.UpdateVideoSReview)
 	app.Put("/history/watch", middleware.NormalUser, handlers.WatchNewVideo)
 	app.Get("/history/current/:courseId", middleware.NormalUser, handlers.GetCurrentVideo)
 	app.Put("/videos", middleware.AdminUser, handlers.UpdateVideo)

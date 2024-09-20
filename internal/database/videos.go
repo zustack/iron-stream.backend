@@ -18,13 +18,30 @@ type Video struct {
 	CourseID    string `json:"course_id"`
 	CreatedAt   string `json:"created_at"`
 	VideoResume string `json:"video_resume"`
+	SReview     bool   `json:"s_review"`
+}
+
+func UpdateVideoSReview(s_review, id string) error {
+	result, err := DB.Exec(`UPDATE videos SET 
+  s_review = ? WHERE id = ?`, s_review, id)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("No video found with id %d", id)
+	}
+	return nil
 }
 
 func GetVideoById(videoId string) (Video, error) {
 	var v Video
 	row := DB.QueryRow(`SELECT * FROM videos WHERE id = ?`, videoId)
 	if err := row.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
-		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt); err != nil {
+		&v.Thumbnail, &v.Length, &v.Duration, &v.Views, &v.CourseID, &v.CreatedAt, &v.SReview); err != nil {
 		if err == sql.ErrNoRows {
 			return v, fmt.Errorf("No video found with id %s", videoId)
 		}
@@ -68,7 +85,7 @@ func GetFistVideoByCourseId(courseID string) (Video, error) {
   course_id = ? ORDER BY id ASC LIMIT 1`, courseID)
 	err := row.Scan(&video.ID, &video.Title, &video.Description,
 		&video.VideoHLS, &video.Thumbnail, &video.Length, &video.Duration,
-		&video.Views, &video.CourseID, &video.CreatedAt)
+		&video.Views, &video.CourseID, &video.CreatedAt, &video.SReview)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return video, fmt.Errorf("No video found with course id %s", courseID)
@@ -195,7 +212,7 @@ func GetAdminVideos(courseId, searchParam string) ([]Video, error) {
 		var v Video
 		if err := rows.Scan(&v.ID, &v.Title, &v.Description, &v.VideoHLS,
 			&v.Thumbnail, &v.Duration, &v.Length, &v.Views, &v.CourseID,
-			&v.CreatedAt); err != nil {
+			&v.CreatedAt, &v.SReview); err != nil {
 			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		videos = append(videos, v)

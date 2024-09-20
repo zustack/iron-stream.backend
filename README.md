@@ -724,6 +724,24 @@ curl -X PUT "http://localhost:8081/history/watch" \
 {"id":22,"video_id":"","course_id":0,"user_id":0,"video_resume":"187.68","created_at":""}%
 ```
 
+### Update video should review request
+```bash
+curl -X PUT "http://localhost:8081/videos/s_review/1/true" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk0NTE0NTEsImlhdCI6MTcyNjg1OTQ1MSwibmJmIjoxNzI2ODU5NDUxLCJzdWIiOjF9.2aEv4OLcMfGzw7OBflhJSfYHlYIG_mrvn8-CtGQ3kJg"
+```
+$2a$10$8x1FC1wLZ2O.tzM86VEVs.w/B9uhKZrgoiEu0oPJ9mBwcF/kreL1i
+### Update video should review response
+```json
+200 OK
+```
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk0NTE0NTEsImlhdCI6MTcyNjg1OTQ1MSwibmJmIjoxNzI2ODU5NDUxLCJzdWIiOjF9.2aEv4OLcMfGzw7OBflhJSfYHlYIG_mrvn8-CtGQ3kJg
+
+{"exp":1729451451,"fullName":"Agustin Fricke","isAdmin":true,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk0NTE0NTEsImlhdCI6MTcyNjg1OTQ1MSwibmJmIjoxNzI2ODU5NDUxLCJzdWIiOjF9.2aEv4OLcMfGzw7OBflhJSfYHlYIG_mrvn8-CtGQ3kJg","userId":1}%
+curl -X POST "http://localhost:8081/users/login" \
+     -H "Content-Type: application/json" \
+     -d '{"email": "agustfricke@gmail.com", "password": "lincon05", "pc": "c48365f10b774834ae71853729371ac8"}'
+
 
 ## History
 ### Get user history request

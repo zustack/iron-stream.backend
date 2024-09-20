@@ -415,7 +415,7 @@ func Login(c *fiber.Ctx) error {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pc), []byte(cleanInput.Pc))
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{
-			"error": "Incorrect password, please try again.",
+			"error": "Incorrect unique identifier, please try again.",
 		})
 	}
 
