@@ -5,6 +5,7 @@ import (
 	"io"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
+	"iron-stream/internal/utils"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -97,12 +98,35 @@ func GetSoloCourse(c *fiber.Ctx) error {
 
 func DeleteCourse(c *fiber.Ctx) error {
 	id := c.Params("id")
-	err := database.DeleteCourseByID(id)
+	course, err := database.GetCourseById(id)
+	// 9 /home/agust/work/iron-stream/backend/web/uploads/thumbnails/course.png
+	filePath := filepath.Join(os.Getenv("ROOT_PATH"), course.Thumbnail)
+	err = utils.DeleteFile(filePath, 9)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	if course.Preview != "" {
+		// 9 /home/agust/work/iron-stream/backend/web/uploads/previews/[uuid]
+		filePath := filepath.Join(os.Getenv("ROOT_PATH"), course.Preview)
+		dirPath := filepath.Dir(filePath)
+		err = utils.DeleteFile(dirPath, 9)
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+	}
+
+	err = database.DeleteCourseByID(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	return c.SendStatus(204)
 }
 

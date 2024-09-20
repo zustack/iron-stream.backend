@@ -112,11 +112,11 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 			}
 
 			return c.Status(200).JSON(fiber.Map{
-				"video":      video,
-				"resume":     "",
-				"history_id": "",
-				"isFile":     isFile,
-        "userHasReviewed": userHasReviewed,
+				"video":           video,
+				"resume":          "",
+				"history_id":      "",
+				"isFile":          isFile,
+				"userHasReviewed": userHasReviewed,
 			})
 
 		} else {
@@ -148,11 +148,11 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"video":      video,
-		"resume":     record.VideoResume,
-		"history_id": record.ID,
-		"isFile":     isFile,
-    "userHasReviewed": userHasReviewed,
+		"video":           video,
+		"resume":          record.VideoResume,
+		"history_id":      record.ID,
+		"isFile":          isFile,
+		"userHasReviewed": userHasReviewed,
 	})
 
 }

@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -59,10 +60,11 @@ func ManagePreviews(filePath string) (string, error) {
 		return "", fmt.Errorf("Failed to convert video to HLS: %v", err)
 	}
 
-  err = os.RemoveAll(filePath)
-  if err != nil {
-    return "", fmt.Errorf("Error deleting directory. error: %v . path: %s", err, filePath)
-  }
+	dirPath := path.Dir(filePath)
+	err = os.RemoveAll(dirPath)
+	if err != nil {
+		return "", fmt.Errorf("Error deleting directory. error: %v . path: %s", err, filePath)
+	}
 
 	return staticPath + "/master.m3u8", nil
 }
@@ -74,7 +76,7 @@ func ManageVideos(filePath, courseId string) (string, error) {
 	err := os.MkdirAll(videoDir, 0755)
 	if err != nil {
 		return "", err
-	} 
+	}
 
 	ffmpegPath := filepath.Join(os.Getenv("ROOT_PATH"), "ffmpeg-convert.sh")
 	cmd := exec.Command("sh", ffmpegPath, filePath, videoDir)
@@ -83,10 +85,11 @@ func ManageVideos(filePath, courseId string) (string, error) {
 		return "", fmt.Errorf("Failed to convert video to HLS: %v", err)
 	}
 
-  err = os.RemoveAll(filePath)
-  if err != nil {
-    return "", fmt.Errorf("Error deleting directory. error: %v . path: %s", err, filePath)
-  }
+	dirPath := path.Dir(filePath)
+	err = os.RemoveAll(dirPath)
+	if err != nil {
+		return "", fmt.Errorf("Error deleting directory. error: %v . path: %s", err, filePath)
+	}
 
 	return staticPath + "/master.m3u8", nil
 }
@@ -130,4 +133,20 @@ func ManageFile(file *multipart.FileHeader) (string, error) {
 	}
 
 	return staticPath + "/" + fileName, nil
+}
+
+// path is the full path of the file that you want to delete
+// level is the expected level of the path
+func DeleteFile(path string, level int) error {
+	segments := strings.Split(path, "/")
+	levelCount := len(segments) - 1
+	if levelCount == level {
+		err := os.RemoveAll(path)
+		if err != nil {
+			return fmt.Errorf("Error deleting file: %s", err)
+		}
+		fmt.Println("File deleted successfully:", path)
+		return nil
+	}
+	return fmt.Errorf("Invalid path: %s", path)
 }
