@@ -201,12 +201,12 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 func DeleteVideo(c *fiber.Ctx) error {
 	id := c.Params("id")
-  video, err := database.GetVideoById(id)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	video, err := database.GetVideoById(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	// 9 /home/agust/work/iron-stream/backend/web/uploads/thumbnails/course.png
 	filePath := filepath.Join(os.Getenv("ROOT_PATH"), video.Thumbnail)
@@ -217,7 +217,7 @@ func DeleteVideo(c *fiber.Ctx) error {
 		})
 	}
 
-	// 9 /home/agust/work/iron-stream/backend/web/uploads/previews/[uuid]
+	// 10 /home/agust/work/iron-stream/backend/web/uploads/videos/[courseid]/[uuid]
 	filePath = filepath.Join(os.Getenv("ROOT_PATH"), video.VideoHLS)
 	dirPath := filepath.Dir(filePath)
 	err = utils.DeleteFile(dirPath, 10)

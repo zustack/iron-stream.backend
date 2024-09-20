@@ -5,6 +5,8 @@ import (
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
 	"mime/multipart"
+	"os"
+	"path/filepath"
 )
 
 type UpdateVideoInput struct {
@@ -61,6 +63,15 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 		if err != nil {
 			return database.Video{}, err
 		}
+
+		// delete the input.OldVideoHLS
+		filePath := filepath.Join(os.Getenv("ROOT_PATH"), input.OldVideoHLS)
+		dirPath := filepath.Dir(filePath)
+		err = utils.DeleteFile(dirPath, 10)
+		if err != nil {
+			return database.Video{}, err
+		}
+
 	} else {
 		video = input.OldVideoHLS
 		length = v.Length
@@ -75,6 +86,13 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 		if err != nil {
 			return database.Video{}, err
 		}
+
+		filePath := filepath.Join(os.Getenv("ROOT_PATH"), input.OldThumbnail)
+		err = utils.DeleteFile(filePath, 9)
+		if err != nil {
+			return database.Video{}, err
+		}
+
 	} else {
 		thumbnail = input.OldThumbnail
 	}

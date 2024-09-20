@@ -99,11 +99,11 @@ func GetSoloCourse(c *fiber.Ctx) error {
 func DeleteCourse(c *fiber.Ctx) error {
 	id := c.Params("id")
 	course, err := database.GetCourseById(id)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	// 9 /home/agust/work/iron-stream/backend/web/uploads/thumbnails/course.png
 	filePath := filepath.Join(os.Getenv("ROOT_PATH"), course.Thumbnail)
