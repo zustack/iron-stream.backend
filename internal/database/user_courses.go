@@ -11,7 +11,12 @@ type CourseProfit struct {
 	Profit int    `json:"profit"`
 }
 
-func GetCoursesProfit(from, to string) ([]CourseProfit, error) {
+type CourseProfitResult struct {
+	Courses []CourseProfit `json:"courses"`
+	Total   int            `json:"total"`
+}
+
+func GetCoursesProfit(from, to string) (CourseProfitResult, error) {
 	query := `
 SELECT c.title, SUM(uc.price) as profit
 FROM courses c
@@ -19,28 +24,31 @@ JOIN user_courses uc ON c.id = uc.course_id
 WHERE uc.created_at BETWEEN ? AND ?
 GROUP BY c.id, c.title
 ORDER BY profit DESC
-    `
-
+	`
 	rows, err := DB.Query(query, from, to)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute query: %v", err)
+		return CourseProfitResult{}, fmt.Errorf("failed to execute query: %v", err)
 	}
 	defer rows.Close()
 
-	var results []CourseProfit
+	var result CourseProfitResult
+	var total int
+
 	for rows.Next() {
 		var cp CourseProfit
 		if err := rows.Scan(&cp.Title, &cp.Profit); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
+			return CourseProfitResult{}, fmt.Errorf("failed to scan row: %v", err)
 		}
-		results = append(results, cp)
+		result.Courses = append(result.Courses, cp)
+		total += cp.Profit
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating over rows: %v", err)
+		return CourseProfitResult{}, fmt.Errorf("error iterating over rows: %v", err)
 	}
 
-	return results, nil
+	result.Total = total
+	return result, nil
 }
 
 func DeleteUserCoursesByCourseIdAndUserId(userId string, courseId string) error {
