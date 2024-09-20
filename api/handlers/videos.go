@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
+	"iron-stream/internal/utils"
+	"os"
+	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -198,7 +201,33 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 func DeleteVideo(c *fiber.Ctx) error {
 	id := c.Params("id")
-	err := database.DeleteVideoByID(id)
+  video, err := database.GetVideoById(id)
+  if err != nil {
+    return c.Status(500).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+	// 9 /home/agust/work/iron-stream/backend/web/uploads/thumbnails/course.png
+	filePath := filepath.Join(os.Getenv("ROOT_PATH"), video.Thumbnail)
+	err = utils.DeleteFile(filePath, 9)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// 9 /home/agust/work/iron-stream/backend/web/uploads/previews/[uuid]
+	filePath = filepath.Join(os.Getenv("ROOT_PATH"), video.VideoHLS)
+	dirPath := filepath.Dir(filePath)
+	err = utils.DeleteFile(dirPath, 10)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err = database.DeleteVideoByID(id)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
