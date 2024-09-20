@@ -145,7 +145,6 @@ func DeleteFile(path string, level int) error {
 		if err != nil {
 			return fmt.Errorf("Error deleting file: %s", err)
 		}
-		fmt.Println("File deleted successfully:", path)
 		return nil
 	}
 	return fmt.Errorf("Invalid path: %s", path)

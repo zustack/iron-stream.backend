@@ -5,6 +5,8 @@ import (
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
 	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -167,6 +169,13 @@ func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 		if err != nil {
 			return database.Course{}, err
 		}
+
+		filePath := filepath.Join(os.Getenv("ROOT_PATH"), input.OldThumbnail)
+		err = utils.DeleteFile(filePath, 9)
+		if err != nil {
+			return database.Course{}, err
+		}
+
 	} else {
 		thumbnail = input.OldThumbnail
 	}
@@ -178,6 +187,13 @@ func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 			return database.Course{}, err
 		}
 		previewToDB = preview
+
+		filePath := filepath.Join(os.Getenv("ROOT_PATH"), input.OldPreview)
+		dirPath := filepath.Dir(filePath)
+		err = utils.DeleteFile(dirPath, 9)
+		if err != nil {
+			return database.Course{}, err
+		}
 	} else {
 		previewToDB = input.OldPreview
 	}
