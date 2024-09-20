@@ -74,6 +74,12 @@ func WatchNewVideo(c *fiber.Ctx) error {
 func GetCurrentVideo(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 	courseId := c.Params("courseId")
+	userHasReviewed, err := database.UserReviewExists(user.ID, courseId)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	record, err := database.GetLastVideoByUserIdAndCourseId(user.ID, courseId)
 	if err != nil {
 		if err.Error() == "Record not found" {
@@ -110,6 +116,7 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 				"resume":     "",
 				"history_id": "",
 				"isFile":     isFile,
+        "userHasReviewed": userHasReviewed,
 			})
 
 		} else {
@@ -145,6 +152,7 @@ func GetCurrentVideo(c *fiber.Ctx) error {
 		"resume":     record.VideoResume,
 		"history_id": record.ID,
 		"isFile":     isFile,
+    "userHasReviewed": userHasReviewed,
 	})
 
 }
