@@ -64,7 +64,6 @@ func UpdateVideo(input UpdateVideoInput) (database.Video, error) {
 			return database.Video{}, err
 		}
 
-		// delete the input.OldVideoHLS
 		filePath := filepath.Join(os.Getenv("ROOT_PATH"), input.OldVideoHLS)
 		dirPath := filepath.Dir(filePath)
 		err = utils.DeleteFile(dirPath, 10)

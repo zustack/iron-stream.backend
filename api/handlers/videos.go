@@ -170,7 +170,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 		Thumbnail:    thumbnail,
 		OldThumbnail: c.FormValue("old_thumbnail"),
 		Video:        c.FormValue("video_tmp"),
-		OldVideoHLS:  c.FormValue("old_video_hls"),
+		OldVideoHLS:  c.FormValue("old_video"),
 	})
 
 	if err != nil {
