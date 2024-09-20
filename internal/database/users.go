@@ -35,7 +35,7 @@ type UserStatisticsResponse struct {
 
 func GetUserCount(day, os string) (int, error) {
 	var count int
-  day = "%" + day + "%"
+	day = "%" + day + "%"
 	err := DB.QueryRow(`SELECT COUNT(*) FROM users WHERE created_at LIKE ? AND os = ?;`, day, os).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("An unexpected error occurred: %v", err)

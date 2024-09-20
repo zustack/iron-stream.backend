@@ -36,6 +36,7 @@ DROP TABLE IF EXISTS user_courses;
 CREATE TABLE user_courses (
   user_id INTEGER NOT NULL,
   course_id INTEGER NOT NULL,
+  price INTEGER DEFAULT 0,
   created_at VARCHAR(40) NOT NULL,
   PRIMARY KEY (user_id, course_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

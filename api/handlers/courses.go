@@ -15,12 +15,12 @@ import (
 func GetCourseStats(c *fiber.Ctx) error {
 	from := c.Query("from", "")
 	to := c.Query("to", "")
-  courses, err := database.GetCoursesProfit(from, to)
-  if err != nil {
-    return c.Status(500).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	courses, err := database.GetCoursesProfit(from, to)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	return c.JSON(courses)
 }
 
@@ -115,6 +115,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Author:       c.FormValue("author"),
 		Duration:     c.FormValue("duration"),
 		IsActive:     c.FormValue("is_active"),
+		Price:        c.FormValue("price"),
 		Thumbnail:    thumbnail,
 		OldThumbnail: c.FormValue("old_thumbnail"),
 		Preview:      c.FormValue("preview_tmp"),
@@ -136,6 +137,7 @@ func UpdateCourse(c *fiber.Ctx) error {
 		Preview:     cleanInput.Preview,
 		Duration:    cleanInput.Duration,
 		IsActive:    cleanInput.IsActive,
+		Price:       cleanInput.Price,
 	})
 
 	if err != nil {
@@ -161,6 +163,7 @@ func CreateCourse(c *fiber.Ctx) error {
 		Author:      c.FormValue("author"),
 		Duration:    c.FormValue("duration"),
 		IsActive:    c.FormValue("is_active"),
+		Price:       c.FormValue("price"),
 		Thumbnail:   thumbnail,
 		Preview:     c.FormValue("preview_tmp"),
 	})
@@ -179,6 +182,7 @@ func CreateCourse(c *fiber.Ctx) error {
 		Preview:     cleanInput.Preview,
 		Duration:    cleanInput.Duration,
 		IsActive:    cleanInput.IsActive,
+		Price:       cleanInput.Price,
 	})
 
 	if err != nil {

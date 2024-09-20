@@ -17,7 +17,7 @@ type Course struct {
 	NumReviews     int    `json:"num_reviews"`
 	Duration       string `json:"duration"`
 	IsActive       bool   `json:"is_active"`
-  Price int `json:"price"`
+	Price          int    `json:"price"`
 	SortOrder      int    `json:"sort_order"`
 	CreatedAt      string `json:"created_at"`
 	IsUserEnrolled bool   `json:"is_user_enrolled"`
@@ -126,9 +126,9 @@ func DeleteCourseByID(id string) error {
 func UpdateCourse(c Course) error {
 	result, err := DB.Exec(`UPDATE courses SET 
   title = ?, description = ? , author = ?, thumbnail = ?, preview = ?, 
-  duration = ?, is_active = ? WHERE id = ?`,
+  duration = ?, is_active = ?, price = ? WHERE id = ?`,
 		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration,
-		c.IsActive, c.ID)
+		c.IsActive, c.Price, c.ID)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
@@ -152,9 +152,10 @@ func CreateCourse(c Course) error {
 	date := utils.FormattedDate()
 	_, err = DB.Exec(`
         INSERT INTO courses
-        (title, description, author, thumbnail, preview, duration, is_active, sort_order, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, maxSortOrder+1, date)
+        (title, description, author, thumbnail, preview, duration, is_active, 
+        price, sort_order, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		c.Title, c.Description, c.Author, c.Thumbnail, c.Preview, c.Duration, c.IsActive, c.Price, maxSortOrder+1, date)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}

@@ -243,7 +243,7 @@ curl -X GET "http://localhost:8081/users/current" \
 ### ChunkUpload request
 ```bash
 curl -X POST http://localhost:8081/courses/chunk/upload \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk0NDUxNzIsImlhdCI6MTcyNjg1MzE3MiwibmJmIjoxNzI2ODUzMTcyLCJzdWIiOjF9.rk1EW27xTcCXur3Vjh5_kYrGGtd-4D5_9e8icXz0ZaQ" \
   -H "Content-Type: multipart/form-data" \
   -F "chunkNumber=0" \
   -F "totalChunks=1" \
@@ -266,6 +266,7 @@ curl -X POST http://localhost:8081/courses/create \
   -F "author=agustfricke" \
   -F "duration=4 hours, 20 minutes" \
   -F "is_active=true" \
+  -F "price=420" \
   -F "thumbnail=@/home/agust/Pictures/test.png" \
   -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4"
 ```
@@ -278,7 +279,7 @@ curl -X POST http://localhost:8081/courses/create \
 ### Update course request
 ```bash
 curl -X PUT "http://localhost:8081/courses/update" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \
   -H "Content-Type: multipart/form-data" \
   -F "id=1" \
   -F "title=Data Structures edit" \
@@ -286,10 +287,11 @@ curl -X PUT "http://localhost:8081/courses/update" \
   -F "author=agustfricke edit" \
   -F "duration=4 hours, 20 minutes edit" \
   -F "is_active=true" \
+  -F "price=69" \
   -F "thumbnail=" \
-  -F "old_thumbnail=/web/uploads/thumbnails/2da28e22-33b6-42ec-9e21-8a46023ecb2b.png" \
-  -F "preview_tmp=/home/agust/work/iron-stream/backend/web/uploads/tmp/42069/test.mp4" \
-  -F "old_preview=/web/uploads/tmp/42069/test.png" \
+  -F "old_thumbnail=/web/uploads/thumbnails/cd7af076-5f37-490c-bc34-998f4468b178.png" \
+  -F "preview_tmp=" \
+  -F "old_preview=/web/uploads/previews/511481d9-af34-40d7-8c1d-73ef42dfdb90/master.m3u8" \
 ```
 ### Update course response
 ```bash
@@ -308,8 +310,8 @@ curl -X DELETE "http://localhost:8081/courses/delete/1" \
 
 ### Get course by ID request
 ```bash
-curl "http://localhost:8081/courses/solo/2" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc3MTYzMjUsImlhdCI6MTcyNTEyNDMyNSwibmJmIjoxNzI1MTI0MzI1LCJzdWIiOjh9._j6dGt0wiBPizAn3dCYnr1NKAksUIi7SYQJ1xmoH_Fw" | jq
+curl "http://localhost:8081/courses/solo/1" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4OTEyOTgsImlhdCI6MTcyNTI5OTI5OCwibmJmIjoxNzI1Mjk5Mjk4LCJzdWIiOjF9.uYzFWle0Apbk89vQ3azD8pe5yBghw8EAx_Jx_p_h884" \ | jq
 ```
 ### Get course by ID response
 ```bash

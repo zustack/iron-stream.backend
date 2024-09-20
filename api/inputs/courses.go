@@ -18,6 +18,7 @@ type CreateCourseInput struct {
 	Preview     string
 	Duration    string
 	IsActive    string
+	Price       string
 }
 
 func CleanCreateCourse(input CreateCourseInput) (database.Course, error) {
@@ -26,6 +27,15 @@ func CleanCreateCourse(input CreateCourseInput) (database.Course, error) {
 	}
 	if len(input.Title) > 50 {
 		return database.Course{}, fmt.Errorf("The title should not have more than 50 characters.")
+	}
+
+	price, err := strconv.Atoi(input.Price)
+	if err != nil {
+		return database.Course{}, fmt.Errorf(err.Error())
+	}
+
+	if price <= 0 {
+		return database.Course{}, fmt.Errorf("The price is required to be greater than 0.")
 	}
 
 	if input.Description == "" {
@@ -77,6 +87,7 @@ func CleanCreateCourse(input CreateCourseInput) (database.Course, error) {
 		Author:      input.Author,
 		Duration:    input.Duration,
 		IsActive:    isActiveBool,
+		Price:       price,
 		Thumbnail:   thumbnail,
 		Preview:     input.Preview,
 	}, nil
@@ -93,6 +104,7 @@ type UpdateCourseInput struct {
 	OldPreview   string
 	Duration     string
 	IsActive     string
+	Price        string
 }
 
 func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
@@ -102,6 +114,15 @@ func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 	id, err := strconv.ParseInt(input.ID, 10, 64)
 	if err != nil {
 		return database.Course{}, fmt.Errorf(err.Error())
+	}
+
+	price, err := strconv.Atoi(input.Price)
+	if err != nil {
+		return database.Course{}, fmt.Errorf(err.Error())
+	}
+
+	if price <= 0 {
+		return database.Course{}, fmt.Errorf("The price is required to be greater than 0.")
 	}
 
 	if input.Title == "" {
@@ -170,5 +191,6 @@ func CleanUpdateCourse(input UpdateCourseInput) (database.Course, error) {
 		IsActive:    isActiveBool,
 		Thumbnail:   thumbnail,
 		Preview:     previewToDB,
+		Price:       price,
 	}, nil
 }
