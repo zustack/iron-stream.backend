@@ -331,11 +331,16 @@ func CreateUser(u User) error {
 		return fmt.Errorf("Failed to hash the password: %v", err)
 	}
 
+	hashedPc, err := bcrypt.GenerateFromPassword([]byte(u.Pc), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("Failed to hash the password: %v", err)
+	}
+
 	_, err = DB.Exec(`
 		INSERT INTO users
 		(email, name, surname, password, is_admin, email_token, pc, os, created_at) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		u.Email, u.Name, u.Surname, string(hashedPassword), false, u.EmailToken, u.Pc, u.Os, date)
+		u.Email, u.Name, u.Surname, string(hashedPassword), false, u.EmailToken, string(hashedPc), u.Os, date)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
