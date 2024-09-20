@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"iron-stream/internal/utils"
 )
@@ -12,12 +13,12 @@ type CourseProfit struct {
 
 func GetCoursesProfit(from, to string) ([]CourseProfit, error) {
 	query := `
-        SELECT c.title, SUM(c.price) as profit
-        FROM courses c
-        JOIN user_courses uc ON c.id = uc.course_id
-        WHERE uc.created_at BETWEEN ? AND ?
-        GROUP BY c.id, c.title
-        ORDER BY profit DESC
+SELECT c.title, SUM(uc.price) as profit
+FROM courses c
+JOIN user_courses uc ON c.id = uc.course_id
+WHERE uc.created_at BETWEEN ? AND ?
+GROUP BY c.id, c.title
+ORDER BY profit DESC
     `
 
 	rows, err := DB.Query(query, from, to)
@@ -185,21 +186,20 @@ func CreateUserCourse(userID, courseID string) error {
 		return fmt.Errorf("The user with the id %s does not exist", userID)
 	}
 
-	var courseExists bool
-	err = DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM courses WHERE id = ?)`,
-		courseID).Scan(&courseExists)
-	if err != nil {
+	var price int
+	row := DB.QueryRow(`SELECT price FROM courses WHERE id = ?`, courseID)
+	if err := row.Scan(&price); err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("The course with the id %s does not exist", courseID)
+		}
 		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-	if !courseExists {
-		return fmt.Errorf("The course with the id %s does not exist", courseID)
 	}
 
 	date := utils.FormattedDate()
 
 	_, err = DB.Exec(`
-    INSERT INTO user_courses (user_id, course_id, created_at) VALUES (?, ?, ?)`,
-		userID, courseID, date)
+    INSERT INTO user_courses (user_id, course_id, created_at, price) VALUES (?, ?, ?, ?)`,
+		userID, courseID, date, price)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}

@@ -287,7 +287,7 @@ curl -X PUT "http://localhost:8081/courses/update" \
   -F "author=agustfricke edit" \
   -F "duration=4 hours, 20 minutes edit" \
   -F "is_active=true" \
-  -F "price=69" \
+  -F "price=73" \
   -F "thumbnail=" \
   -F "old_thumbnail=/web/uploads/thumbnails/cd7af076-5f37-490c-bc34-998f4468b178.png" \
   -F "preview_tmp=" \
