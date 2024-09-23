@@ -21,7 +21,7 @@ func GetCoursesProfit(from, to string) (CourseProfitResult, error) {
 SELECT c.title, SUM(uc.price) as profit
 FROM courses c
 JOIN user_courses uc ON c.id = uc.course_id
-WHERE uc.created_at BETWEEN ? AND ?
+WHERE uc.created_at BETWEEN ? AND ? AND uc.user_id != 1
 GROUP BY c.id, c.title
 ORDER BY profit DESC
 	`
