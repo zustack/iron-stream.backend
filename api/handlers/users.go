@@ -214,6 +214,7 @@ func AdminUsers(c *fiber.Ctx) error {
 }
 
 func UpdatePassword(c *fiber.Ctx) error {
+  time.Sleep(5 * time.Second)
 	user := c.Locals("user").(*database.User)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
@@ -247,12 +248,14 @@ func DeleteAccountByEmail(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+  /* FIX:
 	err = database.DeleteNotification(email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+  */
 	return c.SendStatus(200)
 }
 
@@ -279,6 +282,7 @@ func ResendEmailToken(c *fiber.Ctx) error {
 }
 
 func VerifyEmail(c *fiber.Ctx) error {
+  time.Sleep(5 * time.Second)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -323,6 +327,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 }
 
 func SignUp(c *fiber.Ctx) error {
+  time.Sleep(5 * time.Second)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{

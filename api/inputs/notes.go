@@ -27,6 +27,10 @@ func CreateNote(input CreateNotePayload) (database.Note, error) {
 		return database.Note{}, fmt.Errorf("The video title should not have more than 255 characters.")
 	}
 
+  if input.Time > 255 {
+    return database.Note{}, fmt.Errorf("The m_time should not have more than 255 characters.") 
+  }
+
 	minutes := int(math.Floor(input.Time / 60))
 	remainingSeconds := int(math.Floor(math.Mod(input.Time, 60)))
 	noteTime := fmt.Sprintf("%02d:%02d", minutes, remainingSeconds)
@@ -35,5 +39,6 @@ func CreateNote(input CreateNotePayload) (database.Note, error) {
 		Body:       input.Body,
 		VideoTitle: input.VideoTitle,
 		Time:       noteTime,
+    MTime:      input.Time,
 	}, nil
 }

@@ -9,7 +9,9 @@ type Note struct {
 	ID         int64  `json:"id"`
 	Body       string `json:"body"`
 	VideoTitle string `json:"video_title"`
+  VideoID    string `json:"video_id"`
 	Time       string `json:"time"`
+  MTime float64 `json:"m_time"`
 	CourseID   string `json:"course_id"`
 	UserID     int64  `json:"user_id"`
 }
@@ -69,7 +71,7 @@ func GetNotes(courseId string, userId int64) ([]Note, error) {
 
 	for rows.Next() {
 		var n Note
-		if err := rows.Scan(&n.ID, &n.Body, &n.VideoTitle, &n.Time, &n.CourseID, &n.UserID); err != nil {
+		if err := rows.Scan(&n.ID, &n.Body, &n.VideoTitle, &n.VideoID, &n.Time, &n.MTime, &n.CourseID, &n.UserID); err != nil {
 			return nil, fmt.Errorf("An unexpected error occurred: %v", err)
 		}
 		notes = append(notes, n)
@@ -85,9 +87,9 @@ func GetNotes(courseId string, userId int64) ([]Note, error) {
 func CreateNote(n Note) error {
 	_, err := DB.Exec(`
   INSERT INTO notes
-  (body, video_title, time, course_id, user_id) 
-  VALUES (?, ?, ?, ?, ?)`,
-		n.Body, n.VideoTitle, n.Time, n.CourseID, n.UserID)
+  (body, video_title, video_id, time, m_time, course_id, user_id) 
+  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		n.Body, n.VideoTitle, n.VideoID, n.Time, n.MTime, n.CourseID, n.UserID)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}

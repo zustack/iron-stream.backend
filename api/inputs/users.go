@@ -15,9 +15,6 @@ func LoginInput(input database.User) (database.User, error) {
 	if input.Password == "" {
 		return database.User{}, fmt.Errorf("The password is required.")
 	}
-	if len(input.Password) > 55 {
-		return database.User{}, fmt.Errorf("The password should not have more than 55 characters.")
-	}
 	if input.Pc == "" {
 		return database.User{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
 	}
