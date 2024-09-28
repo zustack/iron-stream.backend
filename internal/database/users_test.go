@@ -7,6 +7,42 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestVerifyAccount(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agustin",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	t.Run("success", func(t *testing.T) {
+		user, err := database.GetUserByEmail("agustfricke@proton.me")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+    err = database.VerifyAccount(user.ID)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		userAfter, err := database.GetUserByEmail("agustfricke@proton.me")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if user.Verified != !userAfter.Verified {
+			t.Errorf("expected %v but got: %v", !user.Verified, userAfter.Verified)
+		}
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
+}
+
 func TestGetUserByEmail(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{
