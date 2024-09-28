@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"iron-stream/internal/database"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -49,7 +48,6 @@ func DeleteAllUserCourses(c *fiber.Ctx) error {
 }
 
 func GetUserCourses(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
 	userId := c.Params("userId")
 	q := c.Query("q", "")
 	courses, err := database.GetUserCourses(userId, q)

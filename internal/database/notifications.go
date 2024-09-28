@@ -13,10 +13,11 @@ type Notification struct {
 }
 
 func DeleteNotification(info string) error {
-	result, err := DB.Exec("DELETE FROM notifications WHERE info = ?", info)
+	_, err := DB.Exec("DELETE FROM notifications WHERE info = ?", info)
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
+  /*
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
@@ -24,6 +25,7 @@ func DeleteNotification(info string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("No notification found with the info %s", info)
 	}
+  */
 	return nil
 }
 

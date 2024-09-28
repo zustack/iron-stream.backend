@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
@@ -214,7 +215,6 @@ func AdminUsers(c *fiber.Ctx) error {
 }
 
 func UpdatePassword(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
 	user := c.Locals("user").(*database.User)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
@@ -242,20 +242,24 @@ func UpdatePassword(c *fiber.Ctx) error {
 
 func DeleteAccountByEmail(c *fiber.Ctx) error {
 	email := c.Params("email")
+  user := c.Locals("user").(*database.User)
+  if !user.IsAdmin && user.Email != email {
+    return c.Status(403).JSON(fiber.Map{
+      "error": "You are not allowed to delete this account",
+    })
+  }
 	err := database.DeleteAccountByEmail(email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
-  /* FIX:
 	err = database.DeleteNotification(email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
-  */
 	return c.SendStatus(200)
 }
 
@@ -282,7 +286,6 @@ func ResendEmailToken(c *fiber.Ctx) error {
 }
 
 func VerifyEmail(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -327,7 +330,6 @@ func VerifyEmail(c *fiber.Ctx) error {
 }
 
 func SignUp(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -386,7 +388,7 @@ func SignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendStatus(200)
+	return c.SendStatus(201)
 }
 
 func Login(c *fiber.Ctx) error {
@@ -417,6 +419,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+  fmt.Println("pc", user.Pc, "pc", cleanInput.Pc)
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pc), []byte(cleanInput.Pc))
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{
@@ -429,14 +432,6 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(401).JSON(fiber.Map{
 			"error": "Incorrect password, please try again.",
 		})
-	}
-
-	if !user.IsAdmin {
-		if user.Pc != payload.Pc {
-			return c.Status(401).JSON(fiber.Map{
-				"error": "The unique identifier does not match.",
-			})
-		}
 	}
 
 	token, exp, err := utils.MakeJWT(user.ID)

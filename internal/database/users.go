@@ -333,7 +333,7 @@ func CreateUser(u User) error {
 
 	hashedPc, err := bcrypt.GenerateFromPassword([]byte(u.Pc), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("Failed to hash the password: %v", err)
+		return fmt.Errorf("Failed to hash the unique identifier: %v", err)
 	}
 
 	_, err = DB.Exec(`
