@@ -397,13 +397,13 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	payloadToClean := database.User{
+	payloadToClean := inputs.LoginInput {
 		Email:    payload.Email,
 		Password: payload.Password,
 		Pc:       payload.Pc,
 	}
 
-	cleanInput, err := inputs.LoginInput(payloadToClean)
+	cleanInput, err := inputs.Login(payloadToClean)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),

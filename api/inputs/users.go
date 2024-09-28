@@ -2,26 +2,34 @@ package inputs
 
 import (
 	"fmt"
-	"iron-stream/internal/database"
 )
 
-func LoginInput(input database.User) (database.User, error) {
+type LoginInput struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Password string `json:"password"`
+	Pc       string `json:"pc"`
+	Os       string `json:"os"`
+}
+
+func Login(input LoginInput) (LoginInput, error) {
 	if input.Email == "" {
-		return database.User{}, fmt.Errorf("The email is required.")
+		return LoginInput{}, fmt.Errorf("The email is required.")
 	}
 	if len(input.Email) > 55 {
-		return database.User{}, fmt.Errorf("The email should not have more than 55 characters.")
+		return LoginInput{}, fmt.Errorf("The email should not have more than 55 characters.")
 	}
 	if input.Password == "" {
-		return database.User{}, fmt.Errorf("The password is required.")
+		return LoginInput{}, fmt.Errorf("The password is required.")
 	}
 	if input.Pc == "" {
-		return database.User{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
+		return LoginInput{}, fmt.Errorf("The unique identifier is required. Please ensure that your system's configuration is correct.")
 	}
 	if len(input.Pc) > 255 {
-		return database.User{}, fmt.Errorf("The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.")
+		return LoginInput{}, fmt.Errorf("The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.")
 	}
-	return database.User{
+	return LoginInput {
 		Email:    input.Email,
 		Password: input.Password,
 		Pc:       input.Pc,
