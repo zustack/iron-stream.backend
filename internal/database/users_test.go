@@ -3,6 +3,8 @@ package database_test
 import (
 	"iron-stream/internal/database"
 	"testing"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestGetUserByEmail(t *testing.T) {
@@ -77,6 +79,31 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("expected error to be 'agustfricke@gmail.com already exists' but got: %v", err.Error())
 		}
 	})
+
+  // test el hash de password
+	t.Run("hash password", func(t *testing.T) {
+    // get user by email
+    user, err := database.GetUserByEmail("agustfricke@some.com")
+    if err != nil {
+      t.Errorf("test failed because: %v", err)
+    }
+	  err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte("some-password"))
+	  if err != nil {
+      t.Errorf("test failed because: %v", err)
+	  }
+  })
+
+  // test el hash de pc
+	t.Run("hash pc", func(t *testing.T) {
+    user, err := database.GetUserByEmail("agustfricke@some.com")
+    if err != nil {
+      t.Errorf("test failed because: %v", err)
+    }
+    err = bcrypt.CompareHashAndPassword([]byte(user.Pc), []byte("agust@ubuntu"))
+	  if err != nil {
+      t.Errorf("test failed because: %v", err)
+	  }
+  })
 
 	_, err := database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@some.com'`)
 	if err != nil {

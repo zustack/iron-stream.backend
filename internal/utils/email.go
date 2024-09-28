@@ -20,7 +20,7 @@ func SendEmail(token int, email string, subject string) error {
 	path := os.Getenv("ROOT_PATH") + "/web/templates/email.html"
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
-		return fmt.Errorf("error al analizar la plantilla: %w", err)
+		return fmt.Errorf("error to read template: %w", err)
 	}
 
 	data := struct {
@@ -31,7 +31,7 @@ func SendEmail(token int, email string, subject string) error {
 
 	var bodyContent bytes.Buffer
 	if err := tmpl.Execute(&bodyContent, data); err != nil {
-		return fmt.Errorf("error al ejecutar la plantilla: %w", err)
+		return fmt.Errorf("error to execute template: %w", err)
 	}
 
 	emailContent := fmt.Sprintf("To: %s\r\n"+
@@ -47,7 +47,7 @@ func SendEmail(token int, email string, subject string) error {
 		[]string{email},
 		[]byte(emailContent),
 	); err != nil {
-		return fmt.Errorf("error al enviar el correo electrónico: %w", err)
+		return fmt.Errorf("error sending email: %w", err)
 	}
 
 	return nil
