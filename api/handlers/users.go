@@ -397,7 +397,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	payloadToClean := inputs.LoginInput {
+	payloadToClean := inputs.LoginInput{
 		Email:    payload.Email,
 		Password: payload.Password,
 		Pc:       payload.Pc,

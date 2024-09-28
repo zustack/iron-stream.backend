@@ -8,11 +8,11 @@ import (
 
 func TestEmail(t *testing.T) {
 	subjet := "Verify your email on Iron Stream"
-  code := utils.GenerateCode()
-  email := "agustfricke@gmail.com"
-  err := utils.SendEmail(code, email, subjet)
+	code := utils.GenerateCode()
+	email := "agustfricke@gmail.com"
+	err := utils.SendEmail(code, email, subjet)
 	if err != nil {
-    t.Errorf("test failed because: %v", err)
+		t.Errorf("test failed because: %v", err)
 	}
-  fmt.Printf("=== Email to %s was sent. Check your inbox\n", email)
+	fmt.Printf("=== Email to %s was sent. Check your inbox\n", email)
 }

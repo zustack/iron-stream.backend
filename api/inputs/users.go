@@ -29,7 +29,7 @@ func Login(input LoginInput) (LoginInput, error) {
 	if len(input.Pc) > 255 {
 		return LoginInput{}, fmt.Errorf("The unique identifier should not have more than 255 characters. Please ensure that your system's configuration is correct.")
 	}
-	return LoginInput {
+	return LoginInput{
 		Email:    input.Email,
 		Password: input.Password,
 		Pc:       input.Pc,

@@ -61,10 +61,10 @@ func TestSignup(t *testing.T) {
 			return
 		}
 
-	  _, err = database.DB.Exec(`DELETE FROM users`)
-	  if err != nil {
-		  t.Fatalf("failed to teardown test database: %v", err)
-	  }
+		_, err = database.DB.Exec(`DELETE FROM users`)
+		if err != nil {
+			t.Fatalf("failed to teardown test database: %v", err)
+		}
 	})
 
 	t.Run("bad body", func(t *testing.T) {
@@ -99,12 +99,12 @@ func TestSignup(t *testing.T) {
 		}
 
 		var errorResponse ErrorResponse
-    if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
-      t.Fatalf("Failed to unmarshal error response: %v", err)
-    }
+		if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
+			t.Fatalf("Failed to unmarshal error response: %v", err)
+		}
 
 		if res.StatusCode != 400 {
-      t.Errorf("expected status code 400 but got %d, %s", res.StatusCode, errorResponse.Error)
+			t.Errorf("expected status code 400 but got %d, %s", res.StatusCode, errorResponse.Error)
 			return
 		}
 
