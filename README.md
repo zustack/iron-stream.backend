@@ -1239,6 +1239,11 @@ go test ./api/handlers/users_test.go -v
 make test
 ```
 
+## Run specific test
+```bash
+go test -v ./path/to/file_test.go -run TestFunction
+```
+
 ## Files
 ```bash
 cwebp image.jpg -o image.webp

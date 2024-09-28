@@ -248,17 +248,22 @@ func GetAdminUsers(searchParam, isActiveParam, isAdminParam, specialAppsParam, v
 }
 
 func UpdatePassword(password, email string) error {
-	result, err := DB.Exec(`UPDATE users SET password = ? WHERE email = ?`,
-		password, email)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
+		return fmt.Errorf("Failed to hash the password: %v.", err)
+	}
+
+	result, err := DB.Exec(`UPDATE users SET password = ? WHERE email = ?`,
+		hashedPassword, email)
+	if err != nil {
+		return fmt.Errorf("An unexpected error occurred: %v.", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
+		return fmt.Errorf("An unexpected error occurred: %v.", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("No account found with the email %s", email)
+		return fmt.Errorf("No account found with the email %s.", email)
 	}
 	return nil
 }

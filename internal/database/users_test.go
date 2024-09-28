@@ -7,6 +7,47 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestUpdatePassword(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+
+	t.Run("success", func(t *testing.T) {
+		err := database.UpdatePassword("new-password", "agustfricke@proton.me")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		user, err := database.GetUserByEmail("agustfricke@proton.me")
+		if err != nil {
+			t.Errorf("test failed because of GetUserByEmail(): %v", err)
+		}
+    if user.Password == "new-password" {
+      t.Errorf("Expected password to be hashed but got 'new-password'")
+    }
+	})
+
+	t.Run("user not found", func(t *testing.T) {
+		err := database.UpdatePassword("new-password", "idont@exist.com")
+		if err == nil {
+			t.Errorf("expected error but god nil")
+		}
+    if err.Error() != "No account found with the email idont@exist.com." {
+      t.Errorf("expected 'No account found with the email idont@exist.com.' but got %v", err.Error())
+    }
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
+}
+
 func TestDeleteAccountByEmail(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{

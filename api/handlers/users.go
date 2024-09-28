@@ -222,14 +222,7 @@ func UpdatePassword(c *fiber.Ctx) error {
 		})
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	err = database.UpdatePassword(string(hashedPassword), user.Email)
+	err := database.UpdatePassword(payload.Email, user.Email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
