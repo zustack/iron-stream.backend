@@ -17,15 +17,15 @@ func DeleteNotification(info string) error {
 	if err != nil {
 		return fmt.Errorf("An unexpected error occurred: %v", err)
 	}
-  /*
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("An unexpected error occurred: %v", err)
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("No notification found with the info %s", info)
-	}
-  */
+	/*
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("An unexpected error occurred: %v", err)
+		}
+		if rowsAffected == 0 {
+			return fmt.Errorf("No notification found with the info %s", info)
+		}
+	*/
 	return nil
 }
 

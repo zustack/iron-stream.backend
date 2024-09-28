@@ -75,7 +75,7 @@ func WatchNewVideo(c *fiber.Ctx) error {
 }
 
 func GetCurrentVideo(c *fiber.Ctx) error {
-  // time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 	user := c.Locals("user").(*database.User)
 	courseId := c.Params("courseId")
 	userHasReviewed, err := database.UserReviewExists(user.ID, courseId)
@@ -238,7 +238,7 @@ func DeleteVideo(c *fiber.Ctx) error {
 }
 
 func GetFeed(c *fiber.Ctx) error {
-  // time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 	user := c.Locals("user").(*database.User)
 	courseId := c.Params("courseId")
 	searchParam := c.Query("q", "")

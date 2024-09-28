@@ -22,6 +22,7 @@ curl -X POST "${API_URL}/users/signup" \
 ```
 This will send a confirmation email with a token used to verify the account in
 the endpoint [verify](##verify)
+
 Response:
 ```json
 201 Created

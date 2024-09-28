@@ -81,7 +81,7 @@ func UpdateNote(c *fiber.Ctx) error {
 func CreateNote(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
 	courseId := c.Params("courseId")
-  videoId := c.Params("videoId")
+	videoId := c.Params("videoId")
 
 	var p inputs.CreateNotePayload
 	if err := c.BodyParser(&p); err != nil {
@@ -105,9 +105,9 @@ func CreateNote(c *fiber.Ctx) error {
 	err = database.CreateNote(database.Note{
 		Body:       cleanInput.Body,
 		VideoTitle: cleanInput.VideoTitle,
-    VideoID:    videoId,
+		VideoID:    videoId,
 		Time:       cleanInput.Time,
-    MTime:      cleanInput.MTime,
+		MTime:      cleanInput.MTime,
 		CourseID:   courseId,
 		UserID:     user.ID,
 	})
@@ -122,7 +122,7 @@ func CreateNote(c *fiber.Ctx) error {
 }
 
 func GetNotes(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
+	time.Sleep(5 * time.Second)
 	user := c.Locals("user").(*database.User)
 	courseId := c.Params("courseId")
 	notes, err := database.GetNotes(courseId, user.ID)

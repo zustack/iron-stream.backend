@@ -1,9 +1,5 @@
 # Iron Stream Backend API
 
-```sql
-UPDATE users SET is_admin = true WHERE id = 1;
-```
-
 ## Overview
 Iron Stream REST API that powers the ui 
 <a href="https://github.com/zustack/ui-iron-stream">Iron Stream</a>.
@@ -15,7 +11,7 @@ Iron Stream is currently in beta and under active development.
 ## Table of contents
 - [Setup local development](#Setup)
 - [API endpoints](#Endpoints) 
-    - [Users](#Users-endpoints)
+    - [Users](https://github.com/zustack/iron-stream.backend/blob/main/docs/users.md)
     - [Courses](#Courses-endpoints)
 - [Tests](#Tests)
 - [Deploy](#Deploy)

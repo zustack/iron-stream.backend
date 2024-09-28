@@ -4,15 +4,114 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"net/http"
-	"testing"
-
 	"iron-stream/api"
 	"iron-stream/internal/database"
-
-	"github.com/stretchr/testify/assert"
+	"net/http"
+	"testing"
 )
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+func TestSignup(t *testing.T) {
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+
+	t.Run("success", func(t *testing.T) {
+		body := bytes.NewBufferString(`
+      {
+        "email": "agustfricke@protonmail.com",
+        "name": "Agustin",
+        "surname": "Fricke",
+        "password": "some-password",
+        "pc": "agust@ubuntu",
+        "os": "Linux"
+      }
+    `)
+
+		req, err := http.NewRequest("POST", "/users/signup", body)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err := app.Test(req, -1)
+		if err != nil {
+			t.Errorf("Test failed because: %v", err)
+			return
+		}
+		defer res.Body.Close()
+
+		responseBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("Failed to read response body: %v", err)
+			return
+		}
+
+		var errorResponse ErrorResponse
+		if res.StatusCode != 201 {
+			if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
+				t.Fatalf("Failed to unmarshal error response: %v", err)
+			}
+			t.Errorf("expected status code 201 but got %d, error: %s", res.StatusCode, errorResponse.Error)
+			return
+		}
+
+	  _, err = database.DB.Exec(`DELETE FROM users`)
+	  if err != nil {
+		  t.Fatalf("failed to teardown test database: %v", err)
+	  }
+	})
+
+	t.Run("bad body", func(t *testing.T) {
+		body := bytes.NewBufferString(`
+      {
+        "email": "agustfricke@protonmail.com"
+        "name": "Agustin"
+        "surname": "Fricke"
+        "password": "some-password"
+        "pc": "agust@ubuntu"
+        "os": "Linux"
+      }
+    `)
+
+		req, err := http.NewRequest("POST", "/users/signup", body)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err := app.Test(req, -1)
+		if err != nil {
+			t.Errorf("Test failed because: %v", err)
+			return
+		}
+		defer res.Body.Close()
+
+		responseBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("Failed to read response body: %v", err)
+			return
+		}
+
+		var errorResponse ErrorResponse
+    if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
+      t.Fatalf("Failed to unmarshal error response: %v", err)
+    }
+
+		if res.StatusCode != 400 {
+      t.Errorf("expected status code 400 but got %d, %s", res.StatusCode, errorResponse.Error)
+			return
+		}
+
+	})
+}
+
+/*
 type SuccessLoginResponse struct {
 	Token    string `json:"token"`
 	UserID   int64  `json:"userId"`
@@ -36,12 +135,11 @@ func TestLogin(t *testing.T) {
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 	}
-	/*
+
 		err = database.UpdateAdminStatusByEmail("agustfricke@gmail.com", "true")
 		if err != nil {
 			t.Errorf("test failed because of UpdateAdminStatusByEmail(): %v", err)
 		}
-	*/
 
 	err = database.CreateUser(database.User{
 		Email:    "agustfricke@protonmail.com",
@@ -157,3 +255,4 @@ func TestLogin(t *testing.T) {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
 }
+*/

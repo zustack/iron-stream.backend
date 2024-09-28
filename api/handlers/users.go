@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"iron-stream/api/inputs"
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
@@ -242,12 +241,12 @@ func UpdatePassword(c *fiber.Ctx) error {
 
 func DeleteAccountByEmail(c *fiber.Ctx) error {
 	email := c.Params("email")
-  user := c.Locals("user").(*database.User)
-  if !user.IsAdmin && user.Email != email {
-    return c.Status(403).JSON(fiber.Map{
-      "error": "You are not allowed to delete this account",
-    })
-  }
+	user := c.Locals("user").(*database.User)
+	if !user.IsAdmin && user.Email != email {
+		return c.Status(403).JSON(fiber.Map{
+			"error": "You are not allowed to delete this account",
+		})
+	}
 	err := database.DeleteAccountByEmail(email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -329,7 +328,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 	})
 }
 
-func SignUp(c *fiber.Ctx) error {
+func Signup(c *fiber.Ctx) error {
 	var payload database.User
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -337,17 +336,16 @@ func SignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	payloadToClean := database.User{
-		Password:   payload.Password,
-		Email:      payload.Email,
-		Name:       payload.Name,
-		Surname:    payload.Surname,
-		EmailToken: payload.EmailToken,
-		Pc:         payload.Pc,
-		Os:         payload.Os,
+	payloadToClean := inputs.SignupInput{
+		Email:    payload.Email,
+		Name:     payload.Name,
+		Surname:  payload.Surname,
+		Password: payload.Password,
+		Pc:       payload.Pc,
+		Os:       payload.Os,
 	}
 
-	cleanInput, err := inputs.RegisterInput(payloadToClean)
+	cleanInput, err := inputs.Signup(payloadToClean)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
@@ -357,13 +355,13 @@ func SignUp(c *fiber.Ctx) error {
 	code := utils.GenerateCode()
 
 	payloadToDB := database.User{
-		Password:   cleanInput.Password,
 		Email:      cleanInput.Email,
 		Name:       cleanInput.Name,
 		Surname:    cleanInput.Surname,
-		EmailToken: code,
+		Password:   cleanInput.Password,
 		Pc:         cleanInput.Pc,
 		Os:         cleanInput.Os,
+		EmailToken: code,
 	}
 
 	err = database.CreateUser(payloadToDB)
@@ -419,7 +417,6 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-  fmt.Println("pc", user.Pc, "pc", cleanInput.Pc)
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pc), []byte(cleanInput.Pc))
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{

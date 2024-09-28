@@ -19,6 +19,6 @@ func UserRoutes(app *fiber.App) {
 	app.Delete("/users/delete/account/by/email/:email", middleware.NormalUser, handlers.DeleteAccountByEmail)
 	app.Post("/users/resend/email/token/:email", handlers.ResendEmailToken)
 	app.Post("/users/verify", handlers.VerifyEmail)
-	app.Post("/users/signup", handlers.SignUp)
+	app.Post("/users/signup", handlers.Signup)
 	app.Post("/users/login", handlers.Login)
 }

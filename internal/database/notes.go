@@ -6,14 +6,14 @@ import (
 )
 
 type Note struct {
-	ID         int64  `json:"id"`
-	Body       string `json:"body"`
-	VideoTitle string `json:"video_title"`
-  VideoID    string `json:"video_id"`
-	Time       string `json:"time"`
-  MTime float64 `json:"m_time"`
-	CourseID   string `json:"course_id"`
-	UserID     int64  `json:"user_id"`
+	ID         int64   `json:"id"`
+	Body       string  `json:"body"`
+	VideoTitle string  `json:"video_title"`
+	VideoID    string  `json:"video_id"`
+	Time       string  `json:"time"`
+	MTime      float64 `json:"m_time"`
+	CourseID   string  `json:"course_id"`
+	UserID     int64   `json:"user_id"`
 }
 
 func GetNoteOwner(id string) (int64, error) {
