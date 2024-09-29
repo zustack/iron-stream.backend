@@ -65,7 +65,7 @@ func GetUserByID(id string) (User, error) {
 		&u.Surname, &u.IsAdmin, &u.SpecialApps, &u.IsActive, &u.EmailToken, &u.Verified,
 		&u.Pc, &u.Os, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
-			return u, fmt.Errorf("No user found with id %s", id)
+			return u, fmt.Errorf("No account found with the id %s", id)
 		}
 		return u, fmt.Errorf("An unexpected error occurred: %v", err)
 	}

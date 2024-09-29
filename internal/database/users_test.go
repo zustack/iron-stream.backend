@@ -12,11 +12,118 @@ func TestGetUserCount(t *testing.T) {
 }
 
 func TestUpdateEmailToken(t *testing.T) {
-	t.Skip("TODO")
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+
+	t.Run("user not found", func(t *testing.T) {
+		err = database.UpdateEmailToken("fo@fo.com", 794209)
+		if err.Error() != "No account found with the email fo@fo.com" {
+			t.Errorf("Expected error to be 'No account found with the email fo@fo.com' but got %v", err.Error())
+		}
+	})
+
+	t.Run("success", func(t *testing.T) {
+		err = database.UpdateEmailToken("agustfricke@proton.me", 794209)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err.Error())
+		}
+		user, err := database.GetUserByID("1")
+		if err != nil {
+			t.Errorf("test failed because of GetUserByID(): %v", err.Error())
+		}
+		if user.EmailToken != 794209 {
+			t.Errorf("expected email token to be 794209 but got %v", user.EmailToken)
+		}
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestGetUserByID(t *testing.T) {
-	t.Skip("TODO")
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+
+	t.Run("user not found", func(t *testing.T) {
+		_, err := database.GetUserByID("99999")
+		if err.Error() != "No account found with the id 99999" {
+			t.Errorf("Expected error to be 'No account found with the id 99999' but got %v", err.Error())
+		}
+	})
+
+	t.Run("success", func(t *testing.T) {
+		user, err := database.GetUserByID("1")
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err.Error())
+		}
+		if user.ID != 1 {
+			t.Errorf("expected id to be 1 but got %v", user.ID)
+		}
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
+
 }
 
 func TestUpdateAdminStatus(t *testing.T) {
