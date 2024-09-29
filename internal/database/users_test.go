@@ -7,6 +7,88 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestUpdateActiveStatusAllUsers(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "agustfricke@gmail.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "agustfricke@some.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.UpdateActiveStatusAllUsers("false")
+	if err != nil {
+		t.Errorf("Expected error to be nil but got: %v", err.Error())
+	}
+	user, err := database.GetUserByEmail("agustfricke@proton.me")
+	if err != nil {
+		t.Errorf("Expected error to be nil but got: %v", err.Error())
+	}
+	if user.IsActive != true {
+		t.Errorf("Expected user.IsActive to be false but got: %v", user.IsActive)
+	}
+	user1, err := database.GetUserByEmail("agustfricke@gmail.me")
+	if err != nil {
+		t.Errorf("Expected error to be nil but got: %v", err.Error())
+	}
+	if user1.IsActive != false {
+		t.Errorf("Expected user.IsActive to be false but got: %v", user1.IsActive)
+	}
+	user2, err := database.GetUserByEmail("agustfricke@some.me")
+	if err != nil {
+		t.Errorf("Expected error to be nil but got: %v", err.Error())
+	}
+	if user2.IsActive != false {
+		t.Errorf("Expected user.IsActive to be false but got: %v", user2.IsActive)
+	}
+}
+
 func TestUpdateActiveStatus(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	database.DB.Exec(`
