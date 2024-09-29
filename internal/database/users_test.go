@@ -7,6 +7,44 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestGetAdminUsersCountAll(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "pepe@pepe.me",
+		Name:     "Pepe",
+		Surname:  "Salamanca",
+		Password: "some-password",
+		Pc:       "pepe@machine",
+		Os:       "Mac",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	t.Run("success", func(t *testing.T) {
+    count, err := database.GetAdminUsersCountAll()
+    if err != nil {
+      t.Errorf("Expected error to be nil but got: %v", err.Error())
+      return
+    }
+    if count != 2 {
+      t.Errorf("Expected count to be 2 but got: %v", count)
+    }
+  })
+}
+
 func TestGetAdminUsersSearchCount(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{
