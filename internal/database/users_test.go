@@ -7,6 +7,176 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestGetAdminUsersSearchCount(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "pepe@pepe.me",
+		Name:     "Pepe",
+		Surname:  "Salamanca",
+		Password: "some-password",
+		Pc:       "pepe@machine",
+		Os:       "Mac",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+
+	t.Run("search", func(t *testing.T) {
+		notFound, err := database.GetAdminUsersSearchCount("%not-found-no-no-no%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if notFound != 0 {
+			t.Errorf("expected 0 users but got: %v", notFound)
+		}
+		usersByEmail, err := database.GetAdminUsersSearchCount("%@pepe%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if usersByEmail > 1 {
+			t.Errorf("expected 1 or more users but got: %v", usersByEmail)
+		}
+		usersByName, err := database.GetAdminUsersSearchCount("%Agu%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if usersByName > 1 {
+			t.Errorf("expected 1 or more users but got: %v", usersByName)
+		}
+		usersBySurname, err := database.GetAdminUsersSearchCount("%Sala%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if usersBySurname > 1 {
+			t.Errorf("expected 1 or more users but got: %v", usersBySurname)
+		}
+		usersByCreatedAt, err := database.GetAdminUsersSearchCount("%20%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if usersByCreatedAt != 2 {
+			t.Errorf("expected 1 or more users but got: %v", usersByCreatedAt)
+		}
+		usersByOs, err := database.GetAdminUsersSearchCount("%Mac%", "", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if usersByOs > 1 {
+			t.Errorf("expected 1 or more users but got: %v", usersByOs)
+		}
+	})
+
+	t.Run("is active", func(t *testing.T) {
+		isActive, err := database.GetAdminUsersSearchCount("%%", "1", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if isActive != 2 {
+			t.Errorf("expected 2 users but got: %v", isActive)
+		}
+		isActive, err = database.GetAdminUsersSearchCount("%%", "0", "", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if isActive != 0 {
+			t.Errorf("expected 0 users but got: %v", isActive)
+		}
+	})
+
+	t.Run("is admin", func(t *testing.T) {
+		isAdmin, err := database.GetAdminUsersSearchCount("%%", "", "0", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if isAdmin != 2 {
+			t.Errorf("expected 2 users but got: %v", isAdmin)
+		}
+		database.DB.Exec(`UPDATE users SET is_admin = 1 WHERE email = 'agustfricke@proton.me';`)
+		isAdmin, err = database.GetAdminUsersSearchCount("%%", "", "1", "", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if isAdmin != 1 {
+			t.Errorf("expected 1 user but got: %v", isAdmin)
+		}
+	})
+
+	t.Run("special apps", func(t *testing.T) {
+		specialApps, err := database.GetAdminUsersSearchCount("%%", "", "", "0", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if specialApps != 2 {
+			t.Errorf("expected 2 users but got: %v", specialApps)
+		}
+
+		database.DB.Exec(`UPDATE users SET special_apps = 1 WHERE email = 'agustfricke@proton.me';`)
+		specialApps, err = database.GetAdminUsersSearchCount("%%", "", "", "1", "", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if specialApps != 1 {
+			t.Errorf("expected 1 user but got: %v", specialApps)
+		}
+	})
+
+	t.Run("verified", func(t *testing.T) {
+		verified, err := database.GetAdminUsersSearchCount("%%", "", "", "", "0", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if verified != 2 {
+			t.Errorf("expected 1 user but got: %v", verified)
+		}
+
+		database.DB.Exec(`UPDATE users SET verified = 1 WHERE email = 'agustfricke@proton.me';`)
+		verified, err = database.GetAdminUsersSearchCount("%%", "", "", "", "1", "", "")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if verified != 1 {
+			t.Errorf("expected 1 user but got: %v", verified)
+		}
+	})
+
+	t.Run("search between dates", func(t *testing.T) {
+		users, err := database.GetAdminUsersSearchCount("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2124%00:00:00")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if users != 2 {
+			t.Errorf("expected 2 users but got: %v", users)
+		}
+
+		users, err = database.GetAdminUsersSearchCount("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2013%00:00:00")
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if users != 0 {
+			t.Errorf("expected 0 users but got: %v", users)
+		}
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
+
+}
+
 func TestGetAdminUsers(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{

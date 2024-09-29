@@ -148,7 +148,7 @@ func GetAdminUsersCountAll() (int, error) {
 	return count, nil
 }
 
-func GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam string) (int, error) {
+func GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, from, to string) (int, error) {
 	var count int
 	var args []interface{}
 	query := `SELECT COUNT(*) FROM users WHERE 
@@ -177,6 +177,11 @@ func GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialA
 		query += ` AND special_apps = ?`
 		specialApps := specialAppsParam == "1"
 		args = append(args, specialApps)
+	}
+
+	if from != "" && to != "" {
+		query += ` AND created_at BETWEEN ? AND ?`
+		args = append(args, from, to)
 	}
 
 	err := DB.QueryRow(query, args...).Scan(&count)
