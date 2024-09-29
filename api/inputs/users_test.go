@@ -6,6 +6,61 @@ import (
 	"testing"
 )
 
+func TestVerifyEmail(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		payload := inputs.VerifyEmailInput{
+			Email:      "test@example.com",
+			EmailToken: 123456,
+		}
+		_, err := inputs.VerifyEmail(payload)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+	})
+
+	t.Run("missing email", func(t *testing.T) {
+		payload := inputs.VerifyEmailInput{
+			Email:      "",
+			EmailToken: 123456,
+		}
+		_, err := inputs.VerifyEmail(payload)
+		if err == nil {
+			t.Errorf("expected error got nil")
+		}
+    if err.Error() != "The email is required." {
+      t.Errorf("Expected error to be 'The email is required.' but got: %v", err)
+    }
+	})
+
+	t.Run("missing email token", func(t *testing.T) {
+		payload := inputs.VerifyEmailInput{
+			Email:      "test@example.com",
+			EmailToken: 0,
+		}
+		_, err := inputs.VerifyEmail(payload)
+		if err == nil {
+			t.Errorf("expected error got nil")
+		}
+    if err.Error() != "The email token is required." {
+      t.Errorf("Expected error to be 'The email token is required.' but got: %v", err)
+    }
+	})
+
+	t.Run("email token out of range", func(t *testing.T) {
+		payload := inputs.VerifyEmailInput{
+			Email:      "test@example.com",
+			EmailToken: 1000000,
+		}
+		_, err := inputs.VerifyEmail(payload)
+		if err == nil {
+			t.Errorf("expected error got nil")
+		}
+    if err.Error() != "The email token is out of range." {
+      t.Errorf("Expected error to be 'The email token is out of range.' but got: %v", err)
+    }
+	})
+}
+
 func TestLoginInput(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		payload := inputs.LoginInput{

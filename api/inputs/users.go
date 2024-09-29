@@ -4,6 +4,27 @@ import (
 	"fmt"
 )
 
+type VerifyEmailInput struct {
+	Email      string `json:"email"`
+	EmailToken int `json:"email_token"`
+}
+
+func VerifyEmail(input VerifyEmailInput) (VerifyEmailInput, error) {
+	if input.Email == "" {
+		return VerifyEmailInput{}, fmt.Errorf("The email is required.")
+	}
+	if input.EmailToken == 0 {
+		return VerifyEmailInput{}, fmt.Errorf("The email token is required.")
+	}
+	if input.EmailToken > 999999 {
+		return VerifyEmailInput{}, fmt.Errorf("The email token is out of range.")
+	}
+	return VerifyEmailInput{
+		Email:      input.Email,
+		EmailToken: input.EmailToken,
+	}, nil
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`

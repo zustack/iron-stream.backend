@@ -12,6 +12,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestVerifyEmail(t *testing.T) {
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+
+}
+
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
@@ -147,7 +156,7 @@ func TestLogin(t *testing.T) {
 		Surname:  "Fricke",
 		Password: "some-password",
 		Pc:       "agust@ubuntu",
-    Os:       "Linux",
+		Os:       "Linux",
 	})
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
@@ -234,7 +243,7 @@ func TestLogin(t *testing.T) {
       "password": "some-password", 
       "pc": "wrong-pc"
     }
-    `)  
+    `)
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -249,9 +258,9 @@ func TestLogin(t *testing.T) {
 		if err := json.Unmarshal(responseBody, &responseData); err != nil {
 			t.Fatalf("Error unmarshaling response: %v", err)
 		}
-    if responseData.Error != "Incorrect unique identifier, please try again." {
-      t.Errorf("expected error to be 'Incorrect unique identifier, please try again.' but got: %v", responseData.Error)
-    }
+		if responseData.Error != "Incorrect unique identifier, please try again." {
+			t.Errorf("expected error to be 'Incorrect unique identifier, please try again.' but got: %v", responseData.Error)
+		}
 
 	})
 
@@ -263,7 +272,7 @@ func TestLogin(t *testing.T) {
       "password": "wrong-password", 
       "pc": "agust@ubuntu"
     }
-    `)  
+    `)
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -278,9 +287,9 @@ func TestLogin(t *testing.T) {
 		if err := json.Unmarshal(responseBody, &responseData); err != nil {
 			t.Fatalf("Error unmarshaling response: %v", err)
 		}
-    if responseData.Error != "Incorrect password, please try again." {
-      t.Errorf("expected error to be 'Incorrect password, please try again.' but got: %v", responseData.Error)
-    }
+		if responseData.Error != "Incorrect password, please try again." {
+			t.Errorf("expected error to be 'Incorrect password, please try again.' but got: %v", responseData.Error)
+		}
 
 	})
 

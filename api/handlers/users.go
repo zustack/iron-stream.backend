@@ -276,21 +276,28 @@ func ResendEmailToken(c *fiber.Ctx) error {
 }
 
 func VerifyEmail(c *fiber.Ctx) error {
-	var payload database.User
+	var payload inputs.VerifyEmailInput
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	user, err := database.GetUserByEmail(payload.Email)
+  cleanInput, err := inputs.VerifyEmail(payload)
+  if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+  }
+
+	user, err := database.GetUserByEmail(cleanInput.Email)
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	if payload.EmailToken != user.EmailToken {
+	if cleanInput.EmailToken != user.EmailToken {
 		return c.Status(401).JSON(fiber.Map{
 			"error": "The token provided is not valid.",
 		})
