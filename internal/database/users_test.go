@@ -63,23 +63,23 @@ func TestGetUserCount(t *testing.T) {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 		return
 	}
-  now := utils.FormattedDate()
-  count, err := database.GetUserCount(now, "Linux")
-  if err != nil {
-    t.Errorf("test failed because of GetUserCount(): %v", err)
-    return
-  }
-  if count != 2 {
-    t.Errorf("expected count to be 2 but got %d", count)
-  }
-  count, err = database.GetUserCount(now, "Mac")
-  if err != nil {
-    t.Errorf("test failed because of GetUserCount(): %v", err)
-    return
-  }
-  if count != 1 {
-    t.Errorf("expected count to be 1 but got %d", count)
-  }
+	now := utils.FormattedDate()
+	count, err := database.GetUserCount(now, "Linux")
+	if err != nil {
+		t.Errorf("test failed because of GetUserCount(): %v", err)
+		return
+	}
+	if count != 2 {
+		t.Errorf("expected count to be 2 but got %d", count)
+	}
+	count, err = database.GetUserCount(now, "Mac")
+	if err != nil {
+		t.Errorf("test failed because of GetUserCount(): %v", err)
+		return
+	}
+	if count != 1 {
+		t.Errorf("expected count to be 1 but got %d", count)
+	}
 
 	_, err = database.DB.Exec(`DELETE FROM users;`)
 	if err != nil {

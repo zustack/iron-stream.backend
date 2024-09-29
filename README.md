@@ -1239,13 +1239,10 @@ go test ./api/handlers/users_test.go -v
 make test
 ```
 
-SELECT email FROM users WHERE created_at BETWEEN '28/09/2024 01:59:21' AND '30/09/2024 01:59:21';
-12/09/2023 00:00:00
-to 12/09/2025 00:00:00
-
-		INSERT INTO users
-		(email, name, surname, password, is_admin, email_token, pc, os, created_at) 
-		VALUES ("b@b.com", "b", "b", "b", false, 0, "linux", "mac", "30/08/2024 13:33:03");
+- Database users test
+```bash
+go test -v ./internal/database/users_test.go
+```
 
 ## Run specific test
 ```bash

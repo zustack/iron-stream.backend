@@ -8,6 +8,8 @@ import (
 	"iron-stream/internal/database"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type ErrorResponse struct {
@@ -111,7 +113,6 @@ func TestSignup(t *testing.T) {
 	})
 }
 
-/*
 type SuccessLoginResponse struct {
 	Token    string `json:"token"`
 	UserID   int64  `json:"userId"`
@@ -121,25 +122,41 @@ type SuccessLoginResponse struct {
 }
 
 func TestLogin(t *testing.T) {
-	t.Skip("Skipping TestLogin()")
 	app := api.Setup()
 	database.ConnectDB("DB_DEV_PATH")
-
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
 	err := database.CreateUser(database.User{
 		Email:    "agustfricke@gmail.com",
 		Name:     "Agustin",
 		Surname:  "Fricke",
 		Password: "some-password",
 		Pc:       "agust@ubuntu",
+    Os:       "Linux",
 	})
 	if err != nil {
 		t.Errorf("test failed because of CreateUser(): %v", err)
 	}
 
-		err = database.UpdateAdminStatusByEmail("agustfricke@gmail.com", "true")
-		if err != nil {
-			t.Errorf("test failed because of UpdateAdminStatusByEmail(): %v", err)
-		}
+	err = database.UpdateAdminStatus("1", "true")
+	if err != nil {
+		t.Errorf("test failed because of UpdateAdminStatus(): %v", err)
+	}
 
 	err = database.CreateUser(database.User{
 		Email:    "agustfricke@protonmail.com",
@@ -151,7 +168,13 @@ func TestLogin(t *testing.T) {
 
 	t.Run("success admin user", func(t *testing.T) {
 		var body io.Reader
-		body = bytes.NewBufferString(`{"email": "agustfricke@gmail.com", "password": "some-password", "pc": "agust@ubuntu"}`)
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com", 
+      "password": "some-password", 
+      "pc": "agust@ubuntu"
+    }
+    `)
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -175,7 +198,13 @@ func TestLogin(t *testing.T) {
 
 	t.Run("success normal user", func(t *testing.T) {
 		var body io.Reader
-		body = bytes.NewBufferString(`{"email": "agustfricke@protonmail.com", "password": "some-password", "pc": "agust@ubuntu"}`)
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@protonmail.com", 
+      "password": "some-password", 
+      "pc": "agust@ubuntu"
+    }
+    `)
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -197,33 +226,15 @@ func TestLogin(t *testing.T) {
 		assert.False(t, responseData.IsAdmin)
 	})
 
-	t.Run("success admin user with wrong pc", func(t *testing.T) {
+	t.Run("incorrect pc", func(t *testing.T) {
 		var body io.Reader
-		body = bytes.NewBufferString(`{"email": "agustfricke@gmail.com", "password": "some-password", "pc": "wrong-pc"}`)
-		req, _ := http.NewRequest("POST", "/users/login", body)
-		req.Header.Set("Content-Type", "application/json")
-
-		res, _ := app.Test(req)
-		defer res.Body.Close()
-
-		assert.Equal(t, 200, res.StatusCode)
-
-		responseBody, _ := io.ReadAll(res.Body)
-
-		var responseData SuccessLoginResponse
-		if err := json.Unmarshal(responseBody, &responseData); err != nil {
-			t.Fatalf("Error unmarshaling response: %v", err)
-		}
-		assert.NotEmpty(t, responseData.Token)
-		assert.NotEmpty(t, responseData.UserID)
-		assert.NotEmpty(t, responseData.Exp)
-		assert.NotEmpty(t, responseData.FullName)
-		assert.True(t, responseData.IsAdmin)
-	})
-
-	t.Run("error normal user with wrong pc", func(t *testing.T) {
-		var body io.Reader
-		body = bytes.NewBufferString(`{"email": "agustfricke@protonmail.com", "password": "some-password", "pc": "wrong-pc"}`)
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com", 
+      "password": "some-password", 
+      "pc": "wrong-pc"
+    }
+    `)  
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -231,11 +242,56 @@ func TestLogin(t *testing.T) {
 		defer res.Body.Close()
 
 		assert.Equal(t, 401, res.StatusCode)
+
+		responseBody, _ := io.ReadAll(res.Body)
+
+		var responseData ErrorResponse
+		if err := json.Unmarshal(responseBody, &responseData); err != nil {
+			t.Fatalf("Error unmarshaling response: %v", err)
+		}
+    if responseData.Error != "Incorrect unique identifier, please try again." {
+      t.Errorf("expected error to be 'Incorrect unique identifier, please try again.' but got: %v", responseData.Error)
+    }
+
+	})
+
+	t.Run("incorrect password", func(t *testing.T) {
+		var body io.Reader
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com", 
+      "password": "wrong-password", 
+      "pc": "agust@ubuntu"
+    }
+    `)  
+		req, _ := http.NewRequest("POST", "/users/login", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		res, _ := app.Test(req)
+		defer res.Body.Close()
+
+		assert.Equal(t, 401, res.StatusCode)
+
+		responseBody, _ := io.ReadAll(res.Body)
+
+		var responseData ErrorResponse
+		if err := json.Unmarshal(responseBody, &responseData); err != nil {
+			t.Fatalf("Error unmarshaling response: %v", err)
+		}
+    if responseData.Error != "Incorrect password, please try again." {
+      t.Errorf("expected error to be 'Incorrect password, please try again.' but got: %v", responseData.Error)
+    }
+
 	})
 
 	t.Run("error json", func(t *testing.T) {
 		var body io.Reader
-		body = bytes.NewBufferString(`{"email: "agustfricke@gmail.com", "password": 1, "pc": "agust@ubuntu"}`)
+		body = bytes.NewBufferString(`
+    {
+      "email: "agustfricke@gmail.com", 
+      "password": 1, 
+      "pc": "agust@ubuntu"
+    }`)
 		req, _ := http.NewRequest("POST", "/users/login", body)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -245,14 +301,8 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, 400, res.StatusCode)
 	})
 
-	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@protonmail.com'`)
-	if err != nil {
-		t.Fatalf("failed to teardown test database: %v", err)
-	}
-
-	_, err = database.DB.Exec(`DELETE FROM users WHERE email = 'agustfricke@gmail.com'`)
+	_, err = database.DB.Exec(`DELETE FROM users;`)
 	if err != nil {
 		t.Fatalf("failed to teardown test database: %v", err)
 	}
 }
-*/
