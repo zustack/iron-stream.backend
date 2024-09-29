@@ -7,6 +7,72 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestUpdateActiveStatus(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+
+	t.Run("user not found", func(t *testing.T) {
+		err = database.UpdateActiveStatus("99999")
+		if err.Error() != "No account found with the id 99999" {
+			t.Errorf("Expected error to be 'No account found with the id 99999' but got %v", err.Error())
+		}
+	})
+
+	t.Run("success", func(t *testing.T) {
+		err = database.UpdateActiveStatus("1")
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err.Error())
+		}
+		user, err := database.GetUserByID("1")
+		if err != nil {
+			t.Errorf("test failed because of GetUserByID(): %v", err.Error())
+		}
+		if user.IsActive != false {
+			t.Errorf("expected IsActive to be false but got %v", user.IsActive)
+		}
+
+		err = database.UpdateActiveStatus("1")
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err.Error())
+		}
+		user, err = database.GetUserByID("1")
+		if err != nil {
+			t.Errorf("test failed because of GetUserByID(): %v", err.Error())
+		}
+		if user.IsActive != true {
+			t.Errorf("expected IsActive to be true but got %v", user.IsActive)
+		}
+	})
+}
+
 func TestGetAdminUsersCountAll(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{
@@ -34,15 +100,15 @@ func TestGetAdminUsersCountAll(t *testing.T) {
 		return
 	}
 	t.Run("success", func(t *testing.T) {
-    count, err := database.GetAdminUsersCountAll()
-    if err != nil {
-      t.Errorf("Expected error to be nil but got: %v", err.Error())
-      return
-    }
-    if count != 2 {
-      t.Errorf("Expected count to be 2 but got: %v", count)
-    }
-  })
+		count, err := database.GetAdminUsersCountAll()
+		if err != nil {
+			t.Errorf("Expected error to be nil but got: %v", err.Error())
+			return
+		}
+		if count != 2 {
+			t.Errorf("Expected count to be 2 but got: %v", count)
+		}
+	})
 }
 
 func TestGetAdminUsersSearchCount(t *testing.T) {
