@@ -12,7 +12,7 @@ export API_URL="http://localhost:8081"
 curl -X POST "${API_URL}/users/signup" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "agustfricke@protonmail.com",
+    "email": "agustfricke@gmail.com",
     "name": "Agustin",
     "surname": "Fricke",
     "password": "some-password",
@@ -40,7 +40,7 @@ Make the login request:
 curl -X POST "${API_URL}/users/login" \
      -H "Content-Type: application/json" \
      -d '{
-        "email": "agustfricke@gmail.com", 
+        "email": "agustfricke@protonmail.com", 
         "password": "some-password", 
         "pc": "agust@ubuntu"
     }'
@@ -141,10 +141,13 @@ Can be true or false
 `verified`: the verified status
 Can be true or false
 `from`: from date 
-Example: 12/09/2024%00:00:00
+Example: from=28/09/202420%01:59:21
 `to`: to date 
-Example: 12:09:2024%00:00:00
+Example: to=30/09/2024%2001:59:21
 ```bash
+curl -X GET "${API_URL}/users/admin?cursor=0&q=&a=&admin=&special=&verified=&from=28/09/202420%01:59:21&to=30/09/2024%2001:59:21" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" | jq
+
 curl -X GET "${API_URL}/users/admin?cursor=0&q=&a=&admin=&special=&verified=&from=&to="  \
      -H "Authorization: Bearer ${ACCESS_TOKEN}" | jq
 ```

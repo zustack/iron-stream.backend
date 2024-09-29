@@ -171,7 +171,7 @@ func AdminUsers(c *fiber.Ctx) error {
 		})
 	}
 
-	searchCount, err := database.GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam)
+	searchCount, err := database.GetAdminUsersSearchCount(searchParam, isActiveParam, isAdminParam, specialAppsParam, verifiedParam, from, to)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),

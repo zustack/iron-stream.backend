@@ -7,6 +7,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestGetUserCount(t *testing.T) {
+	t.Skip("TODO")
+}
+
+func TestUpdateEmailToken(t *testing.T) {
+	t.Skip("TODO")
+}
+
+func TestGetUserByID(t *testing.T) {
+	t.Skip("TODO")
+}
+
 func TestUpdateAdminStatus(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	database.DB.Exec(`
@@ -71,6 +83,11 @@ func TestUpdateAdminStatus(t *testing.T) {
 			t.Errorf("expected IsAdmin to be false but got %v", user.IsAdmin)
 		}
 	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestUpdateUserSpecialApps(t *testing.T) {
@@ -137,6 +154,11 @@ func TestUpdateUserSpecialApps(t *testing.T) {
 			t.Errorf("expected SpecialApps to be false but got %v", user.SpecialApps)
 		}
 	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestUpdateActiveStatusAllUsers(t *testing.T) {
@@ -219,6 +241,11 @@ func TestUpdateActiveStatusAllUsers(t *testing.T) {
 	if user2.IsActive != false {
 		t.Errorf("Expected user.IsActive to be false but got: %v", user2.IsActive)
 	}
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestUpdateActiveStatus(t *testing.T) {
@@ -285,6 +312,11 @@ func TestUpdateActiveStatus(t *testing.T) {
 			t.Errorf("expected IsActive to be true but got %v", user.IsActive)
 		}
 	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestGetAdminUsersCountAll(t *testing.T) {
@@ -323,6 +355,11 @@ func TestGetAdminUsersCountAll(t *testing.T) {
 			t.Errorf("Expected count to be 2 but got: %v", count)
 		}
 	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 }
 
 func TestGetAdminUsersSearchCount(t *testing.T) {
@@ -471,7 +508,7 @@ func TestGetAdminUsersSearchCount(t *testing.T) {
 	})
 
 	t.Run("search between dates", func(t *testing.T) {
-		users, err := database.GetAdminUsersSearchCount("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2124%00:00:00")
+		users, err := database.GetAdminUsersSearchCount("%%", "", "", "", "", "28/09/2024 01:59:21", "30/09/2050 01:59:21")
 		if err != nil {
 			t.Errorf("test failed because: %v", err)
 		}
@@ -479,7 +516,7 @@ func TestGetAdminUsersSearchCount(t *testing.T) {
 			t.Errorf("expected 2 users but got: %v", users)
 		}
 
-		users, err = database.GetAdminUsersSearchCount("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2013%00:00:00")
+		users, err = database.GetAdminUsersSearchCount("%%", "", "", "", "", "28/09/2004 01:59:21", "28/09/2005 01:59:21")
 		if err != nil {
 			t.Errorf("test failed because: %v", err)
 		}
@@ -668,7 +705,7 @@ func TestGetAdminUsers(t *testing.T) {
 	})
 
 	t.Run("search between dates", func(t *testing.T) {
-		users, err := database.GetAdminUsers("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2124%00:00:00", 50, 0)
+		users, err := database.GetAdminUsers("%%", "", "", "", "", "28/09/2024 01:59:21", "30/09/2025 01:59:21", 50, 0)
 		if err != nil {
 			t.Errorf("test failed because: %v", err)
 		}
