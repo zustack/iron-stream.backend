@@ -1239,6 +1239,10 @@ go test ./api/handlers/users_test.go -v
 make test
 ```
 
+		INSERT INTO users
+		(email, name, surname, password, is_admin, email_token, pc, os, created_at) 
+		VALUES ("b@b.com", "b", "b", "b", false, 0, "linux", "mac", "30/08/2024 13:33:03");
+
 ## Run specific test
 ```bash
 go test -v ./path/to/file_test.go -run TestFunction

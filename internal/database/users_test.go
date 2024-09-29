@@ -7,6 +7,203 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestGetAdminUsers(t *testing.T) {
+	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "pepe@pepe.me",
+		Name:     "Pepe",
+		Surname:  "Salamanca",
+		Password: "some-password",
+		Pc:       "pepe@machine",
+		Os:       "Mac",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	t.Run("limit", func(t *testing.T) {
+		users, err := database.GetAdminUsers("%%", "", "", "", "", "", "", 1, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(users) != 1 {
+			t.Errorf("expected 1 user but got: %v", len(users))
+		}
+
+		users, err = database.GetAdminUsers("%%", "", "", "", "", "", "", 2, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(users) != 2 {
+			t.Errorf("expected 2 users but got: %v", len(users))
+		}
+	})
+
+	t.Run("cursor", func(t *testing.T) {
+		users, err := database.GetAdminUsers("%%", "", "", "", "", "", "", 1, 1)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(users) != 1 {
+			t.Errorf("expected 1 user but got: %v", len(users))
+		}
+	})
+
+	t.Run("search", func(t *testing.T) {
+		notFound, err := database.GetAdminUsers("%not-found-no-no-no%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(notFound) != 0 {
+			t.Errorf("expected 0 users but got: %v", len(notFound))
+		}
+		usersByEmail, err := database.GetAdminUsers("%@pepe%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(usersByEmail) > 1 {
+			t.Errorf("expected 1 or more users but got: %v", len(usersByEmail))
+		}
+		usersByName, err := database.GetAdminUsers("%Agu%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(usersByName) > 1 {
+			t.Errorf("expected 1 or more users but got: %v", len(usersByName))
+		}
+		usersBySurname, err := database.GetAdminUsers("%Sala%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(usersBySurname) > 1 {
+			t.Errorf("expected 1 or more users but got: %v", len(usersBySurname))
+		}
+		usersByCreatedAt, err := database.GetAdminUsers("%20%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(usersByCreatedAt) != 2 {
+			t.Errorf("expected 1 or more users but got: %v", len(usersByCreatedAt))
+		}
+		usersByOs, err := database.GetAdminUsers("%Mac%", "", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(usersByOs) > 1 {
+			t.Errorf("expected 1 or more users but got: %v", len(usersByOs))
+		}
+	})
+
+	t.Run("is active", func(t *testing.T) {
+		isActive, err := database.GetAdminUsers("%%", "1", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(isActive) != 2 {
+			t.Errorf("expected 2 users but got: %v", len(isActive))
+		}
+		isActive, err = database.GetAdminUsers("%%", "0", "", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(isActive) != 0 {
+			t.Errorf("expected 0 users but got: %v", len(isActive))
+		}
+	})
+
+	t.Run("is admin", func(t *testing.T) {
+		isAdmin, err := database.GetAdminUsers("%%", "", "0", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(isAdmin) != 2 {
+			t.Errorf("expected 2 users but got: %v", len(isAdmin))
+		}
+		database.DB.Exec(`UPDATE users SET is_admin = 1 WHERE email = 'agustfricke@proton.me';`)
+		isAdmin, err = database.GetAdminUsers("%%", "", "1", "", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(isAdmin) != 1 {
+			t.Errorf("expected 1 user but got: %v", len(isAdmin))
+		}
+	})
+
+	t.Run("special apps", func(t *testing.T) {
+		specialApps, err := database.GetAdminUsers("%%", "", "", "0", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(specialApps) != 2 {
+			t.Errorf("expected 2 users but got: %v", len(specialApps))
+		}
+
+		database.DB.Exec(`UPDATE users SET special_apps = 1 WHERE email = 'agustfricke@proton.me';`)
+		specialApps, err = database.GetAdminUsers("%%", "", "", "1", "", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(specialApps) != 1 {
+			t.Errorf("expected 1 user but got: %v", len(specialApps))
+		}
+	})
+
+	t.Run("verified", func(t *testing.T) {
+		verified, err := database.GetAdminUsers("%%", "", "", "", "0", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(verified) != 2 {
+			t.Errorf("expected 1 user but got: %v", len(verified))
+		}
+
+		database.DB.Exec(`UPDATE users SET verified = 1 WHERE email = 'agustfricke@proton.me';`)
+		verified, err = database.GetAdminUsers("%%", "", "", "", "1", "", "", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(verified) != 1 {
+			t.Errorf("expected 1 user but got: %v", len(verified))
+		}
+	})
+
+	t.Run("search between dates", func(t *testing.T) {
+		users, err := database.GetAdminUsers("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2124%00:00:00", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(users) != 2 {
+			t.Errorf("expected 2 users but got: %v", len(users))
+		}
+
+		users, err = database.GetAdminUsers("%%", "", "", "", "", "01/12/2012%00:00:00", "28/09/2013%00:00:00", 50, 0)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+		if len(users) != 0 {
+			t.Errorf("expected 0 users but got: %v", len(users))
+		}
+	})
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
+
+}
+
 func TestUpdatePassword(t *testing.T) {
 	database.ConnectDB("DB_DEV_PATH")
 	err := database.CreateUser(database.User{
@@ -27,9 +224,9 @@ func TestUpdatePassword(t *testing.T) {
 		if err != nil {
 			t.Errorf("test failed because of GetUserByEmail(): %v", err)
 		}
-    if user.Password == "new-password" {
-      t.Errorf("Expected password to be hashed but got 'new-password'")
-    }
+		if user.Password == "new-password" {
+			t.Errorf("Expected password to be hashed but got 'new-password'")
+		}
 	})
 
 	t.Run("user not found", func(t *testing.T) {
@@ -37,9 +234,9 @@ func TestUpdatePassword(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected error but god nil")
 		}
-    if err.Error() != "No account found with the email idont@exist.com." {
-      t.Errorf("expected 'No account found with the email idont@exist.com.' but got %v", err.Error())
-    }
+		if err.Error() != "No account found with the email idont@exist.com." {
+			t.Errorf("expected 'No account found with the email idont@exist.com.' but got %v", err.Error())
+		}
 	})
 
 	_, err = database.DB.Exec(`DELETE FROM users;`)
