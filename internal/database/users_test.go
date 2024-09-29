@@ -2,13 +2,64 @@ package database_test
 
 import (
 	"iron-stream/internal/database"
+	"iron-stream/internal/utils"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func TestGetUserCount(t *testing.T) {
-	t.Skip("TODO")
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@proton.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+	err = database.CreateUser(database.User{
+		Email:    "agustfricke@gmail.me",
+		Name:     "Agust",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+		return
+	}
+  now := utils.FormattedDate()
+  count, err := database.GetUserCount(now, "Linux")
+  if err != nil {
+    t.Errorf("test failed because of GetUserCount(): %v", err)
+    return
+  }
+  if count != 2 {
+    t.Errorf("expected count to be 2 but got %d", count)
+  }
 }
 
 func TestUpdateEmailToken(t *testing.T) {

@@ -27,12 +27,10 @@ func GetUserStatistics(c *fiber.Ctx) error {
 	var err error
 
 	if from == "" || to == "" {
-		// Si no se proporcionan fechas, usar el mes actual
 		now := time.Now()
 		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 		endDate = startDate.AddDate(0, 1, -1)
 	} else {
-		// Parsear las fechas proporcionadas
 		startDate, err = time.Parse("2006-01-02", from)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Formato de fecha 'from' inválido. Use YYYY-MM-DD"})
