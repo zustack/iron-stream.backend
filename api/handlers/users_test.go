@@ -18,6 +18,86 @@ func TestVerifyEmail(t *testing.T) {
 		t.Fatal("Failed to initialize app")
 	}
 	database.ConnectDB("DB_DEV_PATH")
+	err := database.CreateUser(database.User{
+		Email:    "agustfricke@gmail.com",
+		Name:     "Agustin",
+		Surname:  "Fricke",
+		Password: "some-password",
+		Pc:       "agust@ubuntu",
+		Os:       "Linux",
+    EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+
+	t.Run("success", func(t *testing.T) {
+		var body io.Reader
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com", 
+      "email_token": 123456
+    }
+    `)
+		req, _ := http.NewRequest("POST", "/users/verify", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		res, _ := app.Test(req)
+		defer res.Body.Close()
+
+		assert.Equal(t, 200, res.StatusCode)
+
+		responseBody, _ := io.ReadAll(res.Body)
+
+		var responseData SuccessLoginResponse
+		if err := json.Unmarshal(responseBody, &responseData); err != nil {
+			t.Fatalf("Error unmarshaling response: %v", err)
+		}
+		assert.NotEmpty(t, responseData.Token)
+		assert.NotEmpty(t, responseData.UserID)
+		assert.NotEmpty(t, responseData.Exp)
+		assert.NotEmpty(t, responseData.FullName)
+		assert.False(t, responseData.IsAdmin)
+  })
+
+	t.Run("bad request", func(t *testing.T) {
+		var body io.Reader
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com"
+      "email_token": 123456
+    }
+    `)
+		req, _ := http.NewRequest("POST", "/users/verify", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		res, _ := app.Test(req)
+		defer res.Body.Close()
+
+		assert.Equal(t, 400, res.StatusCode)
+  })
+
+	t.Run("token not valid", func(t *testing.T) {
+		var body io.Reader
+		body = bytes.NewBufferString(`
+    {
+      "email": "agustfricke@gmail.com", 
+      "email_token": 923450
+    }
+    `)
+		req, _ := http.NewRequest("POST", "/users/verify", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		res, _ := app.Test(req)
+		defer res.Body.Close()
+
+		assert.Equal(t, 401, res.StatusCode)
+  })
+
+	_, err = database.DB.Exec(`DELETE FROM users;`)
+	if err != nil {
+		t.Fatalf("failed to teardown test database: %v", err)
+	}
 
 }
 

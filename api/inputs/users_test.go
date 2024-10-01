@@ -32,21 +32,21 @@ func TestVerifyEmail(t *testing.T) {
     }
 	})
 
-	t.Run("missing email token", func(t *testing.T) {
+	t.Run("token to small", func(t *testing.T) {
 		payload := inputs.VerifyEmailInput{
 			Email:      "test@example.com",
-			EmailToken: 0,
+			EmailToken: 99999,
 		}
 		_, err := inputs.VerifyEmail(payload)
 		if err == nil {
 			t.Errorf("expected error got nil")
 		}
-    if err.Error() != "The email token is required." {
-      t.Errorf("Expected error to be 'The email token is required.' but got: %v", err)
+    if err.Error() != "The email token is to small." {
+      t.Errorf("Expected error to be 'The email token is to small.' but got: %v", err)
     }
 	})
 
-	t.Run("email token out of range", func(t *testing.T) {
+	t.Run("token to large", func(t *testing.T) {
 		payload := inputs.VerifyEmailInput{
 			Email:      "test@example.com",
 			EmailToken: 1000000,
@@ -55,8 +55,8 @@ func TestVerifyEmail(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected error got nil")
 		}
-    if err.Error() != "The email token is out of range." {
-      t.Errorf("Expected error to be 'The email token is out of range.' but got: %v", err)
+    if err.Error() != "The email token is to large." {
+      t.Errorf("Expected error to be 'The email token is to large.' but got: %v", err)
     }
 	})
 }

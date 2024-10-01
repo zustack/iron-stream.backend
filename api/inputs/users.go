@@ -16,8 +16,11 @@ func VerifyEmail(input VerifyEmailInput) (VerifyEmailInput, error) {
 	if input.EmailToken == 0 {
 		return VerifyEmailInput{}, fmt.Errorf("The email token is required.")
 	}
+	if input.EmailToken < 100000  {
+		return VerifyEmailInput{}, fmt.Errorf("The email token is to small.")
+	}
 	if input.EmailToken > 999999 {
-		return VerifyEmailInput{}, fmt.Errorf("The email token is out of range.")
+		return VerifyEmailInput{}, fmt.Errorf("The email token is to large.")
 	}
 	return VerifyEmailInput{
 		Email:      input.Email,
