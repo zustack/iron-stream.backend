@@ -78,7 +78,7 @@ func UpdateAdminStatus(c *fiber.Ctx) error {
 	isAdmin := c.Params("isAdmin")
 	if userId == "1" {
 		return c.Status(400).JSON(fiber.Map{
-			"error": "The user with the id 1 cannot be updated",
+			"error": "The user with the id 1 cannot be updated.",
 		})
 	}
 	err := database.UpdateAdminStatus(userId, isAdmin)
@@ -130,7 +130,7 @@ func UpdateActiveStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "1" {
 		return c.Status(400).JSON(fiber.Map{
-			"error": "The user with the id 1 cannot be deactivated",
+			"error": "The user with the id 1 cannot be deactivated.",
 		})
 	}
 
@@ -191,7 +191,6 @@ func AdminUsers(c *fiber.Ctx) error {
 
 	var nextID *int
 
-	// cursor + 50 es menor a total users count
 	if cursor+limit < totalCount {
 		next := cursor + limit
 		nextID = &next

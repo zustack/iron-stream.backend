@@ -12,32 +12,608 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetUserStatistics(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+
+	operatingSystems := []string{"Mac", "Windows", "Linux"}
+	baseEmail := "user%d@example.com"
+  startTime := time.Date(2022, 12, 1, 0, 0, 0, 0, time.UTC)
+
+	for i := 0; i < 99; i++ {
+		os := operatingSystems[i%3] 
+		email := fmt.Sprintf(baseEmail, i+1)
+    createdAt := startTime.Add(time.Duration(i/33) * 24 * time.Hour)
+    _, err := database.DB.Exec(`
+		INSERT INTO users
+		(email, name, surname, password, email_token, is_admin, os, created_at) 
+		VALUES (?, ?,?,?, ?, ?, ?, ?)`,
+    email, "foo", "foo", "foo", 123456, false, os, createdAt.Format("02/01/2006 15:04:05")) 
+		if err != nil {
+			t.Errorf("test failed because of CreateUser(): %v", err)
+		}
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE id = 1;`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	untoken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	t.Run("success", func(t *testing.T) {
+    req, _ := http.NewRequest("GET", "/users/stats?from=2022-12-01&to=2022-12-03", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+
+    var response []handlers.Statistics
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		assert.Equal(t, "2022/12/01", response[0].Date)
+		assert.Equal(t, 33, response[0].All)
+		assert.Equal(t, 11, response[0].Mac)
+		assert.Equal(t, 11, response[0].Linux)
+		assert.Equal(t, 11, response[0].Windows)
+
+		assert.Equal(t, "2022/12/02", response[1].Date)
+		assert.Equal(t, 33, response[1].All)
+		assert.Equal(t, 11, response[1].Mac)
+		assert.Equal(t, 11, response[1].Linux)
+		assert.Equal(t, 11, response[1].Windows)
+
+		assert.Equal(t, "2022/12/03", response[2].Date)
+		assert.Equal(t, 33, response[2].All)
+		assert.Equal(t, 11, response[2].Mac)
+		assert.Equal(t, 11, response[2].Linux)
+		assert.Equal(t, 11, response[2].Windows)
+
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not admin user", func(t *testing.T) {
+    req, _ := http.NewRequest("GET", "/users/stats?from=2022-12-01&to=2022-12-03", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+untoken)
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+		assert.Equal(t, 403, res.StatusCode)
+	})
 }
 
 func TestGetCurrentUser(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	t.Run("success", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/users/current", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		var response database.User
+		err = json.Unmarshal([]byte(body), &response)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		assert.Equal(t, response.ID, 1)
+		assert.Equal(t, response.Email, "agustfricke@gmail.com")
+		assert.Equal(t, response.Name, "Agustin")
+		assert.Equal(t, response.Surname, "Fricke")
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not authenticated", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/users/current", nil)
+		req.Header.Set("Content-Type", "application/json")
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 401, res.StatusCode)
+	})
 }
 
 func TestUpdateAdminStatus(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	unToken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test2@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+
+	t.Run("success true normal user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/admin/status/2/true", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("2")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.True(t, user.IsAdmin)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("success false normal user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/admin/status/2/false", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("2")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.False(t, user.IsAdmin)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not admin user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/admin/status/2/true", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+unToken)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("2")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.False(t, user.IsAdmin)
+		assert.Equal(t, 403, res.StatusCode)
+	})
+
+	t.Run("error admin with id 1", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/admin/status/1/false", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("1")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.True(t, user.IsAdmin)
+		assert.Equal(t, 400, res.StatusCode)
+	})
 }
 
 func TestUpdateSpecialAppUser(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	unToken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+
+	t.Run("success active", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/special/apps/user/2/true", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("2")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.True(t, user.SpecialApps)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("success unactive", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/special/apps/user/2/false", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		user, err := database.GetUserByID("2")
+		if err != nil {
+			t.Error("test failed GetUserByID")
+		}
+		assert.False(t, user.SpecialApps)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not admin user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/special/apps/user/2/true", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+unToken)
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 403, res.StatusCode)
+	})
+
 }
 
 func TestUpdateActiveStatusAllUsers(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	unToken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test2@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+
+	t.Run("success unactive", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/all/active/status/false", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+
+		rows, err := database.DB.Query("SELECT is_active FROM users WHERE id != 1")
+		if err != nil {
+			t.Fatalf("Failed to query database: %v", err)
+		}
+		defer rows.Close()
+
+		anyActive := false
+		for rows.Next() {
+			var isActive bool
+			if err := rows.Scan(&isActive); err != nil {
+				t.Fatalf("Failed to scan row: %v", err)
+			}
+			if isActive {
+				anyActive = true
+				break
+			}
+		}
+
+		assert.False(t, anyActive)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("success active", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/all/active/status/true", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+
+		rows, err := database.DB.Query("SELECT is_active FROM users")
+		if err != nil {
+			t.Fatalf("Failed to query database: %v", err)
+		}
+		defer rows.Close()
+
+		allActive := true
+		for rows.Next() {
+			var isActive bool
+			if err := rows.Scan(&isActive); err != nil {
+				t.Fatalf("Failed to scan row: %v", err)
+			}
+			if !isActive {
+				allActive = false
+				break
+			}
+		}
+
+		assert.True(t, allActive)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not admin user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/all/active/status/false", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+unToken)
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 403, res.StatusCode)
+	})
+
 }
 
 func TestUpdateActiveStatus(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	unToken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+
+	t.Run("success", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/active/status/2", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("error not admin user", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/active/status/2", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+unToken)
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 403, res.StatusCode)
+	})
+
+	t.Run("error update admin with id 1", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/users/update/active/status/1", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		assert.Equal(t, 400, res.StatusCode)
+	})
 }
 
 func TestAdminUsers(t *testing.T) {
