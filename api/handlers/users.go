@@ -213,14 +213,27 @@ func AdminUsers(c *fiber.Ctx) error {
 
 func UpdatePassword(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
-	var payload database.User
+	var payload inputs.UpdatePasswordInput
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	err := database.UpdatePassword(payload.Email, user.Email)
+  cleanInput, err := inputs.UpdatePassword(payload)
+  if err != nil {
+    return c.Status(400).JSON(fiber.Map{
+      "error": err.Error(),
+    })
+  }
+
+  if user.Email != cleanInput.Email {
+		return c.Status(403).JSON(fiber.Map{
+			"error": "You are not allowed to change the password of this account.",
+		})
+  }
+
+	err = database.UpdatePassword(cleanInput.Password, cleanInput.Email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
@@ -257,6 +270,7 @@ func ResendEmailToken(c *fiber.Ctx) error {
 	email := c.Params("email")
 
 	code := utils.GenerateCode()
+
 	err := database.UpdateEmailToken(email, code)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -283,12 +297,12 @@ func VerifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
-  cleanInput, err := inputs.VerifyEmail(payload)
-  if err != nil {
+	cleanInput, err := inputs.VerifyEmail(payload)
+	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
-  }
+	}
 
 	user, err := database.GetUserByEmail(cleanInput.Email)
 	if err != nil {

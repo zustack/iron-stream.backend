@@ -1,3 +1,6 @@
+/*
+- check the return values!
+*/
 package inputs_test
 
 import (
@@ -5,6 +8,47 @@ import (
 	"strings"
 	"testing"
 )
+
+func TestUpdatePassword(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		payload := inputs.UpdatePasswordInput{
+			Email:      "test@example.com",
+			Password:      "some-passsword",
+		}
+		_, err := inputs.UpdatePassword(payload)
+		if err != nil {
+			t.Errorf("test failed because: %v", err)
+		}
+	})
+
+	t.Run("missing email", func(t *testing.T) {
+		payload := inputs.UpdatePasswordInput{
+			Email:      "",
+			Password:      "some-passsword",
+		}
+		_, err := inputs.UpdatePassword(payload)
+		if err == nil {
+			t.Error("expected error but got nil")
+		}
+		if err.Error() != "The email is required." {
+			t.Errorf("Expected error to be 'The email is required.' but got: %v", err)
+		}
+  })
+
+	t.Run("missing password", func(t *testing.T) {
+		payload := inputs.UpdatePasswordInput{
+			Email:      "test@example.com",
+			Password:      "",
+		}
+		_, err := inputs.UpdatePassword(payload)
+		if err == nil {
+			t.Error("expected error but got nil")
+		}
+		if err.Error() != "The password is required." {
+			t.Errorf("Expected error to be 'The password is required.' but got: %v", err)
+		}
+  })
+}
 
 func TestVerifyEmail(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
@@ -27,9 +71,9 @@ func TestVerifyEmail(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected error got nil")
 		}
-    if err.Error() != "The email is required." {
-      t.Errorf("Expected error to be 'The email is required.' but got: %v", err)
-    }
+		if err.Error() != "The email is required." {
+			t.Errorf("Expected error to be 'The email is required.' but got: %v", err)
+		}
 	})
 
 	t.Run("token to small", func(t *testing.T) {
@@ -41,9 +85,9 @@ func TestVerifyEmail(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected error got nil")
 		}
-    if err.Error() != "The email token is to small." {
-      t.Errorf("Expected error to be 'The email token is to small.' but got: %v", err)
-    }
+		if err.Error() != "The email token is to small." {
+			t.Errorf("Expected error to be 'The email token is to small.' but got: %v", err)
+		}
 	})
 
 	t.Run("token to large", func(t *testing.T) {
@@ -55,9 +99,9 @@ func TestVerifyEmail(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected error got nil")
 		}
-    if err.Error() != "The email token is to large." {
-      t.Errorf("Expected error to be 'The email token is to large.' but got: %v", err)
-    }
+		if err.Error() != "The email token is to large." {
+			t.Errorf("Expected error to be 'The email token is to large.' but got: %v", err)
+		}
 	})
 }
 

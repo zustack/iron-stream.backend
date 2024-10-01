@@ -4,9 +4,27 @@ import (
 	"fmt"
 )
 
+type UpdatePasswordInput struct {
+	Email      string `json:"email"`
+	Password string `json:"password"`
+}
+
+func UpdatePassword(input UpdatePasswordInput) (UpdatePasswordInput, error) {
+  if input.Email == "" {
+		return UpdatePasswordInput{}, fmt.Errorf("The email is required.")
+  }
+  if input.Password == "" {
+		return UpdatePasswordInput{}, fmt.Errorf("The password is required.")
+  }
+  return UpdatePasswordInput{
+    Email: input.Email,
+    Password: input.Password,
+  }, nil
+}
+
 type VerifyEmailInput struct {
 	Email      string `json:"email"`
-	EmailToken int `json:"email_token"`
+	EmailToken int    `json:"email_token"`
 }
 
 func VerifyEmail(input VerifyEmailInput) (VerifyEmailInput, error) {
@@ -16,7 +34,7 @@ func VerifyEmail(input VerifyEmailInput) (VerifyEmailInput, error) {
 	if input.EmailToken == 0 {
 		return VerifyEmailInput{}, fmt.Errorf("The email token is required.")
 	}
-	if input.EmailToken < 100000  {
+	if input.EmailToken < 100000 {
 		return VerifyEmailInput{}, fmt.Errorf("The email token is to small.")
 	}
 	if input.EmailToken > 999999 {
