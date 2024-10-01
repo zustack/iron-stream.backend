@@ -12,8 +12,8 @@ import (
 func TestUpdatePassword(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		payload := inputs.UpdatePasswordInput{
-			Email:      "test@example.com",
-			Password:      "some-passsword",
+			Email:    "test@example.com",
+			Password: "some-passsword",
 		}
 		_, err := inputs.UpdatePassword(payload)
 		if err != nil {
@@ -23,8 +23,8 @@ func TestUpdatePassword(t *testing.T) {
 
 	t.Run("missing email", func(t *testing.T) {
 		payload := inputs.UpdatePasswordInput{
-			Email:      "",
-			Password:      "some-passsword",
+			Email:    "",
+			Password: "some-passsword",
 		}
 		_, err := inputs.UpdatePassword(payload)
 		if err == nil {
@@ -33,12 +33,12 @@ func TestUpdatePassword(t *testing.T) {
 		if err.Error() != "The email is required." {
 			t.Errorf("Expected error to be 'The email is required.' but got: %v", err)
 		}
-  })
+	})
 
 	t.Run("missing password", func(t *testing.T) {
 		payload := inputs.UpdatePasswordInput{
-			Email:      "test@example.com",
-			Password:      "",
+			Email:    "test@example.com",
+			Password: "",
 		}
 		_, err := inputs.UpdatePassword(payload)
 		if err == nil {
@@ -47,7 +47,7 @@ func TestUpdatePassword(t *testing.T) {
 		if err.Error() != "The password is required." {
 			t.Errorf("Expected error to be 'The password is required.' but got: %v", err)
 		}
-  })
+	})
 }
 
 func TestVerifyEmail(t *testing.T) {

@@ -5,21 +5,21 @@ import (
 )
 
 type UpdatePasswordInput struct {
-	Email      string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 func UpdatePassword(input UpdatePasswordInput) (UpdatePasswordInput, error) {
-  if input.Email == "" {
+	if input.Email == "" {
 		return UpdatePasswordInput{}, fmt.Errorf("The email is required.")
-  }
-  if input.Password == "" {
+	}
+	if input.Password == "" {
 		return UpdatePasswordInput{}, fmt.Errorf("The password is required.")
-  }
-  return UpdatePasswordInput{
-    Email: input.Email,
-    Password: input.Password,
-  }, nil
+	}
+	return UpdatePasswordInput{
+		Email:    input.Email,
+		Password: input.Password,
+	}, nil
 }
 
 type VerifyEmailInput struct {

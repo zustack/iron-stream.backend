@@ -147,7 +147,6 @@ Example: to=30/09/2024%2001:59:21
 ```bash
 curl -X GET "${API_URL}/users/admin?cursor=0&q=&a=&admin=&special=&verified=&from=28/09/202420%01:59:21&to=30/09/2024%2001:59:21" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" | jq
-
 curl -X GET "${API_URL}/users/admin?cursor=0&q=&a=&admin=&special=&verified=&from=&to="  \
      -H "Authorization: Bearer ${ACCESS_TOKEN}" | jq
 ```

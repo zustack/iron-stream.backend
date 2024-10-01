@@ -143,6 +143,12 @@ func UpdateActiveStatus(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
+type AdminUsersResponse struct {
+	Data       []database.User `json:"data"`
+	TotalCount int             `json:"totalCount"`
+	NextID     *int            `json:"nextId"`
+}
+
 func AdminUsers(c *fiber.Ctx) error {
 	cursor, err := strconv.Atoi(c.Query("cursor", "0"))
 	if err != nil {
@@ -183,28 +189,17 @@ func AdminUsers(c *fiber.Ctx) error {
 		})
 	}
 
-	var previousID, nextID *int
-	if cursor > 0 {
-		prev := cursor - limit
-		if prev < 0 {
-			prev = 0
-		}
-		previousID = &prev
-	}
+	var nextID *int
+
+	// cursor + 50 es menor a total users count
 	if cursor+limit < totalCount {
 		next := cursor + limit
 		nextID = &next
 	}
 
-	response := struct {
-		Data       []database.User `json:"data"`
-		TotalCount int             `json:"totalCount"`
-		PreviousID *int            `json:"previousId"`
-		NextID     *int            `json:"nextId"`
-	}{
+	response := AdminUsersResponse{
 		Data:       users,
 		TotalCount: searchCount,
-		PreviousID: previousID,
 		NextID:     nextID,
 	}
 
@@ -220,18 +215,18 @@ func UpdatePassword(c *fiber.Ctx) error {
 		})
 	}
 
-  cleanInput, err := inputs.UpdatePassword(payload)
-  if err != nil {
-    return c.Status(400).JSON(fiber.Map{
-      "error": err.Error(),
-    })
-  }
+	cleanInput, err := inputs.UpdatePassword(payload)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
-  if user.Email != cleanInput.Email {
+	if user.Email != cleanInput.Email {
 		return c.Status(403).JSON(fiber.Map{
 			"error": "You are not allowed to change the password of this account.",
 		})
-  }
+	}
 
 	err = database.UpdatePassword(cleanInput.Password, cleanInput.Email)
 	if err != nil {

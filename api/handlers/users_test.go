@@ -3,11 +3,14 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"iron-stream/api"
+	"iron-stream/api/handlers"
 	"iron-stream/internal/database"
 	"iron-stream/internal/utils"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +41,142 @@ func TestUpdateActiveStatus(t *testing.T) {
 }
 
 func TestAdminUsers(t *testing.T) {
-	t.Skip("Skip")
+	app := api.Setup()
+	if app == nil {
+		t.Fatal("Failed to initialize app")
+	}
+	database.ConnectDB("DB_DEV_PATH")
+	database.DB.Exec(`
+      DROP TABLE IF EXISTS users;
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(55) NOT NULL UNIQUE,
+        name VARCHAR(55) NOT NULL,
+        surname VARCHAR(55) NOT NULL,
+        is_admin BOOL,
+        special_apps BOOL DEFAULT FALSE,
+        is_active BOOL DEFAULT TRUE,
+        email_token INT,
+        verified BOOL DEFAULT FALSE, 
+        pc VARCHAR(255) DEFAULT '',  
+        os VARCHAR(20) DEFAULT '',  
+        created_at VARCHAR(40) NOT NULL
+    );`)
+	err := database.CreateUser(database.User{
+		Email:      "agustfricke@gmail.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	database.DB.Exec(`UPDATE users SET is_admin = true WHERE email = 'agustfricke@gmail.com';`)
+	token, _, err := utils.MakeJWT(1)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+	err = database.CreateUser(database.User{
+		Email:      "test@test.com",
+		Name:       "Agustin",
+		Surname:    "Fricke",
+		Password:   "some-password",
+		Pc:         "agust@ubuntu",
+		Os:         "Linux",
+		EmailToken: 123456,
+	})
+	if err != nil {
+		t.Errorf("test failed because of CreateUser(): %v", err)
+	}
+	unToken, _, err := utils.MakeJWT(2)
+	if err != nil {
+		t.Error("Test failed because of utils.MakeJWT")
+	}
+
+	t.Run("success", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/users/admin", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		var response handlers.AdminUsersResponse
+		err = json.Unmarshal([]byte(body), &response)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		if len(response.Data) != 2 {
+			t.Errorf("expected 2 users but got %v", len(response.Data))
+		}
+		if response.TotalCount != 2 {
+			t.Errorf("expected 2 total count but got %v", response.TotalCount)
+		}
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("success with cursor", func(t *testing.T) {
+		for i := 1; i <= 150; i++ {
+			email := "user" + strconv.Itoa(i) + "@test.com"
+			user := database.User{
+				Email:      email,
+				Name:       "Agustin",
+				Surname:    "Fricke",
+				Password:   "some-password",
+				Pc:         "agust@ubuntu",
+				Os:         "Linux",
+				EmailToken: 123456,
+			}
+			err := database.CreateUser(user)
+			if err != nil {
+				t.Errorf("test failed because of CreateUser(): %v", err)
+			}
+		}
+
+		req, _ := http.NewRequest("GET", "/users/admin?cursor=53&q=&a=&admin=&special=&verified=&from=&to=", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+		var response handlers.AdminUsersResponse
+		err = json.Unmarshal([]byte(body), &response)
+		if err != nil {
+			t.Errorf("expected error to be nil but got %v", err)
+		}
+
+		if len(response.Data) != 50 {
+			t.Errorf("expected 50 users but got %v", len(response.Data))
+		}
+		if response.TotalCount != 152 {
+			t.Errorf("expected 152 total count but got %v", response.TotalCount)
+		}
+		if *response.NextID != 103 {
+			t.Errorf("expected NextID to be nil but got %v", response.NextID)
+		}
+		assert.Equal(t, 200, res.StatusCode)
+	})
+
+	t.Run("unauthorized", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/users/admin", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+unToken)
+
+		res, _ := app.Test(req, -1)
+		defer res.Body.Close()
+
+		assert.Equal(t, 403, res.StatusCode)
+	})
+
 }
 
 func TestUpdatePassword(t *testing.T) {
@@ -103,9 +241,9 @@ func TestUpdatePassword(t *testing.T) {
       "password": "123456"
     }
     `)
-    req, _ := http.NewRequest("PUT", "/users/update/password", body)
+		req, _ := http.NewRequest("PUT", "/users/update/password", body)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
@@ -121,9 +259,9 @@ func TestUpdatePassword(t *testing.T) {
       "password": "123456"
     }
     `)
-    req, _ := http.NewRequest("PUT", "/users/update/password", body)
+		req, _ := http.NewRequest("PUT", "/users/update/password", body)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
@@ -139,9 +277,9 @@ func TestUpdatePassword(t *testing.T) {
       "password": "123456"
     }
     `)
-    req, _ := http.NewRequest("PUT", "/users/update/password", body)
+		req, _ := http.NewRequest("PUT", "/users/update/password", body)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
@@ -224,7 +362,7 @@ func TestDeleteAccountByEmail(t *testing.T) {
 	t.Run("success normal user", func(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/users/delete/account/by/email/agustfricke@protonmail.com", nil)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
@@ -235,7 +373,7 @@ func TestDeleteAccountByEmail(t *testing.T) {
 	t.Run("success admin", func(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/users/delete/account/by/email/test@test.com", nil)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+adminToken)
+		req.Header.Set("Authorization", "Bearer "+adminToken)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
@@ -276,7 +414,7 @@ func TestDeleteAccountByEmail(t *testing.T) {
 
 		req, _ := http.NewRequest("DELETE", "/users/delete/account/by/email/other2@gmail.com", nil)
 		req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		res, _ := app.Test(req)
 		defer res.Body.Close()
