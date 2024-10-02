@@ -7,6 +7,9 @@ export API_URL="http://localhost:8081"
 ```
 
 
+---
+
+
 ## User Signup
 
 ### Permissions
@@ -49,7 +52,9 @@ If the registration is successful, you will receive the following response:
 201 Created
 ```
 
+
 ---
+
 
 ## Verify Account
 
@@ -86,17 +91,22 @@ If the verification is successful, you will receive a response like the followin
 }
 ```
 
+
 ---
 
 
-## Login request
-`Permission`: Any user can access this resource.
-By default, the user with id 1 should be the super administrator. 
-To achieve this, you can execute the following command:
+## Login Request
+
+### Permissions
+Any user can access this resource. By default, the user with ID `1` is designated as the super administrator. To set this up, execute the following SQL command:
+
 ```sql
 UPDATE users SET is_admin = true WHERE id = 1;
 ```
-Make the login request:
+
+### Making the Login Request
+To log in, send a POST request using the following `curl` command:
+
 ```bash
 curl -X POST "${API_URL}/users/login" \
      -H "Content-Type: application/json" \
@@ -106,44 +116,30 @@ curl -X POST "${API_URL}/users/login" \
         "pc": "agust@ubuntu"
     }'
 ```
-Response: 
+
+### Response
+Upon successful login, you will receive a response in the following format:
+
 ```json
 {
-    "exp":1727628111,
-    "fullName":"Agustin Fricke",
-    "isAdmin":true,
-    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc2MjgxMTEsImlhdCI6MTcyNTAzNjExMSwibmJmIjoxNzI1MDM2MTExLCJzdWIiOjF9.ZBCbxsEbMoQS5legRGu1QArw3vcZV0jjqJ_f0u9l-0I",
-    "userId":1
+    "exp": 1727628111,
+    "fullName": "Agustin Fricke",
+    "isAdmin": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc2MjgxMTEsImlhdCI6MTcyNTAzNjExMSwibmJmIjoxNzI1MDM2MTExLCJzdWIiOjF9.ZBCbxsEbMoQS5legRGu1QArw3vcZV0jjqJ_f0u9l-0I",
+    "userId": 1
 }
 ```
-Now you can export the token in the ACCESS_TOKEN variable. to hit the endpoints
-that need authentication.
+
+### Using the Access Token
+You can export the token received in the response to the `ACCESS_TOKEN` variable. This token is necessary for accessing endpoints that require authentication:
+
 ```bash
 export ACCESS_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzAxNDQ3NDcsImlhdCI6MTcyNzU1Mjc0NywibmJmIjoxNzI3NTUyNzQ3LCJzdWIiOjF9._vnlD2OJgr21jCHV7FbceSU1eBqwuLKfl6PG9U72vSQ"
 ```
 
-## Verify account 
-`Permission`: Any user can access this resource.
-When the user [registers](##register), an email with a verification code was 
-sent to them.
-```bash
-curl -X POST "${API_URL}/users/verify" \
-     -H "Content-Type: application/json" \
-     -d '{
-         "email": "agustfricke@gmail.com", 
-         "email_token": 674488
-         }'
-```
-Response:
-```json
-{
-    "exp":1727627599,
-    "fullName":"Agustin Fricke",
-    "isAdmin":true,
-    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc2Mjc1OTksImlhdCI6MTcyNTAzNTU5OSwibmJmIjoxNzI1MDM1NTk5LCJzdWIiOjF9.dbpz5t6noMEW264uHL1AlbcOiVSrhbfiPvh9PwL1oSM",
-    "userId":1
-}
-```
+
+---
+
 
 ## Resend email 
 `Permission`: Any user can access this resource.
