@@ -6,8 +6,18 @@ By default it run on port 8081 but feel free to change it.
 export API_URL="http://localhost:8081"
 ```
 
-## Signup 
-`Permission`: Any user can access this resource.
+
+## User Signup
+
+### Permissions
+Any user can access this resource.
+
+### Endpoint
+`POST ${API_URL}/users/signup`
+
+### Request Example
+To register, send a POST request using the following `curl` command:
+
 ```bash
 curl -X POST "${API_URL}/users/signup" \
   -H "Content-Type: application/json" \
@@ -20,13 +30,27 @@ curl -X POST "${API_URL}/users/signup" \
     "os": "Linux"
   }'
 ```
-This will send a confirmation email with a token used to verify the account in
-the endpoint [verify](##verify)
 
-Response:
+### Field Descriptions
+- **email**: The user's email address.
+- **name**: The user's first name.
+- **surname**: The user's last name.
+- **password**: The user's password.
+- **pc**: The name of the user's computer.
+- **os**: The user's operating system.
+
+### Verification Process
+After submitting the request, a confirmation email will be sent with a 
+token used to verify the account. To verify your account, use the 
+following endpoint: [Verify Account](##verify).
+
+### Response
+If the registration is successful, you will receive the following response:
+
 ```json
 201 Created
 ```
+
 
 ## Login request
 `Permission`: Any user can access this resource.
