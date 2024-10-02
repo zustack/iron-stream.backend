@@ -40,9 +40,7 @@ curl -X POST "${API_URL}/users/signup" \
 - **os**: The user's operating system.
 
 ### Verification Process
-After submitting the request, a confirmation email will be sent with a 
-token used to verify the account. To verify your account, use the 
-following endpoint: [Verify Account](##verify).
+After submitting the request, a confirmation email will be sent with a token used to verify the account. To verify your account, use the following endpoint: [Verify Account](#verify-account).
 
 ### Response
 If the registration is successful, you will receive the following response:
@@ -50,6 +48,45 @@ If the registration is successful, you will receive the following response:
 ```json
 201 Created
 ```
+
+---
+
+## Verify Account
+
+### Permissions
+Any user can access this resource.
+
+When the user [registers](#user-signup), an email with a verification code will be sent to them.
+
+### Endpoint
+`POST ${API_URL}/users/verify`
+
+### Request Example
+To verify your account, send a POST request using the following `curl` command:
+
+```bash
+curl -X POST "${API_URL}/users/verify" \
+  -H "Content-Type: application/json" \
+  -d '{
+      "email": "agustfricke@gmail.com", 
+      "email_token": 674488
+  }'
+```
+
+### Response
+If the verification is successful, you will receive a response like the following:
+
+```json
+{
+    "exp": 1727627599,
+    "fullName": "Agustin Fricke",
+    "isAdmin": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc2Mjc1OTksImlhdCI6MTcyNTAzNTU5OSwibmJmIjoxNzI1MDM1NTk5LCJzdWIiOjF9.dbpz5t6noMEW264uHL1AlbcOiVSrhbfiPvh9PwL1oSM",
+    "userId": 1
+}
+```
+
+---
 
 
 ## Login request
